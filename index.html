@@ -186,6 +186,109 @@
           <div class="check"><input id="fin_done" type="checkbox" onchange="persist()"><div>Spreadsheet updated with payment date/status; copy saved to Drive (“Invoices – [Date]”)</div></div>
           <button class="btn primary" onclick="genFinance()">Generate Finance Intake Note</button>
           <textarea id="fin_note" placeholder="Click Generate to fill…"></textarea>
+          <!-- ==== Water Bills (inside Finance view) ==== -->
+<div class="hr"></div>
+<h3>Water Bills</h3>
+
+<details open id="wb_checklist">
+<summary><strong>✅ Pre-Handoff Checklist — Water Bills</strong></summary>
+<div class="check"><input type="checkbox" data-required data-scope="wb" id="wb_c1"><label for="wb_c1">Owner &amp; Tenant copies prepared &amp; named correctly</label></div>
+<div class="check"><input type="checkbox" data-required data-scope="wb" id="wb_c2"><label for="wb_c2">5% late fee added if prior cycle unpaid</label></div>
+<div class="check"><input type="checkbox" data-required data-scope="wb" id="wb_c3"><label for="wb_c3">Bill posted to tenant ledger + Tenant Copy attached</label></div>
+<div class="check"><input type="checkbox" data-required data-scope="wb" id="wb_c4"><label for="wb_c4">Notices prepared (Email + Mail) and saved/linked</label></div>
+<div class="check"><input type="checkbox" data-required data-scope="wb" id="wb_c5"><label for="wb_c5">Compared to 6-mo avg &amp; unpaid balances checked</label></div>
+<div class="check"><input type="checkbox" data-required data-scope="wb" id="wb_c6"><label for="wb_c6">Proof/links uploaded (Drive/Buildium)</label></div>
+</details>
+
+<details open>
+<summary><strong>Step 1 • Process the Bill</strong></summary>
+<ol>
+<li>Open the <strong>Main Water Bill Tracking Sheet</strong> &amp; pick a bill date ≤ today.</li>
+<li>DPW Portal → search property → download latest bill.</li>
+<li>Name Owner Copy: <code>YYYYMMDD_Property_$Amount_dueMMDD</code>.</li>
+<li>Duplicate → Tenant Copy (remove owner; highlight balances).</li>
+<li>If previous cycle unpaid → add <strong>5% late fee</strong> in Buildium (WB Late Fee Income).</li>
+<li>Post current bill to tenant ledger (Account: Utility Income) and attach Tenant Copy.</li>
+</ol>
+<div class="field"><label><strong>Buildium memo</strong></label>
+<textarea id="wb_memo_process">Water Bill [Start Date] – [End Date], $[Amount] due after [Due Date].</textarea>
+</div>
+<button type="button" data-copy-target="wb_memo_process" class="btn">Copy memo</button>
+</details>
+
+<details>
+<summary><strong>Step 2 • Prepare the Bill</strong></summary>
+<ol>
+<li>Upload Owner Copy (Owner only) &amp; Tenant Copy (Tenant only) to Buildium.</li>
+<li>Send notices (Email + 1st Notice). Save as <code>YYYYMMDD_Property_WaterBillNotice</code>.</li>
+<li>Upload PDFs to the designated Drive folder.</li>
+<li>Email the Water Bill Process Report to: rachel@…, michelle@…, neha@…</li>
+</ol>
+<div class="field"><label><strong>Notice quick-fill</strong></label>
+<textarea id="wb_notice_notes">Bill Due Date: [MM/DD/YYYY]
+Current Amount: $[Amount]
+After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
+</div>
+<button type="button" data-copy-target="wb_notice_notes" class="btn">Copy notes</button>
+</details>
+
+<details>
+<summary><strong>Step 3 • Pay the Bill</strong></summary>
+<p><strong>Rule Summary:</strong> Pay ≤ $200 directly. Over $200: confirm no unpaid balances &amp; compare to 6-mo avg. Escalate if &gt;$300 (SFD) or &gt;$350 (MFD).</p>
+<div class="two-col">
+<div class="soft">
+<div class="field"><label>Bill amount (USD)</label><input id="wb_amount" type="number" inputmode="decimal" step="0.01" placeholder="e.g., 286.34"></div>
+<div class="field"><label>Property Type</label><select id="wb_ptype"><option value="sfd">SFD</option><option value="mfd">MFD</option></select></div>
+</div>
+<div class="soft">
+<div class="field"><label>Any unpaid balances?</label><select id="wb_unpaid"><option value="no">No</option><option value="yes">Yes</option></select></div>
+<div class="field"><label>Similar to 6-month average?</label><select id="wb_avgok"><option value="yes">Yes</option><option value="no">No</option></select></div>
+</div>
+</div>
+<div class="row">
+<button type="button" id="wb_decide" class="btn primary">Check Decision</button>
+<button type="button" id="wb_clear" class="btn">Reset</button>
+</div>
+<div id="wb_decision" class="note" aria-live="polite"></div>
+<div class="field"><label><strong>Buildium payment memo</strong></label>
+<textarea id="wb_memo_pay">Water Bill Paid [Service Period] – $[Amount] paid on [MM/DD/YYYY].</textarea>
+</div>
+<button type="button" data-copy-target="wb_memo_pay" class="btn">Copy memo</button>
+</details>
+
+<details open>
+<summary><strong>Handoff Tool (Water Bills → …)</strong></summary>
+<div class="two-col">
+<div class="soft">
+<div class="field"><label>From (role)</label><select id="ho_from_wb"><option>Finance – Water Bills</option><option>Finance</option><option>Operations/EPM</option><option>Owner Comms</option></select></div>
+<div class="field"><label>To (role)</label><select id="ho_to_wb"><option>Operations/EPM</option><option>Owner Comms</option><option>Finance</option><option>Maintenance</option><option>Leasing</option></select></div>
+</div>
+<div class="soft">
+<div class="field"><label>To (person)</label><input id="ho_person_wb" type="text" placeholder="e.g., Rachel S."></div>
+<div class="field"><label>Due date</label><input id="ho_due_wb" type="date"></div>
+</div>
+</div>
+<div class="field"><label>Bill Ref / Account # / Link</label><input id="ho_ref_wb" type="text" placeholder="DPW acct # / URL"></div>
+<div class="field"><label>Tags</label><input id="ho_tags_wb" type="text" placeholder="#water #urgent #owner-approval"></div>
+<div class="field"><label>Decision / Action taken</label><textarea id="ho_decision_wb" placeholder="Paste decision from Step 3"></textarea></div>
+<div class="field"><label>Threshold / SOP basis</label><textarea id="ho_threshold_wb" placeholder="SFD>$300 escalate • MFD>$350 escalate • within 6-mo avg • no unpaid balances"></textarea></div>
+<div class="field"><label>Summary / Next steps (ask)</label><textarea id="ho_summary_wb"></textarea></div>
+<div class="field"><label>Blocking items</label><textarea id="ho_block_wb"></textarea></div>
+<div class="field"><label>Attachments / Proof</label><textarea id="ho_attach_wb"></textarea></div>
+<div class="field"><label>Notify (emails)</label><input id="ho_notify_wb" type="text" placeholder="rachel@..., neha@..., epm@..."></div>
+
+<div class="row">
+<button type="button" class="btn primary" data-ho-generate="wb" data-guard-scope="wb">Generate</button>
+<button type="button" data-ho-copy-bu="wb" class="btn">Copy Buildium Comment</button>
+<button type="button" data-ho-copy-em="wb" class="btn">Copy Email Draft</button>
+<button type="button" data-ho-clear="wb" class="btn">Clear</button>
+</div>
+
+<div class="field"><label>Buildium Comment</label><textarea id="ho_out_bu_wb" readonly></textarea></div>
+<div class="field"><label>Email Draft (Subject + Body)</label><textarea id="ho_out_em_wb" readonly></textarea></div>
+</details>
+<!-- ==== /Water Bills ==== -->
+
         </div>
       </div>
     </div>
