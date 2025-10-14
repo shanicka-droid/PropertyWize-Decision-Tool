@@ -61,14 +61,26 @@
   <section class="card">
     <div class="section-title">Select Role</div>
     <div id="rolePicker" class="row">
-      <label class="pill"><input type="radio" name="role" value="maintenance">🛠️ Maintenance</label>
-      <label class="pill"><input type="radio" name="role" value="finance">💵 Finance</label>
-      <label class="pill"><input type="radio" name="role" value="nonmaint">📄 Non‑Maintenance Bill</label>
-      <label class="pill"><input type="radio" name="role" value="delinquency" data-target="viewDelinquency"><span>Delinquency</span>
-</label>
-      <label class="pill">
-</label>
-    </div>
+  <label class="pill">
+    <input type="radio" name="role" value="maintenance" data-target="viewMaintenance">
+    <span>🛠 Maintenance</span>
+  </label>
+
+  <label class="pill">
+    <input type="radio" name="role" value="finance" data-target="viewFinance">
+    <span>💵 Finance</span>
+  </label>
+
+  <label class="pill">
+    <input type="radio" name="role" value="nonmaint" data-target="viewNonMaint">
+    <span>📄 Non-Maintenance Bill</span>
+  </label>
+
+  <label class="pill">
+    <input type="radio" name="role" value="delinquency" data-target="viewDelinquency">
+    <span>Delinquency</span>
+  </label>
+</div>
     <div class="hr"></div>
     <div class="section-title">Quick Actions</div>
     <div class="row">
