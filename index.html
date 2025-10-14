@@ -194,30 +194,12 @@
 
 <details open id="wb_checklist">
 <summary><strong>✅ Pre-Handoff Checklist — Water Bills</strong></summary>
-<div class="check">
-<input type="checkbox" data-required data-scope="wb" id="wb_c1">
-<label for="wb_c1">Owner &amp; Tenant copies prepared &amp; named correctly</label>
-</div>
-<div class="check">
-<input type="checkbox" data-required data-scope="wb" id="wb_c2">
-<label for="wb_c2">5% late fee added if prior cycle unpaid</label>
-</div>
-<div class="check">
-<input type="checkbox" data-required data-scope="wb" id="wb_c3">
-<label for="wb_c3">Bill posted to tenant ledger + Tenant Copy attached</label>
-</div>
-<div class="check">
-<input type="checkbox" data-required data-scope="wb" id="wb_c4">
-<label for="wb_c4">Notices prepared (Email + Mail) and saved/linked</label>
-</div>
-<div class="check">
-<input type="checkbox" data-required data-scope="wb" id="wb_c5">
-<label for="wb_c5">Compared to 6-mo avg &amp; unpaid balances checked</label>
-</div>
-<div class="check">
-<input type="checkbox" data-required data-scope="wb" id="wb_c6">
-<label for="wb_c6">Proof/links uploaded (Drive/Buildium)</label>
-</div>
+<div class="check"><input type="checkbox" id="wb_c1"><label for="wb_c1">Owner &amp; Tenant copies prepared &amp; named correctly</label></div>
+<div class="check"><input type="checkbox" id="wb_c2"><label for="wb_c2">5% late fee added if prior cycle unpaid</label></div>
+<div class="check"><input type="checkbox" id="wb_c3"><label for="wb_c3">Bill posted to tenant ledger + Tenant Copy attached</label></div>
+<div class="check"><input type="checkbox" id="wb_c4"><label for="wb_c4">Notices prepared (Email + Mail) and saved/linked</label></div>
+<div class="check"><input type="checkbox" id="wb_c5"><label for="wb_c5">Compared to 6-mo avg &amp; unpaid balances checked</label></div>
+<div class="check"><input type="checkbox" id="wb_c6"><label for="wb_c6">Proof/links uploaded (Drive/Buildium)</label></div>
 </details>
 
 <details open>
@@ -230,8 +212,7 @@
 <li>If previous cycle unpaid → add <strong>5% late fee</strong> in Buildium (WB Late Fee Income).</li>
 <li>Post current bill to tenant ledger (Account: Utility Income) and attach Tenant Copy.</li>
 </ol>
-<div class="field">
-<label><strong>Buildium memo</strong></label>
+<div class="field"><label><strong>Buildium memo</strong></label>
 <textarea id="wb_memo_process">Water Bill [Start Date] – [End Date], $[Amount] due after [Due Date].</textarea>
 </div>
 <button type="button" class="btn" onclick="pw_copyFrom('wb_memo_process')">Copy memo</button>
@@ -245,8 +226,7 @@
 <li>Upload PDFs to the designated Drive folder.</li>
 <li>Email the Water Bill Process Report to: rachel@…, michelle@…, neha@…</li>
 </ol>
-<div class="field">
-<label><strong>Notice quick-fill</strong></label>
+<div class="field"><label><strong>Notice quick-fill</strong></label>
 <textarea id="wb_notice_notes">Bill Due Date: [MM/DD/YYYY]
 Current Amount: $[Amount]
 After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
@@ -260,45 +240,23 @@ After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
 
 <div class="two-col">
 <div class="soft">
-<div class="field">
-<label>Bill amount (USD)</label>
-<input id="wb_amount" type="number" inputmode="decimal" step="0.01" placeholder="e.g., 286.34">
-</div>
-<div class="field">
-<label>Property Type</label>
-<select id="wb_ptype">
-<option value="sfd">SFD</option>
-<option value="mfd">MFD</option>
-</select>
-</div>
+<div class="field"><label>Bill amount (USD)</label><input id="wb_amount" type="number" inputmode="decimal" step="0.01"></div>
+<div class="field"><label>Property Type</label><select id="wb_ptype"><option value="sfd">SFD</option><option value="mfd">MFD</option></select></div>
 </div>
 <div class="soft">
-<div class="field">
-<label>Any unpaid balances?</label>
-<select id="wb_unpaid">
-<option value="no">No</option>
-<option value="yes">Yes</option>
-</select>
-</div>
-<div class="field">
-<label>Similar to 6-month average?</label>
-<select id="wb_avgok">
-<option value="yes">Yes</option>
-<option value="no">No</option>
-</select>
-</div>
+<div class="field"><label>Any unpaid balances?</label><select id="wb_unpaid"><option value="no">No</option><option value="yes">Yes</option></select></div>
+<div class="field"><label>Similar to 6-month average?</label><select id="wb_avgok"><option value="yes">Yes</option><option value="no">No</option></select></div>
 </div>
 </div>
 
 <div class="row">
-<button type="button" id="wb_decide" class="btn primary" onclick="pw_decideWB()">Check Decision</button>
-<button type="button" id="wb_clear" class="btn" onclick="pw_resetWB()">Reset</button>
+<button type="button" class="btn primary" onclick="pw_decideWB()">Check Decision</button>
+<button type="button" class="btn" onclick="pw_resetWB()">Reset</button>
 </div>
 
 <div id="wb_decision" class="note" aria-live="polite"></div>
 
-<div class="field">
-<label><strong>Buildium payment memo</strong></label>
+<div class="field"><label><strong>Buildium payment memo</strong></label>
 <textarea id="wb_memo_pay">Water Bill Paid [Service Period] – $[Amount] paid on [MM/DD/YYYY].</textarea>
 </div>
 <button type="button" class="btn" onclick="pw_copyFrom('wb_memo_pay')">Copy memo</button>
@@ -309,71 +267,23 @@ After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
 
 <div class="two-col">
 <div class="soft">
-<div class="field">
-<label>From (role)</label>
-<select id="ho_from_wb">
-<option>Finance – Water Bills</option>
-<option>Finance</option>
-<option>Operations/EPM</option>
-<option>Owner Comms</option>
-</select>
+<div class="field"><label>From (role)</label><select id="ho_from_wb"><option>Finance – Water Bills</option><option>Finance</option><option>Operations/EPM</option><option>Owner Comms</option></select></div>
+<div class="field"><label>To (role)</label><select id="ho_to_wb"><option>Operations/EPM</option><option>Owner Comms</option><option>Finance</option><option>Maintenance</option><option>Leasing</option></select></div>
 </div>
-<div class="field">
-<label>To (role)</label>
-<select id="ho_to_wb">
-<option>Operations/EPM</option>
-<option>Owner Comms</option>
-<option>Finance</option>
-<option>Maintenance</option>
-<option>Leasing</option>
-</select>
-</div>
-</div>
-
 <div class="soft">
-<div class="field">
-<label>To (person)</label>
-<input id="ho_person_wb" type="text" placeholder="e.g., Rachel S.">
-</div>
-<div class="field">
-<label>Due date</label>
-<input id="ho_due_wb" type="date">
-</div>
+<div class="field"><label>To (person)</label><input id="ho_person_wb" type="text" placeholder="e.g., Rachel S."></div>
+<div class="field"><label>Due date</label><input id="ho_due_wb" type="date"></div>
 </div>
 </div>
 
-<div class="field">
-<label>Bill Ref / Account # / Link</label>
-<input id="ho_ref_wb" type="text" placeholder="DPW acct # / URL">
-</div>
-<div class="field">
-<label>Tags</label>
-<input id="ho_tags_wb" type="text" placeholder="#water #urgent #owner-approval">
-</div>
-<div class="field">
-<label>Decision / Action taken</label>
-<textarea id="ho_decision_wb" placeholder="Paste decision from Step 3"></textarea>
-</div>
-<div class="field">
-<label>Threshold / SOP basis</label>
-<textarea id="ho_threshold_wb" placeholder="SFD>$300 escalate • MFD>$350 escalate • within 6-mo avg • no unpaid balances"></textarea>
-</div>
-<div class="field">
-<label>Summary / Next steps (ask)</label>
-<textarea id="ho_summary_wb"></textarea>
-</div>
-<div class="field">
-<label>Blocking items</label>
-<textarea id="ho_block_wb"></textarea>
-</div>
-<div class="field">
-<label>Attachments / Proof</label>
-<textarea id="ho_attach_wb"></textarea>
-</div>
-<div class="field">
-<label>Notify (emails)</label>
-<input id="ho_notify_wb" type="text" placeholder="rachel@..., neha@..., epm@...">
-</div>
+<div class="field"><label>Bill Ref / Account # / Link</label><input id="ho_ref_wb" type="text"></div>
+<div class="field"><label>Tags</label><input id="ho_tags_wb" type="text" placeholder="#water #urgent #owner-approval"></div>
+<div class="field"><label>Decision / Action taken</label><textarea id="ho_decision_wb" placeholder="Paste decision from Step 3"></textarea></div>
+<div class="field"><label>Threshold / SOP basis</label><textarea id="ho_threshold_wb" placeholder="SFD>$300 escalate • MFD>$350 escalate • within 6-mo avg • no unpaid balances"></textarea></div>
+<div class="field"><label>Summary / Next steps (ask)</label><textarea id="ho_summary_wb"></textarea></div>
+<div class="field"><label>Blocking items</label><textarea id="ho_block_wb"></textarea></div>
+<div class="field"><label>Attachments / Proof</label><textarea id="ho_attach_wb"></textarea></div>
+<div class="field"><label>Notify (emails)</label><input id="ho_notify_wb" type="text" placeholder="rachel@…, neha@…, epm@…"></div>
 
 <div class="row">
 <button type="button" class="btn primary" onclick="pw_genWB()">Generate</button>
@@ -382,18 +292,10 @@ After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
 <button type="button" class="btn" onclick="pw_clearWB()">Clear</button>
 </div>
 
-<div class="field">
-<label>Buildium Comment</label>
-<textarea id="ho_out_bu_wb" readonly></textarea>
-</div>
-<div class="field">
-<label>Email Draft (Subject + Body)</label>
-<textarea id="ho_out_em_wb" readonly></textarea>
-</div>
+<div class="field"><label>Buildium Comment</label><textarea id="ho_out_bu_wb" readonly></textarea></div>
+<div class="field"><label>Email Draft (Subject + Body)</label><textarea id="ho_out_em_wb" readonly></textarea></div>
 </details>
-<!-- ==== /Water Bills ==== -->
 
-<!-- Inline functions for Water Bills (no external dependencies) -->
 <script>
 (function(){
 if (window._pwWB_inline) return; window._pwWB_inline = true;
@@ -401,106 +303,54 @@ if (window._pwWB_inline) return; window._pwWB_inline = true;
 function $(id){ return document.getElementById(id); }
 function val(id){ var el=$(id); return el ? (el.value || '').trim() : ''; }
 
-// Clipboard with fallback
+// Copy with fallback
 window.pw_copyFrom = function(id){
 var el = $(id); if(!el) return;
 var text = (el.value !== undefined) ? el.value : (el.innerText || el.textContent || '');
 if (navigator.clipboard && navigator.clipboard.writeText) {
 navigator.clipboard.writeText(text).catch(function(){ pw_legacyCopy(el); });
-} else {
-pw_legacyCopy(el);
-}
-try {
-var btn = event && event.target; if(btn){ var old = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function(){ btn.textContent = old; }, 900); }
-} catch(_){}
+} else { pw_legacyCopy(el); }
+try { var btn = event && event.target; if(btn){ var old=btn.textContent; btn.textContent='Copied!'; setTimeout(function(){ btn.textContent=old; }, 900); } } catch(_){}
 };
-function pw_legacyCopy(el){
-try { if (el.select) { el.select(); el.setSelectionRange(0, 99999); document.execCommand('copy'); } } catch(_){}
-}
+function pw_legacyCopy(el){ try { if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } } catch(_){ } }
 
-// Checklist (checked at generate time)
-function wb_allChecked(){
-var ids = ['wb_c1','wb_c2','wb_c3','wb_c4','wb_c5','wb_c6'];
-for (var i=0;i<ids.length;i++){ var cb=$(ids[i]); if(cb && !cb.checked) return false; }
-return true;
-}
-
-// Decision helper
+// Decision
 window.pw_decideWB = function(){
-var amount = parseFloat(val('wb_amount') || '0');
-var ptype = val('wb_ptype') || 'sfd';
-var unpaid = val('wb_unpaid') || 'no';
-var avgok = val('wb_avgok') || 'yes';
-var out = $('wb_decision');
-function render(txt){ if(out) out.innerHTML = txt || '<em>Enter details and tap “Check Decision”.</em>'; }
+var amount = parseFloat(val('wb_amount')||'0'), type=val('wb_ptype')||'sfd', unpaid=val('wb_unpaid')||'no', avgok=val('wb_avgok')||'yes';
+var out=$('wb_decision'); function render(t){ if(out) out.innerHTML = t || '<em>Enter details and tap “Check Decision”.</em>'; }
 if(!(amount>0)) return render();
-if(amount <= 200) return render('<span>Decision: <strong>APPROVE – Direct pay</strong> (≤ $200)</span>');
-if(unpaid === 'yes') return render('<span>Decision: <strong>HOLD / REJECT</strong> – Unpaid balances exist</span>');
-var th = (ptype === 'sfd') ? 300 : 350;
-if(amount > th) return render('<span>Decision: <strong>ESCALATE to EPM</strong> – Over threshold</span>');
-if(amount > 200 && amount <= th && avgok === 'yes') return render('<span>Decision: <strong>APPROVE – Finance may pay</strong> (within avg, no unpaid)</span>');
+if(amount<=200) return render('<span>Decision: <strong>APPROVE – Direct pay</strong> (≤ $200)</span>');
+if(unpaid==='yes') return render('<span>Decision: <strong>HOLD / REJECT</strong> – Unpaid balances exist</span>');
+var th=(type==='sfd')?300:350;
+if(amount>th) return render('<span>Decision: <strong>ESCALATE to EPM</strong> – Over threshold</span>');
+if(amount>200 && amount<=th && avgok==='yes') return render('<span>Decision: <strong>APPROVE – Finance may pay</strong> (within avg, no unpaid)</span>');
 return render('<span>Decision: <strong>ESCALATE</strong> – Not within 6-mo average</span>');
 };
+window.pw_resetWB = function(){ var a=$('wb_amount'); if(a) a.value=''; var p=$('wb_ptype'); if(p) p.value='sfd'; var u=$('wb_unpaid'); if(u) u.value='no'; var g=$('wb_avgok'); if(g) g.value='yes'; var out=$('wb_decision'); if(out) out.innerHTML='<em>Enter details and tap “Check Decision”.</em>'; };
 
-window.pw_resetWB = function(){
-var a=$('wb_amount'); if(a) a.value='';
-var p=$('wb_ptype'); if(p) p.value='sfd';
-var u=$('wb_unpaid'); if(u) u.value='no';
-var g=$('wb_avgok'); if(g) g.value='yes';
-var out=$('wb_decision'); if(out) out.innerHTML='<em>Enter details and tap “Check Decision”.</em>';
-};
-
-// Generate handoff outputs
+// Generate & Clear
+function allChecked(){ var ids=['wb_c1','wb_c2','wb_c3','wb_c4','wb_c5','wb_c6']; for(var i=0;i<ids.length;i++){ var cb=$(ids[i]); if(cb && !cb.checked) return false; } return true; }
 window.pw_genWB = function(){
-if(!wb_allChecked()){ alert('Please complete the checklist before generating the handoff.'); return; }
+if(!allChecked()){ alert('Please complete the checklist before generating the handoff.'); return; }
 var from=val('ho_from_wb'), toRole=val('ho_to_wb'), toPerson=val('ho_person_wb'), due=val('ho_due_wb'),
 ref=val('ho_ref_wb'), tags=val('ho_tags_wb'), decision=val('ho_decision_wb'), threshold=val('ho_threshold_wb'),
 summary=val('ho_summary_wb'), block=val('ho_block_wb'), attach=val('ho_attach_wb'), notify=val('ho_notify_wb');
 
-var bu=[];
-bu.push('HANDOFF – Finance – Water Bills');
-bu.push('From: '+(from||'Finance – Water Bills')+' → To: '+(toPerson||toRole||''));
-if(ref) bu.push('Ref: '+ref);
-if(due) bu.push('Due: '+due);
-if(tags) bu.push('Tags: '+tags);
-if(decision) bu.push('Decision/Action: '+decision);
-if(threshold) bu.push('SOP/Threshold: '+threshold);
-if(summary){ bu.push('Next Steps:'); bu.push(summary); }
-if(block){ bu.push('Blocking:'); bu.push(block); }
-if(attach) bu.push('Attachments: '+attach);
+var bu=[]; bu.push('HANDOFF – Finance – Water Bills'); bu.push('From: '+(from||'Finance – Water Bills')+' → To: '+(toPerson||toRole||'')); if(ref) bu.push('Ref: '+ref);
+if(due) bu.push('Due: '+due); if(tags) bu.push('Tags: '+tags); if(decision) bu.push('Decision/Action: '+decision); if(threshold) bu.push('SOP/Threshold: '+threshold);
+if(summary){ bu.push('Next Steps:'); bu.push(summary); } if(block){ bu.push('Blocking:'); bu.push(block); } if(attach) bu.push('Attachments: '+attach);
 var ob=$('ho_out_bu_wb'); if(ob) ob.value = bu.join('\\n');
 
-var subj='Handoff: Finance – Water Bills' + (ref?(' – '+ref):'');
-var em=[];
-em.push('To: '+(notify||toPerson||''));
-em.push('Subject: '+subj);
-em.push('');
-em.push('Hi '+(toPerson||toRole||'team')+',');
-em.push('');
-if(summary){ em.push('Request:'); em.push(summary); em.push(''); }
-if(decision) em.push('Decision/Action: '+decision);
-if(threshold) em.push('SOP/Threshold: '+threshold);
-if(due) em.push('Due: '+due);
-if(ref) em.push('Ref: '+ref);
-if(tags) em.push('Tags: '+tags);
-if(block){ em.push(''); em.push('Blocking:'); em.push(block); }
-if(attach){ em.push(''); em.push('Attachments:'); em.push(attach); }
-em.push('');
-em.push('Thanks,');
-em.push('[Your Name]');
-var oe=$('ho_out_em_wb'); if(oe) oe.value = em.join('\\n');
+var subj='Handoff: Finance – Water Bills'+(ref?(' – '+ref):''); var em=[];
+em.push('To: '+(notify||toPerson||'')); em.push('Subject: '+subj); em.push(''); em.push('Hi '+(toPerson||toRole||'team')+','); em.push('');
+if(summary){ em.push('Request:'); em.push(summary); em.push(''); } if(decision) em.push('Decision/Action: '+decision); if(threshold) em.push('SOP/Threshold: '+threshold);
+if(due) em.push('Due: '+due); if(ref) em.push('Ref: '+ref); if(tags) em.push('Tags: '+tags);
+if(block){ em.push(''); em.push('Blocking:'); em.push(block); } if(attach){ em.push(''); em.push('Attachments:'); em.push(attach); }
+em.push(''); em.push('Thanks,'); em.push('[Your Name]'); var oe=$('ho_out_em_wb'); if(oe) oe.value = em.join('\\n');
 };
-
-// Clear all inputs/outputs
-window.pw_clearWB = function(){
-var ids = ['ho_from_wb','ho_to_wb','ho_person_wb','ho_due_wb','ho_ref_wb','ho_tags_wb','ho_decision_wb','ho_threshold_wb','ho_summary_wb','ho_block_wb','ho_attach_wb','ho_notify_wb'];
-for (var i=0;i<ids.length;i++){ var el=$(ids[i]); if(!el) continue; if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; }
-var ob=$('ho_out_bu_wb'); if(ob) ob.value='';
-var oe=$('ho_out_em_wb'); if(oe) oe.value='';
-};
+window.pw_clearWB = function(){ var ids=['ho_from_wb','ho_to_wb','ho_person_wb','ho_due_wb','ho_ref_wb','ho_tags_wb','ho_decision_wb','ho_threshold_wb','ho_summary_wb','ho_block_wb','ho_attach_wb','ho_notify_wb']; for(var i=0;i<ids.length;i++){ var el=$(ids[i]); if(!el) continue; if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; } var ob=$('ho_out_bu_wb'); if(ob) ob.value=''; var oe=$('ho_out_em_wb'); if(oe) oe.value=''; };
 })();
 </script>
-
         </div>
       </div>
     </div>
