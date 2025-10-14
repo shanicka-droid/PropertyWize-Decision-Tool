@@ -577,6 +577,66 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
     <label>Delinquency Comment (Buildium / Email / Slack)</label>
     <textarea id="dlq_out" readonly></textarea>
   </div>
+  <script>
+(function(){
+  if (window._dlqWired) return; window._dlqWired = true;
+
+  // helpers
+  function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
+  function s(id,txt){ var el=document.getElementById(id); if(el) el.value = txt; }
+  function allChecked(){
+    var ids=['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'];
+    for (var i=0;i<ids.length;i++){ var cb=document.getElementById(ids[i]); if(cb && !cb.checked) return false; }
+    return true;
+  }
+
+  // copy with fallback
+  window.dlq_copy = function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).catch(function(){ legacy(); });
+    } else { legacy(); }
+    function legacy(){ try{ if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } }catch(_){ } }
+    try{ var b=event&&event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
+  };
+
+  // generate comment (gated by checklist)
+  window.dlq_generate = function(){
+    if(!allChecked()){ alert('Please complete the checklist before generating.'); return; }
+    var lines=[];
+    lines.push('Delinquency Report — ' + (g('dlq_tenant')||'[Tenant]'));
+    lines.push('Address: ' + (g('dlq_address')||'[Address]'));
+    lines.push('Balances — Rent: ' + (g('dlq_rent')||'$0') + '  •  Utilities: ' + (g('dlq_util')||'$0') + '  •  Misc: ' + (g('dlq_misc')||'$0'));
+    lines.push('Last Payment: ' + (g('dlq_lastpay')||'—'));
+    lines.push('Last Communication: ' + (g('dlq_lastcomm')||'—'));
+    lines.push('FTP Date: ' + (g('dlq_ftp')||'—'));
+    lines.push('Court Outcome: ' + (g('dlq_court')||'—'));
+    lines.push('Judgment Ordered: ' + (g('dlq_judgment')||'—'));
+    lines.push('Eviction Date Scheduled: ' + (g('dlq_eviction')||'—'));
+    var r=g('dlq_noevict_reason'); if(r) lines.push('Reason No Eviction Scheduled: ' + r);
+    lines.push('Lease End Date: ' + (g('dlq_leaseend')||'—'));
+    lines.push('Last PW Action: ' + (g('dlq_lastaction')||'—'));
+    lines.push('Collection Status in Buildium: ' + (g('dlq_collection')||'—'));
+    lines.push('Maintenance Auto-Dispatch Disabled (> $500): ' + (g('dlq_maint_disable')||'—'));
+    s('dlq_out', lines.join('\n'));
+  };
+
+  // clear
+  window.dlq_clear = function(){
+    ['dlq_tenant','dlq_address','dlq_rent','dlq_util','dlq_misc','dlq_lastpay','dlq_lastcomm','dlq_ftp','dlq_court','dlq_judgment','dlq_eviction','dlq_noevict_reason','dlq_leaseend','dlq_lastaction'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.value='';
+    });
+    ['dlq_collection','dlq_maint_disable'].forEach(function(id){
+      var el=document.getElementById(id); if(el && el.tagName==='SELECT') el.selectedIndex=0;
+    });
+    ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].forEach(function(id){
+      var cb=document.getElementById(id); if(cb) cb.checked=false;
+    });
+    s('dlq_out','');
+  };
+})();
+</script>
 </div>
 <!-- ==== /Delinquency Handoff ==== -->
   
