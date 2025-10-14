@@ -361,6 +361,66 @@ window.pw_clearWB = function(){ var ids=['ho_from_wb','ho_to_wb','ho_person_wb',
       <div class="check"><input id="nm_record" type="checkbox" onchange="persist()"><div>Accounting → Bills → Record Bill (vendor, property, expense, due date, memo)</div></div>
       <div class="check"><input id="nm_epm" type="checkbox" onchange="persist()"><div>Submit to EPM for approval</div></div>
       <div class="check"><input id="nm_pay" type="checkbox" onchange="persist()"><div>Process payment & upload receipt to Files → Invoices/Payments</div></div>
+      <!-- ==== Non-Maintenance Bill Handoff (add inside #viewNonMaint) ==== -->
+<div class="hr"></div>
+<h3>Non-Maintenance Bill Handoff</h3>
+
+<details open id="nmb_checklist">
+<summary><strong>✅ Pre-Handoff Checklist — Non-Maintenance Bill</strong></summary>
+<div class="check"><input type="checkbox" id="nb_c1"><label for="nb_c1">Invoice verified vs. PO/Agreement</label></div>
+<div class="check"><input type="checkbox" id="nb_c2"><label for="nb_c2">Coding complete (chart of accounts)</label></div>
+<div class="check"><input type="checkbox" id="nb_c3"><label for="nb_c3">Owner/Property allocation correct</label></div>
+<div class="check"><input type="checkbox" id="nb_c4"><label for="nb_c4">Docs uploaded (PDF/Proof)</label></div>
+<div class="check"><input type="checkbox" id="nb_c5"><label for="nb_c5">Next action &amp; due date chosen</label></div>
+</details>
+
+<details open>
+<summary><strong>Handoff Tool (Non-Maintenance Bill → …)</strong></summary>
+
+<div class="two-col">
+<div class="soft">
+<div class="field"><label>From (role)</label>
+<select id="ho_from_nb">
+<option>Non-Maintenance Bill</option>
+<option>Finance</option>
+<option>Operations/EPM</option>
+<option>Owner Comms</option>
+</select>
+</div>
+<div class="field"><label>To (role)</label>
+<select id="ho_to_nb">
+<option>Finance</option>
+<option>Operations/EPM</option>
+<option>Owner Comms</option>
+<option>Maintenance</option>
+<option>Leasing</option>
+</select>
+</div>
+</div>
+<div class="soft">
+<div class="field"><label>To (person)</label><input id="ho_person_nb" type="text" placeholder="e.g., Rachel"></div>
+<div class="field"><label>Due date</label><input id="ho_due_nb" type="date"></div>
+</div>
+</div>
+
+<div class="field"><label>Invoice Ref / Link</label><input id="ho_ref_nb" type="text" placeholder="Invoice# / Buildium URL"></div>
+<div class="field"><label>Tags</label><input id="ho_tags_nb" type="text" placeholder="#bill #approval #owner-pay"></div>
+<div class="field"><label>Summary / Ask</label><textarea id="ho_summary_nb"></textarea></div>
+<div class="field"><label>Blocking items</label><textarea id="ho_block_nb"></textarea></div>
+<div class="field"><label>Attachments / Proof</label><textarea id="ho_attach_nb"></textarea></div>
+<div class="field"><label>Notify (emails)</label><input id="ho_notify_nb" type="text" placeholder="rachel@…, finance@…"></div>
+
+<div class="row">
+<button type="button" class="btn primary" onclick="pw_genNonMaint()">Generate</button>
+<button type="button" class="btn" onclick="pw_copyFrom('ho_out_bu_nb')">Copy Buildium Comment</button>
+<button type="button" class="btn" onclick="pw_copyFrom('ho_out_em_nb')">Copy Email Draft</button>
+<button type="button" class="btn" onclick="pw_clearNonMaint()">Clear</button>
+</div>
+
+<div class="field"><label>Buildium Comment</label><textarea id="ho_out_bu_nb" readonly></textarea></div>
+<div class="field"><label>Email Draft (Subject + Body)</label><textarea id="ho_out_em_nb" readonly></textarea></div>
+</details>
+<!-- ==== /Non-Maintenance Bill Handoff ==== -->
     </div>
   </section>
 </main>
@@ -377,7 +437,7 @@ window.pw_clearWB = function(){ var ids=['ho_from_wb','ho_to_wb','ho_person_wb',
     </div>
   </div>
 </div>
-
+                                                
 <footer class="wrap" style="text-align:center;font-size:12px;color:var(--muted);padding-bottom:28px">
   © 2025 PropertyWize • This single file runs entirely on your device. Add to Home Screen for faster access.
 </footer>
@@ -392,12 +452,12 @@ window.pw_clearWB = function(){ var ids=['ho_from_wb','ho_to_wb','ho_person_wb',
 
   // Plans
   const DEFAULT_PLANS = [
-    "Full Coverage",
-    "Essential",
-    "Basic",
+    "Standard- (Ownner Approval >300+)",
+    "Home Warranty",
+    "Basic- (Owner Approval >150+)",
     "Opt-Out (Owner Managed)",
-    "Emergency-Only",
-    "Cap $300 Auto-Approve"
+    "Emergency-Only (Auto Approved, EPM Approved, FYI to Owner",
+    
   ];
   function loadPlans() {
     let list = localStorage.getItem("pw_plans");
