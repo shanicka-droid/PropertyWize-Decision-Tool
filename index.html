@@ -363,6 +363,8 @@ window.pw_clearWB = function(){ var ids=['ho_from_wb','ho_to_wb','ho_person_wb',
       <div class="check"><input id="nm_pay" type="checkbox" onchange="persist()"><div>Process payment & upload receipt to Files → Invoices/Payments</div></div>
       <!-- ==== Non-Maintenance Bill Handoff (add inside #viewNonMaint) ==== -->
 <div class="hr"></div>
+<!-- ==== Non-Maintenance Bill Handoff (self-contained) ==== -->
+<div class="hr"></div>
 <h3>Non-Maintenance Bill Handoff</h3>
 
 <details open id="nmb_checklist">
@@ -411,15 +413,88 @@ window.pw_clearWB = function(){ var ids=['ho_from_wb','ho_to_wb','ho_person_wb',
 <div class="field"><label>Notify (emails)</label><input id="ho_notify_nb" type="text" placeholder="rachel@…, finance@…"></div>
 
 <div class="row">
-<button type="button" class="btn primary" onclick="pw_genNonMaint()">Generate</button>
-<button type="button" class="btn" onclick="pw_copyFrom('ho_out_bu_nb')">Copy Buildium Comment</button>
-<button type="button" class="btn" onclick="pw_copyFrom('ho_out_em_nb')">Copy Email Draft</button>
-<button type="button" class="btn" onclick="pw_clearNonMaint()">Clear</button>
+<button type="button" class="btn primary" onclick="pwNM_gen()">Generate</button>
+<button type="button" class="btn" onclick="pwNM_copy('ho_out_bu_nb')">Copy Buildium Comment</button>
+<button type="button" class="btn" onclick="pwNM_copy('ho_out_em_nb')">Copy Email Draft</button>
+<button type="button" class="btn" onclick="pwNM_clear()">Clear</button>
 </div>
 
 <div class="field"><label>Buildium Comment</label><textarea id="ho_out_bu_nb" readonly></textarea></div>
 <div class="field"><label>Email Draft (Subject + Body)</label><textarea id="ho_out_em_nb" readonly></textarea></div>
 </details>
+
+<script>
+(function(){
+// unique helpers (NB = Non-Maintenance Bill)
+function nb$(id){ return document.getElementById(id); }
+function nbVal(id){ var el = nb$(id); return el ? (el.value||'').trim() : ''; }
+
+// Copy (navigator.clipboard with fallback)
+window.pwNM_copy = function(id){
+var el = nb$(id); if(!el) return;
+var text = (el.value !== undefined) ? el.value : (el.innerText || el.textContent || '');
+if (navigator.clipboard && navigator.clipboard.writeText) {
+navigator.clipboard.writeText(text).catch(function(){ nbLegacyCopy(el); });
+} else { nbLegacyCopy(el); }
+try { var btn = event && event.target; if(btn){ var old=btn.textContent; btn.textContent='Copied!'; setTimeout(function(){ btn.textContent=old; }, 900); } } catch(_){}
+};
+function nbLegacyCopy(el){ try{ if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } }catch(_){ } }
+
+function nbAllChecked(){
+var ids=['nb_c1','nb_c2','nb_c3','nb_c4','nb_c5'];
+for (var i=0;i<ids.length;i++){ var cb=nb$(ids[i]); if(cb && !cb.checked) return false; }
+return true;
+}
+
+// Generate handoff
+window.pwNM_gen = function(){
+if(!nbAllChecked()){ alert('Please complete the checklist before generating.'); return; }
+
+var from=nbVal('ho_from_nb'), toRole=nbVal('ho_to_nb'), toPerson=nbVal('ho_person_nb'), due=nbVal('ho_due_nb'),
+ref=nbVal('ho_ref_nb'), tags=nbVal('ho_tags_nb'), summary=nbVal('ho_summary_nb'),
+block=nbVal('ho_block_nb'), attach=nbVal('ho_attach_nb'), notify=nbVal('ho_notify_nb');
+
+var bu=[];
+bu.push('HANDOFF – Non-Maintenance Bill');
+bu.push('From: '+(from||'Non-Maintenance Bill')+' → To: '+(toPerson||toRole||''));
+if(ref) bu.push('Ref: '+ref);
+if(due) bu.push('Due: '+due);
+if(tags) bu.push('Tags: '+tags);
+if(summary){ bu.push('Summary/Ask:'); bu.push(summary); }
+if(block){ bu.push('Blocking:'); bu.push(block); }
+if(attach){ bu.push('Attachments: '+attach); }
+var buOut = nb$('ho_out_bu_nb'); if(buOut) buOut.value = bu.join('\\n');
+
+var subj='Handoff: Non-Maintenance Bill'+(ref?(' – '+ref):'');
+var em=[];
+em.push('To: '+(notify||toPerson||''));
+em.push('Subject: '+subj);
+em.push('');
+em.push('Hi '+(toPerson||toRole||'team')+',');
+em.push('');
+if(summary){ em.push('Request:'); em.push(summary); em.push(''); }
+if(due) em.push('Due: '+due);
+if(ref) em.push('Ref: '+ref);
+if(tags) em.push('Tags: '+tags);
+if(block){ em.push(''); em.push('Blocking:'); em.push(block); }
+if(attach){ em.push(''); em.push('Attachments:'); em.push(attach); }
+em.push('');
+em.push('Thanks,');
+em.push('[Your Name]');
+var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value = em.join('\\n');
+};
+
+// Clear
+window.pwNM_clear = function(){
+['ho_from_nb','ho_to_nb','ho_person_nb','ho_due_nb','ho_ref_nb','ho_tags_nb','ho_summary_nb','ho_block_nb','ho_attach_nb','ho_notify_nb'].forEach(function(id){
+var el = nb$(id); if(!el) return;
+if(el.tagName === 'SELECT'){ el.selectedIndex = 0; } else { el.value=''; }
+});
+var buOut = nb$('ho_out_bu_nb'); if(buOut) buOut.value='';
+var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
+};
+})();
+</script>
 <!-- ==== /Non-Maintenance Bill Handoff ==== -->
     </div>
   </section>
