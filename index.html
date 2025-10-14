@@ -64,9 +64,9 @@
       <label class="pill"><input type="radio" name="role" value="maintenance">🛠️ Maintenance</label>
       <label class="pill"><input type="radio" name="role" value="finance">💵 Finance</label>
       <label class="pill"><input type="radio" name="role" value="nonmaint">📄 Non‑Maintenance Bill</label>
+      <label class="pill"><input type="radio" name="role" value="delinquency" data-target="viewDelinquency"><span>Delinquency</span>
+</label>
       <label class="pill">
-  <input type="radio" name="role" value="delinquency">
-  <span>Delinquency</span>
 </label>
     </div>
     <div class="hr"></div>
@@ -503,6 +503,29 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
     </div>
   </section>
 </main>
+  <!-- New Delinquency pane -->
+<div id="viewDelinquency" class="view-pane hidden">
+  <h2>Delinquency Handoff Checklist</h2>
+  <p>Use this to prepare and hand off delinquency reports.</p>
+
+  <details open>
+    <summary>Pre-handoff checks</summary>
+    <label><input type="checkbox"> Tenant balance confirmed over 60 days</label><br>
+    <label><input type="checkbox"> FTP notice sent & logged</label><br>
+    <label><input type="checkbox"> Court status recorded</label><br>
+    <label><input type="checkbox"> Eviction step confirmed / reason noted</label><br>
+    <label><input type="checkbox"> Tenant status = Collection / partial-payments blocked</label><br>
+    <label><input type="checkbox"> Maintenance dispatch disabled (> $500)</label>
+  </details>
+
+  <textarea id="pwDLQ_text" placeholder="Enter tenant info here…"></textarea>
+
+  <div class="button-row">
+    <button id="pwDLQ_generate" class="btn-green">Generate</button>
+    <button id="pwDLQ_copy" class="btn-blue">Copy Comment</button>
+    <button id="pwDLQ_clear" class="btn-gray">Clear</button>
+  </div>
+</div>
 
 <!-- Plans Modal -->
 <div id="plansModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:center;padding:14px">
