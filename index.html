@@ -738,5 +738,46 @@ document.getElementById('viewDelinquency')?.classList.remove('hidden');
   // Init
   restore(); setRole(null);
 </script>
+  <script>
+(function(){
+  if (window._pwRoleSwitch) return; window._pwRoleSwitch = true;
+
+  // guarantee .hidden utility exists
+  if (!document.querySelector('style[data-pw-hidden]')) {
+    var s = document.createElement('style');
+    s.setAttribute('data-pw-hidden','');
+    s.textContent = '.hidden{display:none!important;}';
+    document.head.appendChild(s);
+  }
+
+  function show(id){
+    document.querySelectorAll('.view-pane').forEach(function(p){ p.classList.add('hidden'); });
+    var t = document.getElementById(id);
+    if (t) t.classList.remove('hidden');
+  }
+  function fallbackId(val){
+    if (!val) return null;
+    if (val === 'nonmaint') return 'viewNonMaint';
+    return 'view' + val.charAt(0).toUpperCase() + val.slice(1);
+  }
+
+  // wire pills
+  document.querySelectorAll('#rolePicker input[type="radio"][name="role"]').forEach(function(r){
+    r.addEventListener('change', function(){
+      var id = this.dataset.target || fallbackId(this.value);
+      if (id) { localStorage.setItem('pw_role', id); show(id); }
+    });
+  });
+
+  // initial view
+  var saved = localStorage.getItem('pw_role');
+  var initial = saved;
+  if (!initial) {
+    var checked = document.querySelector('#rolePicker input[name="role"]:checked');
+    if (checked) initial = checked.dataset.target || fallbackId(checked.value);
+  }
+  if (initial) show(initial);
+})();
+</script>
 </body>
 </html>
