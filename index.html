@@ -175,7 +175,18 @@
           <div class="check"><input id="chkOwnerOK" type="checkbox" onchange="persist()"><div><b>Owner Approval</b> attached (required for Non‑Emergency &gt; $300)</div></div>
         </div>
       </div>
+<!-- Buildium Note Output -->
+<div class="hr"></div>
+<h3>Buildium Note / Copy Output</h3>
+<p class="note">Use this section to generate a clean Buildium note template.</p>
 
+<textarea id="mt_note" style="width:100%;min-height:120px;"
+  placeholder="Click 'Generate Note' to create formatted output..."></textarea>
+
+<div class="row" style="margin-top:10px;">
+  <button class="btn primary" onclick="genMaintNote()">Generate Note</button>
+  <button class="btn" onclick="copyMaintNote()">Copy to Clipboard</button>
+</div>
       <div class="hr"></div>
       <div class="soft">
         <h3>Policy Guidance</h3>
@@ -974,6 +985,26 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
     s('dlq_out','');
   };
 })();
+// === Maintenance Note generator ===
+function genMaintNote(){
+  const issue = document.getElementById("issue")?.value || "";
+  const tenantResp = document.getElementById("mt_tenant_resp")?.checked ? "Tenant responsibility confirmed." : "";
+  const followup = document.getElementById("mt_followup_suggested")?.checked ? "Vendor suggested follow-up." : "";
+  const temp = document.getElementById("mt_tempcheck")?.checked ? "Temp check / 2nd opinion required." : "";
+  const lease = document.getElementById("mt_lease_violation")?.checked ? "Lease violation triggered." : "";
+  const charge = document.getElementById("mt_tenant_chargeback")?.checked ? 
+      `Tenant chargeback required (${document.getElementById("mt_chargeback_amt").value}).` : "";
+  const forward = document.getElementById("mt_forward_fin")?.checked ? "Forwarded to Finance." : "";
+
+  const note = `MAINTENANCE UPDATE\nIssue Type: ${issue}\n${tenantResp}\n${followup}\n${temp}\n${lease}\n${charge}\n${forward}`;
+  document.getElementById("mt_note").value = note.trim();
+}
+
+function copyMaintNote(){
+  const note = document.getElementById("mt_note").value;
+  if (!note) return alert("Generate note first!");
+  navigator.clipboard.writeText(note).then(() => alert("Copied to clipboard ✅"));
+}
 </script>
 </body>
 </html>
