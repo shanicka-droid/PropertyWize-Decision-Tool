@@ -117,13 +117,16 @@
           <div class="field">
             <label class="small">Owner Plan</label>
             <select id="plan" onchange="persist()"></select>
-            <label class="small">Issue Type</label>
-            <select id="issue" onchange="persist()">
-              <option value="">Select…</option>
-              <option>Emergency</option>
-              <option>Non‑Emergency</option>
-              <option>Cosmetic / Upgrade</option>
-            </select>
+        <label class="small">Issue Type</label>
+<select id="issue" onchange="persist()">
+  <option value="">Select…</option>
+  <option>Emergency</option>
+  <option>Non-Emergency</option>
+  <option>Urgent</option>              <!-- NEW -->
+  <option>Recall</option>              <!-- NEW -->
+  <option>Cosmetic / Upgrade</option>
+  <option>Opt-Out Maintenance</option> <!-- NEW -->
+</select>
           </div>
         </div>
 
