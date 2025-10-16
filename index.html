@@ -129,6 +129,42 @@
 </select>
           </div>
         </div>
+        <!-- Vendor Findings & Compliance -->
+<div class="hr"></div>
+<h3>Vendor Findings & Compliance</h3>
+<details open>
+  <summary><strong>Flags from vendor / SOP</strong></summary>
+
+  <div class="two-col">
+    <div class="soft">
+      <div class="check"><input id="mt_tenant_resp" type="checkbox">
+        <label for="mt_tenant_resp">Vendor confirmed tenant responsibility</label></div>
+
+      <div class="check"><input id="mt_followup_suggested" type="checkbox">
+        <label for="mt_followup_suggested">Vendor suggested follow-up work</label></div>
+
+      <div class="check"><input id="mt_tempcheck" type="checkbox">
+        <label for="mt_tempcheck">Temp check / 2nd opinion needed</label></div>
+
+      <div class="check"><input id="mt_optout" type="checkbox">
+        <label for="mt_optout">Opt-out maintenance (use opt-out path)</label></div>
+    </div>
+
+    <div class="soft">
+      <div class="check"><input id="mt_lease_violation" type="checkbox">
+        <label for="mt_lease_violation">Trigger Lease Violation Notice</label></div>
+
+      <div class="check"><input id="mt_tenant_chargeback" type="checkbox">
+        <label for="mt_tenant_chargeback">Tenant responsible but work done (chargeback)</label></div>
+
+      <div class="field"><label>Chargeback amount (if applicable)</label>
+        <input id="mt_chargeback_amt" type="text" placeholder="$125.00"></div>
+
+      <div class="check"><input id="mt_forward_fin" type="checkbox" checked>
+        <label for="mt_forward_fin">Forward to Finance when complete</label></div>
+    </div>
+  </div>
+</details>
 
         <div class="soft">
           <h3>Controls & Approvals</h3>
