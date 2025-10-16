@@ -603,7 +603,67 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
       <div class="field"><label>Last PW action completed</label><input id="dlq_lastaction" type="text" placeholder="FTP sent 9/25; court filing 10/01"></div>
     </div>
   </div>
+<!-- ===== Delinquency • Notices & Reporting ===== -->
+<div class="hr"></div>
+<h3>Notices & Reporting</h3>
 
+<!-- Red Notice: date range (no time) -->
+<div class="field">
+  <label><strong>Red Notice Posting Window</strong></label>
+  <div class="two-col">
+    <div class="soft">
+      <div class="field">
+        <label>Start Date</label>
+        <input id="dlq_red_start" type="date">
+      </div>
+    </div>
+    <div class="soft">
+      <div class="field">
+        <label>End Date (optional)</label>
+        <input id="dlq_red_end" type="date">
+      </div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:6px;">
+    <button type="button" class="btn primary" onclick="dlq_icsRed()">📅 Add to Calendar</button>
+  </div>
+</div>
+
+<!-- Credit Reporting: single date -->
+<div class="field">
+  <label><strong>Credit Bureau Report Submission</strong></label>
+  <div class="field">
+    <label>Report Date</label>
+    <input id="dlq_credit_date" type="date">
+  </div>
+  <div class="row" style="margin-top:6px;">
+    <button type="button" class="btn primary" onclick="dlq_icsCredit()">📅 Add to Calendar</button>
+  </div>
+</div>
+
+<!-- Owner informed + tracker -->
+<div class="field">
+  <label><strong>Owner Notification (Tracker)</strong></label>
+  <div class="check">
+    <input id="dlq_owner_informed" type="checkbox" onchange="dlq_ownerToggle()">
+    <label for="dlq_owner_informed">Owner informed of non-payment in tracker</label>
+  </div>
+  <div class="two-col">
+    <div class="soft">
+      <div class="field">
+        <label>Informed On</label>
+        <input id="dlq_owner_date" type="date">
+      </div>
+    </div>
+    <div class="soft">
+      <div class="field">
+        <label>Tracker Link (optional)</label>
+        <input id="dlq_owner_link" type="text" placeholder="https://…">
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== /Notices & Reporting ===== -->
   <div class="two-col">
     <div class="soft">
       <div class="field"><label>Collection status in Buildium?</label>
