@@ -628,7 +628,71 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
     <button type="button" class="btn primary" onclick="dlq_icsRed()">📅 Add to Calendar</button>
   </div>
 </div>
+<script>
+(function(){
+  if (window._dlqNotices) return; window._dlqNotices = true;
 
+  // Track whether calendar exports were clicked
+  var redCalSet = false, creditCalSet = false;
+
+  // Helpers
+  function byId(id){ return document.getElementById(id); }
+  function val(id){ var el=byId(id); return el ? (el.value||'').trim() : ''; }
+  function fmtDisplay(d){ if(!d) return '—'; try { var t=new Date(d); return (t.getMonth()+1).toString().padStart(2,'0')+'/'+t.getDate().toString().padStart(2,'0')+'/'+t.getFullYear(); } catch(_){ return d; } }
+  function yyyymmdd(d){ var t = new Date(d); if(isNaN(t)) return ''; var m=('0'+(t.getMonth()+1)).slice(-2), day=('0'+t.getDate()).slice(-2); return ''+t.getFullYear()+m+day; }
+  function addDaysISO(d, n){ var t = new Date(d); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); }
+
+  // Build ICS file (all-day; DTSTART/DTEND in local date format YYYYMMDD)
+  function makeIcs(options){
+    var lines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//PropertyWize//Delinquency//EN',
+      'CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT',
+      'UID:' + (Date.now()) + '@propertywize',
+      'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z'),
+      'SUMMARY:' + (options.summary||''),
+      'DESCRIPTION:' + (options.description||'').replace(/\n/g,'\\n'),
+      options.location ? ('LOCATION:' + options.location.replace(/\n/g,' ')) : '',
+      // All-day events use date-only, and DTEND is exclusive; add +1 day to end
+      'DTSTART;VALUE=DATE:' + (options.start),
+      'DTEND;VALUE=DATE:' + (options.end),
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(Boolean).join('\r\n');
+
+    var blob = new Blob([lines], {type:'text/calendar;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = (options.filename || 'event') + '.ics';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+  }
+
+  // Pull details from Delinquency form for descriptions
+  function tenant(){ return val('dlq_tenant') || '[Tenant]'; }
+  function address(){ return val('dlq_address') || '[Address]'; }
+  function balancesLine(){
+    var rent = val('dlq_rent')||'$0', util = val('dlq_util')||'$0', misc = val('dlq_misc')||'$0';
+    return 'Balances — Rent: ' + rent + ' • Utilities: ' + util + ' • Misc: ' + misc;
+    }
+
+  // Owner informed toggle auto-date
+  window.dlq_ownerToggle = function(){
+    var cb = byId('dlq_owner_informed'), d = byId('dlq_owner_date');
+    if (cb && d && cb.checked && !d.value){
+      var today = new Date(); var iso = today.toISOString().slice(0,10);
+      d.value = iso;
+    }
+  };
+
+  // Red Notice: ICS (date range; all-day)
+  window.dlq_icsRed = function(){
+    var start = val('dlq_red_start'), end = val('dlq_red_end') || val('dlq_red_start');
+    if (!
 <!-- Credit Reporting: single date -->
 <div class="field">
   <label><strong>Credit Bureau Report Submission</strong></label>
