@@ -1,4 +1,4 @@
-
+as
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1417,10 +1417,9 @@ PropertyWize Leasing Team`;
     const reco = gv('sl_reco') || '—';
 
     const subject = `[PropertyWize] Unit Status — ${addr} — ${dom} days on market`;
+const body = `Hi ${owner},
 
-    const body = `Hi ${owner},
-
-Here’s the status update for ${addr}:
+We're reaching out to provide you with this week's update on the applications received for your property at ${addr}. Below is a summary of the activities from the past 7 days:
 
 Listing Summary
 • Date Listed: ${listed}
@@ -1443,8 +1442,9 @@ ${reco}
 
 Attached: Buildium Listing + Rentometer Report
 
-Thanks,
+Thanks,  
 PropertyWize Leasing Team`;
+    
 
     const out = $('sl_out'); if(out) out.value = `Subject: ${subject}\n\n${body}`;
 
