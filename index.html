@@ -1232,5 +1232,129 @@ function copyMaintNote(){
   // helpers
   function $(id){ return document.getElementById(id); }
   function v(id){
+  <script>
+(function(){
+  // ---- helper shims ----
+  function $(id){ return document.getElementById(id); }
+  function v(id){ var el=$(id); return el ? (el.value||'').trim() : ''; }
+  function n(x){ return (x===''||x==null)?0:parseInt(x,10)||0; }
+  function fmtMoney(x){ return x&&x[0]==='$' ? x : (x?('$'+x):''); }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function fmtDate(d){ try{ var t=new Date(d); return (t.getMonth()+1).toString().padStart(2,'0')+'/'+t.getDate().toString().padStart(2,'0')+'/'+t.getFullYear(); }catch(_){ return d||'—'; } }
+
+  // ---- core actions (expose on window) ----
+  window.sl_copy = function(id){
+    var el=$(id); if(!el) return;
+    var txt=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
+    if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt); }
+    else { try{ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); }catch(_){} }
+  };
+
+  window.sl_calcDOM = function(){
+    var d=v('sl_listed'); if(!d){ $('sl_dom').value=''; return; }
+    var start=new Date(d), now=new Date();
+    $('sl_dom').value = Math.max(0, Math.round((now-start)/86400000));
+  };
+
+  window.sl_generate = function(){
+    sl_calcDOM();
+
+    var addr=v('sl_address')||'[Address]';
+    var owner=v('sl_owner')||'Owner';
+    var listed=v('sl_listed')?fmtDate(v('sl_listed')):'—';
+    var rent=fmtMoney(v('sl_rent')), dom=v('sl_dom')||'0';
+
+    var aNew=n(v('sl_apps_new')), aPen=n(v('sl_apps_pending')), aApp=n(v('sl_apps_approved')), aDec=n(v('sl_apps_declined'));
+    var show=n(v('sl_showings')), feed=v('sl_feedback')||'—';
+
+    var med=v('sl_med')||'—', low=v('sl_low')||'—', high=v('sl_high')||'—', reco=v('sl_reco')||'—';
+
+    var subject = `[PropertyWize] Unit Status — ${addr} — ${dom} days on market`;
+
+    var body = `Hi ${owner},
+
+Here’s the status update for ${addr}:
+
+Listing Summary
+• Date Listed: ${listed}
+• List Rent: ${rent}
+• DOM: ${dom}
+
+Applications
+• New: ${aNew} | Pending: ${aPen} | Approved: ${aApp} | Declined: ${aDec}
+
+Showings/Feedback
+• Showings in last 7 days: ${show}
+• Feedback: "${feed}"
+
+Market Check (Rentometer)
+• Median: ${med} | Range: ${low}–${high}
+• Current List: ${rent}
+
+Recommendation
+${reco}
+
+Attached: Buildium Listing + Rentometer Report
+
+Thanks,
+PropertyWize Leasing Team`;
+
+    $('sl_out').value = `Subject: ${subject}\n\n${body}`;
+
+    var staleFlag = ( (aApp===0 && (parseInt(dom,10)>=14)) || (parseInt(dom,10)>=30) ) ? 'STALE' : 'MONITOR';
+    $('sl_handoff').value =
+      `Stale Listing Review — ${addr}\n`+
+      `DOM: ${dom} | List: ${rent}\n`+
+      `Apps N/P/A/D: ${aNew}/${aPen}/${aApp}/${aDec} | Showings(7d): ${show}\n`+
+      `Rentometer: med ${med}, range ${low}-${high}\n`+
+      `Reco: ${reco}\n`+
+      `Status: ${staleFlag}\n`+
+      `EPM approval required before owner send.`;
+  };
+
+  function dl(name, mime, text){
+    var blob=new Blob([text], {type: mime+';charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download=name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+  }
+
+  window.sl_downloadTXT = function(){
+    var content=$('sl_out').value || ''; if(!content){ sl_generate(); content=$('sl_out').value; }
+    var addr=(v('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
+    dl(`OwnerReport_${addr}_${todayISO()}.txt`, 'text/plain', content);
+  };
+
+  window.sl_downloadCSV = function(){
+    var csv=[
+      ['Date','Address','ListRent','DOM','New','Pending','Approved','Declined','Showings7d','Median','Low','High','Recommendation'].join(','),
+      [ todayISO(), `"${v('sl_address')}"`, `"${v('sl_rent')}"`, v('sl_dom')||'',
+        v('sl_apps_new')||'0', v('sl_apps_pending')||'0', v('sl_apps_approved')||'0', v('sl_apps_declined')||'0',
+        v('sl_showings')||'0', `"${v('sl_med')}"`, `"${v('sl_low')}"`, `"${v('sl_high')}"`, `"${v('sl_reco')}"` ].join(',')
+    ].join('\n');
+    var addr=(v('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
+    dl(`StaleListing_${addr}_${todayISO()}.csv`, 'text/csv', csv);
+  };
+
+  window.sl_downloadEML = function(){
+    var addr=v('sl_address')||'Unit', dom=v('sl_dom')||'0';
+    var to='operationsmgr@propertywize.com';
+    var subject=`EPM Review – ${addr} – ${dom} DOM`;
+    var body=$('sl_out').value || ''; if(!body){ sl_generate(); body=$('sl_out').value; }
+    var eml=['From: ','To: '+to,'Subject: '+subject,'Content-Type: text/plain; charset=UTF-8','',body].join('\r\n');
+    var name=(addr.replace(/[^A-Za-z0-9]+/g,'_'));
+    dl(`EPM_Review_${name}_${todayISO()}.eml`, 'message/rfc822', eml);
+  };
+
+  // ---- resilient wiring (buttons work even if inline onclicks are missing) ----
+  function on(id, fn){ var el=$(id); if(el && typeof fn==='function') el.addEventListener('click', fn); }
+  on('sl_btnGen',  window.sl_generate);
+  on('sl_btnCopy', function(){ window.sl_copy('sl_out'); });
+  on('sl_btnTxt',  window.sl_downloadTXT);
+  on('sl_btnCsv',  window.sl_downloadCSV);
+  on('sl_btnEml',  window.sl_downloadEML);
+})();
+</script>
 </body>
 </html>
