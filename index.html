@@ -881,15 +881,17 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
   </details>
 
   <div class="hr"></div>
-  <h3>Outputs</h3>
-  <div class="row">
-    <button type="button" class="btn primary" onclick="sl_generate()">Generate Owner Report</button>
-    <button type="button" class="btn" onclick="sl_copy('sl_out')">Copy Email Body</button>
-  </div>
-  <div class="row" style="margin-top:6px;">
-    <button type="button" class="btn" onclick="sl_downloadTXT()">Download Report (.txt)</button>
-    <button type="button" class="btn" onclick="sl_downloadCSV()">Download Summary (.csv)</button>
-    <button type="button" class="btn" onclick="sl_downloadEML()">Download EPM Draft (.eml)</button>
+  <div class="hr"></div>
+<h3>Outputs</h3>
+<div class="row">
+  <button type="button" class="btn primary" id="sl_btnGen">Generate Owner Report</button>
+  <button type="button" class="btn" id="sl_btnCopy">Copy Email Body</button>
+</div>
+<div class="row" style="margin-top:6px;">
+  <button type="button" class="btn" id="sl_btnTxt">Download Report (.txt)</button>
+  <button type="button" class="btn" id="sl_btnCsv">Download Summary (.csv)</button>
+  <button type="button" class="btn" id="sl_btnEml">Download EPM Draft (.eml)</button>
+</div>
   </div>
 
   <div class="field">
