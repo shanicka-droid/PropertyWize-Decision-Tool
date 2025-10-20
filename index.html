@@ -973,6 +973,19 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
   };
 })();
 </script>
+<div class="hr"></div>
+<h3>Delinquency Comment</h3>
+
+<div class="row">
+  <button type="button" class="btn primary" onclick="dlq_generate()">Generate</button>
+  <button type="button" class="btn" onclick="dlq_copy('dlq_out')">Copy Comment</button>
+  <button type="button" class="btn" onclick="dlq_clear()">Clear</button>
+</div>
+
+<div class="field">
+  <label>Output</label>
+  <textarea id="dlq_out" readonly style="min-height:220px" placeholder="Generated delinquency report will appear here…"></textarea>
+</div>
 </div>
 <!-- ==== /Delinquency Handoff ==== -->
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
@@ -1840,6 +1853,107 @@ PropertyWize Leasing Team`;
     } else {
       s('appl_deferral',''); // not applicable
     }
+  };
+})();
+</script>
+<script>
+(function(){
+  // prevent double-wiring
+  if (window._dlqRepair) return; window._dlqRepair = true;
+
+  // helpers
+  function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
+  function s(id,txt){ var el=document.getElementById(id); if(el) el.value = txt; }
+  function valOrDash(x){ return x ? x : '—'; }
+  function money(x){ if(x==null || x==='') return '$0'; var t=(x+'').replace(/[^0-9.]/g,''); return t ? ('$'+t) : '$0'; }
+  function fmt(d){ if(!d) return '—'; try{ var t=new Date(d); if(!isNaN(t)) return (t.getMonth()+1).toString().padStart(2,'0')+'/'+t.getDate().toString().padStart(2,'0')+'/'+t.getFullYear(); }catch(_){} return d; }
+
+  // checklist gate (change these IDs to your actual checklist boxes if different)
+  function allChecked(){
+    var ids = ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'];
+    for (var i=0;i<ids.length;i++){ var cb=document.getElementById(ids[i]); if(cb && !cb.checked) return false; }
+    return true;
+  }
+
+  // Copy / Clear
+  window.dlq_copy = function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var text = (el.value!==undefined)? el.value : (el.innerText||el.textContent||'');
+    if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text); }
+    else { try{ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); }catch(_){ } }
+    try{ var b=event && event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
+  };
+
+  window.dlq_clear = function(){
+    // clear common Delinquency inputs (only those that exist will be cleared)
+    [
+      'dlq_tenant','dlq_address','dlq_rent','dlq_util','dlq_misc','dlq_fees',
+      'dlq_lastpay','dlq_lastcomm','dlq_ftp','dlq_court','dlq_judgment',
+      'dlq_eviction','dlq_noevict_reason','dlq_leaseend','dlq_lastaction',
+      'dlq_collection','dlq_maint_disable','dlq_credit_date','dlq_red_start','dlq_red_end','dlq_owner_link','dlq_owner_date'
+    ].forEach(function(id){ var el=document.getElementById(id); if(!el) return; if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; });
+    ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6','dlq_owner_informed'].forEach(function(id){ var el=document.getElementById(id); if(el) el.checked=false; });
+    s('dlq_out','');
+  };
+
+  // Generate
+  window.dlq_generate = function(){
+    if(!allChecked()){ alert('Please complete the checklist before generating.'); return; }
+
+    // read fields (only if present)
+    var tenant = g('dlq_tenant') || '[Tenant]';
+    var addr   = g('dlq_address') || '[Address]';
+
+    var rent = g('dlq_rent'), util = g('dlq_util'), misc = g('dlq_misc'), fees = g('dlq_fees');
+    var lastpay = g('dlq_lastpay'), lastcomm = g('dlq_lastcomm');
+    var ftp = g('dlq_ftp'); var court = g('dlq_court'); var judgment = g('dlq_judgment');
+    var evict = g('dlq_eviction'); var reason = g('dlq_noevict_reason');
+    // Lease End can be text (e.g., MTM) or a date
+    var leaseend = g('dlq_leaseend'); if (/^\d{4}-\d{2}-\d{2}$/.test(leaseend)) leaseend = fmt(leaseend);
+
+    var coll = g('dlq_collection'); var maint = g('dlq_maint_disable');
+
+    // Notices & Reporting (if you added that section)
+    var redStart = g('dlq_red_start'), redEnd = g('dlq_red_end') || redStart;
+    var creditDate = g('dlq_credit_date');
+    var ownerInf = (document.getElementById('dlq_owner_informed')?.checked) ? 'Yes' : 'No';
+    var ownerLink = g('dlq_owner_link'); var ownerDate = g('dlq_owner_date'); if (/^\d{4}-\d{2}-\d{2}$/.test(ownerDate)) ownerDate = fmt(ownerDate);
+
+    // totals
+    var sumNums = function(x){ var n=parseFloat((x||'').toString().replace(/[^0-9.]/g,'')); return isNaN(n)?0:n; };
+    var tRent = sumNums(rent), tUtil=sumNums(util), tMisc=sumNums(misc), tFees=sumNums(fees);
+    var total = tRent + tUtil + tMisc + tFees;
+
+    var lines = [];
+    lines.push('Delinquency Report — ' + tenant);
+    lines.push('Address: ' + addr);
+    lines.push('Balances — Rent: ' + money(rent) + '  •  Utilities: ' + money(util) + '  •  Misc: ' + money(misc) + '  •  Late/Court: ' + money(fees));
+    lines.push('Total Balance: ' + money(total));
+    lines.push('Last Payment: ' + valOrDash(lastpay));
+    lines.push('Last Communication: ' + valOrDash(lastcomm));
+    lines.push('FTP Date: ' + valOrDash(ftp));
+    lines.push('Court Outcome: ' + valOrDash(court));
+    lines.push('Judgment Ordered: ' + valOrDash(judgment));
+    lines.push('Eviction Date Scheduled: ' + valOrDash(evict));
+    if (reason) lines.push('Reason No Eviction Scheduled: ' + reason);
+    lines.push('Lease End Date: ' + valOrDash(leaseend));
+    lines.push('Last PW Action: ' + valOrDash(g('dlq_lastaction')));
+    if (coll)  lines.push('Collection Status in Buildium: ' + coll);
+    if (maint) lines.push('Maintenance Auto-Dispatch Disabled (> $500): ' + maint);
+
+    // Notices & Reporting, if present
+    if (redStart || redEnd || creditDate || ownerInf==='Yes' || ownerLink || ownerDate){
+      var redWin = (redStart ? fmt(redStart) : '—') + ' – ' + (redEnd ? fmt(redEnd) : (redStart ? fmt(redStart) : '—'));
+      lines.push('— Notices & Reporting —');
+      lines.push('Red Notice window: ' + redWin);
+      lines.push('Credit Report submission: ' + (creditDate ? fmt(creditDate) : '—'));
+      lines.push('Owner informed: ' + ownerInf);
+      lines.push('Tracker link: ' + (ownerLink || '—'));
+      lines.push('Informed on: ' + (ownerDate ? ownerDate : '—'));
+    }
+
+    var out = document.getElementById('dlq_out');
+    if (out) out.value = lines.join('\n');
   };
 })();
 </script>
