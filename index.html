@@ -746,6 +746,10 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
       <div class="field"><label>Tenant name</label><input id="dlq_tenant" type="text" placeholder="e.g., Jane Doe"></div>
       <div class="field"><label>Address</label><input id="dlq_address" type="text" placeholder="123 Main St, City, ST"></div>
       <div class="field"><label>Rent balance</label><input id="dlq_rent" type="text" placeholder="$2,400.00"></div>
+      <div class="field">
+  <label>Late Fee / Court Charges</label>
+  <input id="del_fees" type="number" placeholder="e.g. 150">
+</div>
       <div class="field"><label>Utility balance</label><input id="dlq_util" type="text" placeholder="$175.00"></div>
       <div class="field"><label>Misc. balance</label><input id="dlq_misc" type="text" placeholder="$45.00"></div>
       <div class="field"><label>Last payment received</label><input id="dlq_lastpay" type="text" placeholder="09/01/2025 – $500"></div>
@@ -757,7 +761,7 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
       <div class="field"><label>Judgment ordered</label><input id="dlq_judgment" type="text" placeholder="Yes – $2,100 on 10/10/2025"></div>
       <div class="field"><label>Eviction date scheduled</label><input id="dlq_eviction" type="text" placeholder="10/28/2025 (set)"></div>
       <div class="field"><label>Reason if no eviction scheduled</label><input id="dlq_noevict_reason" type="text" placeholder="Payment plan / Court delay / Owner hold"></div>
-      <div class="field"><label>Lease end date</label><input id="dlq_leaseend" type="date"></div>
+    <input id="leaseend" type="text" placeholder="e.g. 12/31/2025 or MTM" oninput="persist()">
       <div class="field"><label>Last PW action completed</label><input id="dlq_lastaction" type="text" placeholder="FTP sent 9/25; court filing 10/01"></div>
     </div>
   </div>
