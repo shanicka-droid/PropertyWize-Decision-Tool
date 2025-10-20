@@ -170,52 +170,7 @@ as
     </div>
   </div>
 </details>
-
-        <div class="soft">
-          <h3>Controls & Approvals</h3>
-          <div class="field"><label class="small">Invoice Amount (USD)</label><input id="amount" type="number" min="0" step="0.01" placeholder="e.g., 425.00" oninput="persist();calcRules()"></div>
-          <div class="check"><input id="chkPhotos" type="checkbox" onchange="persist()"><div>Photos complete (before & after, <b>timestamp + watermark</b>)</div></div>
-          <div class="check"><input id="chkTenant" type="checkbox" onchange="persist()"><div>Tenant confirmed completion</div></div>
-          <div class="check"><input id="chkFYI" type="checkbox" onchange="persist()"><div><b>FYI to Owner</b> sent (required for Emergency &gt; $300)</div></div>
-          <div class="check"><input id="chkOwnerOK" type="checkbox" onchange="persist()"><div><b>Owner Approval</b> attached (required for Non‑Emergency &gt; $300)</div></div>
-        </div>
-      </div>
-<!-- Buildium Note Output -->
-<div class="hr"></div>
-<h3>Buildium Note / Copy Output</h3>
-<p class="note">Use this section to generate a clean Buildium note template.</p>
-
-<textarea id="mt_note" style="width:100%;min-height:120px;"
-  placeholder="Click 'Generate Note' to create formatted output..."></textarea>
-
-<div class="row" style="margin-top:10px;">
-  <button class="btn primary" onclick="genMaintNote()">Generate Note</button>
-  <button class="btn" onclick="copyMaintNote()">Copy to Clipboard</button>
-</div>
-      <div class="hr"></div>
-      <div class="soft">
-        <h3>Policy Guidance</h3>
-        <div id="policy" class="note">Enter amount & issue type to see policy cues…</div>
-      </div>
-
-      <div class="hr"></div>
-      <div class="two-col">
-        <div>
-          <h3>Dispatch & Completion</h3>
-          <div class="check"><input id="chkVendorApproved" type="checkbox" onchange="persist()"><div>Vendor is approved & scheduled in Buildium</div></div>
-          <div class="check"><input id="chkWOStatus" type="checkbox" onchange="persist()"><div>WO status set to <span class="kbd">Vendor Scheduled</span></div></div>
-          <div class="check"><input id="chkInvoiceWO" type="checkbox" onchange="persist()"><div>Invoice has <b>WO#</b> printed on it</div></div>
-        </div>
-        <div>
-          <h3>Handoff to Finance</h3>
-          <div class="check"><input id="chkAllDocs" type="checkbox" onchange="persist()"><div>All docs attached: invoice, approvals/FYI, photos, tenant confirm</div></div>
-          <div class="check"><input id="chkReady" type="checkbox" onchange="persist()"><div>Status set to <span class="kbd">READY FOR FINANCE</span>, assigned to Finance, team notified</div></div>
-          <button class="btn primary" onclick="genHandoff()">Generate Handoff Note</button>
-          <textarea id="handoff" placeholder="Click Generate to fill…"></textarea>
-        </div>
-      </div>
-    </div>
-    <!-- ========= APPLIANCE TICKET PROCESSING (Maintenance) ========= -->
+<!-- ========= APPLIANCE TICKET PROCESSING (Maintenance) ========= -->
 <div class="hr"></div>
 <h3>Appliance Ticket Processing</h3>
 <p class="note">Use this tool to process appliance tickets end-to-end: delinquency check, essential vs non-essential, troubleshooting, inspection details, vendor review, options, and EPM email.</p>
@@ -369,6 +324,51 @@ as
 </div>
 <!-- ========= /APPLIANCE TICKET PROCESSING ========= -->
 
+        <div class="soft">
+          <h3>Controls & Approvals</h3>
+          <div class="field"><label class="small">Invoice Amount (USD)</label><input id="amount" type="number" min="0" step="0.01" placeholder="e.g., 425.00" oninput="persist();calcRules()"></div>
+          <div class="check"><input id="chkPhotos" type="checkbox" onchange="persist()"><div>Photos complete (before & after, <b>timestamp + watermark</b>)</div></div>
+          <div class="check"><input id="chkTenant" type="checkbox" onchange="persist()"><div>Tenant confirmed completion</div></div>
+          <div class="check"><input id="chkFYI" type="checkbox" onchange="persist()"><div><b>FYI to Owner</b> sent (required for Emergency &gt; $300)</div></div>
+          <div class="check"><input id="chkOwnerOK" type="checkbox" onchange="persist()"><div><b>Owner Approval</b> attached (required for Non‑Emergency &gt; $300)</div></div>
+        </div>
+      </div>
+<!-- Buildium Note Output -->
+<div class="hr"></div>
+<h3>Buildium Note / Copy Output</h3>
+<p class="note">Use this section to generate a clean Buildium note template.</p>
+
+<textarea id="mt_note" style="width:100%;min-height:120px;"
+  placeholder="Click 'Generate Note' to create formatted output..."></textarea>
+
+<div class="row" style="margin-top:10px;">
+  <button class="btn primary" onclick="genMaintNote()">Generate Note</button>
+  <button class="btn" onclick="copyMaintNote()">Copy to Clipboard</button>
+</div>
+      <div class="hr"></div>
+      <div class="soft">
+        <h3>Policy Guidance</h3>
+        <div id="policy" class="note">Enter amount & issue type to see policy cues…</div>
+      </div>
+
+      <div class="hr"></div>
+      <div class="two-col">
+        <div>
+          <h3>Dispatch & Completion</h3>
+          <div class="check"><input id="chkVendorApproved" type="checkbox" onchange="persist()"><div>Vendor is approved & scheduled in Buildium</div></div>
+          <div class="check"><input id="chkWOStatus" type="checkbox" onchange="persist()"><div>WO status set to <span class="kbd">Vendor Scheduled</span></div></div>
+          <div class="check"><input id="chkInvoiceWO" type="checkbox" onchange="persist()"><div>Invoice has <b>WO#</b> printed on it</div></div>
+        </div>
+        <div>
+          <h3>Handoff to Finance</h3>
+          <div class="check"><input id="chkAllDocs" type="checkbox" onchange="persist()"><div>All docs attached: invoice, approvals/FYI, photos, tenant confirm</div></div>
+          <div class="check"><input id="chkReady" type="checkbox" onchange="persist()"><div>Status set to <span class="kbd">READY FOR FINANCE</span>, assigned to Finance, team notified</div></div>
+          <button class="btn primary" onclick="genHandoff()">Generate Handoff Note</button>
+          <textarea id="handoff" placeholder="Click Generate to fill…"></textarea>
+        </div>
+      </div>
+    </div>
+    
     <!-- Finance VIEW -->
     <div id="viewFinance" class="hidden">
       <div class="badge">Temp Check required if &gt; $300</div>
