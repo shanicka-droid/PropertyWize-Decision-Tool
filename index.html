@@ -215,6 +215,159 @@ as
         </div>
       </div>
     </div>
+    <!-- ========= APPLIANCE TICKET PROCESSING (Maintenance) ========= -->
+<div class="hr"></div>
+<h3>Appliance Ticket Processing</h3>
+<p class="note">Use this tool to process appliance tickets end-to-end: delinquency check, essential vs non-essential, troubleshooting, inspection details, vendor review, options, and EPM email.</p>
+
+<!-- 1) Ticket & Delinquency -->
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>WO#</label><input id="appl_wo" type="text" placeholder="e.g., WO-12345"></div>
+    <div class="field"><label>Property Address</label><input id="appl_address" type="text" placeholder="123 Main St, City ST"></div>
+    <div class="field"><label>Unit</label><input id="appl_unit" type="text" placeholder="Apt 2B"></div>
+    <div class="field"><label>Tenant Name</label><input id="appl_tenant" type="text" placeholder="Jane Doe"></div>
+    <div class="field">
+      <label>Appliance Type</label>
+      <select id="appl_type">
+        <option value="">Select…</option>
+        <option>Refrigerator</option>
+        <option>Oven / Stove / Range</option>
+        <option>Dishwasher</option>
+        <option>Microwave</option>
+        <option>Washer</option>
+        <option>Dryer</option>
+      </select>
+    </div>
+  </div>
+  <div class="soft">
+    <div class="field"><label>Tenant Balance (USD)</label><input id="appl_balance" type="text" placeholder="$0.00"></div>
+    <div class="field">
+      <label>Essential vs Non-Essential</label>
+      <select id="appl_priority">
+        <option value="">Auto (based on type)</option>
+        <option value="essential">Essential (Refrigerator, Oven/Stove/Range)</option>
+        <option value="nonessential">Non-Essential (Microwave, Washer, Dryer, Dishwasher)</option>
+      </select>
+    </div>
+    <div class="field"><label>EPM (Manager)</label><input id="appl_epm" type="text" placeholder="(Optional) e.g., Michelle / Shanicka"></div>
+    <div class="field"><label>Tenant Complaint (from WO)</label><input id="appl_complaint" type="text" placeholder="e.g., fridge not cooling"></div>
+  </div>
+</div>
+
+<!-- 2) Troubleshooting -->
+<div class="hr"></div>
+<h4>Tenant Troubleshooting</h4>
+<div class="field">
+  <div class="row" style="margin-bottom:6px;">
+    <button type="button" class="btn" onclick="appl_insertTroubleshooting()">Insert basic troubleshooting template</button>
+  </div>
+  <textarea id="appl_troubleshoot" placeholder="Record steps provided to tenant and result…"></textarea>
+</div>
+
+<!-- 3) Appliance Details (Inspection / Tenant) -->
+<div class="hr"></div>
+<h4>Appliance Details</h4>
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>Brand</label><input id="appl_brand" type="text" placeholder="Whirlpool"></div>
+    <div class="field"><label>Model #</label><input id="appl_model" type="text" placeholder="WRS325FDAM"></div>
+    <div class="field"><label>Serial #</label><input id="appl_serial" type="text" placeholder="SER1234567"></div>
+    <div class="field"><label>Color</label><input id="appl_color" type="text" placeholder="Stainless / White"></div>
+    <div class="field"><label>Age (years, approximate)</label><input id="appl_age" type="text" placeholder="e.g., 8"></div>
+  </div>
+  <div class="soft">
+    <div class="field"><label>Photo Album Link (Drive)</label><input id="appl_album" type="text" placeholder="https://drive.google.com/…"></div>
+    <div class="field"><label>Info Source</label>
+      <select id="appl_info_source">
+        <option>PW Inspection</option>
+        <option>Tenant Provided</option>
+        <option>Vendor</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:6px;">
+      <a class="btn" href="https://www.appliance411.com/service/date-code.php" target="_blank" rel="noopener">Appliance411 (Age Lookup)</a>
+      <a class="btn" href="https://propertywize.managebuilding.com/manager/public/authentication/login?returnUrl=%2Fmanager%2Fapp%2Fdraft-leases%2Fdraft%2F101559%2Fsummary%3FopenSignModal%3Dtrue%26signatureRequestId%3D7cd1654a-b69c-4b35-ab4f-b1580df7a6df" target="_blank" rel="noopener">Open Buildium</a>
+    </div>
+  </div>
+</div>
+
+<!-- 4) Vendor Coordination -->
+<div class="hr"></div>
+<h4>Vendor Coordination</h4>
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>Preferred Vendor</label><input id="appl_vendor" type="text" value="NT Appliance – Ahmed"></div>
+    <div class="field"><label>Vendor Recommendation</label>
+      <select id="appl_vendor_reco">
+        <option value="">Select…</option>
+        <option>Repair</option>
+        <option>Replace</option>
+        <option>Unknown / Awaiting review</option>
+      </select>
+    </div>
+  </div>
+  <div class="soft">
+    <div class="check"><input id="appl_sent_vendor" type="checkbox"><label for="appl_sent_vendor">Sent ticket details & photos to vendor</label></div>
+    <div class="check"><input id="appl_vendor_reviewed" type="checkbox"><label for="appl_vendor_reviewed">Vendor reviewed and advised next step</label></div>
+  </div>
+</div>
+
+<!-- 5) Replacement Options (2 NEW + 1 USED) -->
+<div class="hr"></div>
+<h4>Replacement Options (verify pricing & requirements)</h4>
+<p class="note">Provide two <b>Brand New</b> options (≥4.0 rating & ≥500 reviews) and one <b>USED</b> option with photo link. Verify delivery/kit pricing before submission.</p>
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>Option 1 — Brand NEW (Name/URL/Price/Rating/Reviews)</label><input id="appl_opt1" type="text" placeholder="LG LDFN4542... | https://... | $699 | 4.3 | 1,204"></div>
+    <div class="field"><label>Option 2 — Brand NEW (Name/URL/Price/Rating/Reviews)</label><input id="appl_opt2" type="text" placeholder="Samsung ... | https://... | $649 | 4.2 | 980"></div>
+    <div class="check"><input id="appl_verify_price" type="checkbox"><label for="appl_verify_price">Verified current delivery/kit pricing (Lowe’s & Home Depot)</label></div>
+  </div>
+  <div class="soft">
+    <div class="field"><label>Option 3 — USED (Name/URL/Price/PhotoLink/Notes)</label><input id="appl_opt3" type="text" placeholder="Whirlpool USED ... | https://... | $350 | Photo: https://..."></div>
+    <div class="field"><label>Notes to EPM (optional)</label><input id="appl_notes" type="text" placeholder="Any context, constraints, measurements, etc."></div>
+  </div>
+</div>
+
+<!-- 6) Pre-Handoff Checklist -->
+<div class="hr"></div>
+<h4>Pre-Handoff Checklist</h4>
+<details open id="appl_checklist">
+  <summary><strong>Complete before Generate</strong></summary>
+  <div class="check"><input id="appl_ck_delinquency" type="checkbox"><label for="appl_ck_delinquency">Delinquency checked in Buildium</label></div>
+  <div class="check"><input id="appl_ck_ack" type="checkbox"><label for="appl_ck_ack">Acknowledgement email sent to tenant</label></div>
+  <div class="check"><input id="appl_ck_details" type="checkbox"><label for="appl_ck_details">Brand/Model/Serial/Color captured (or requested)</label></div>
+  <div class="check"><input id="appl_ck_vendor" type="checkbox"><label for="appl_ck_vendor">Vendor consulted (reviewed ticket & photos)</label></div>
+  <div class="check"><input id="appl_ck_options" type="checkbox"><label for="appl_ck_options">2 NEW + 1 USED options prepared</label></div>
+  <div class="check"><input id="appl_ck_photos" type="checkbox"><label for="appl_ck_photos">Photo album link added</label></div>
+</details>
+
+<!-- 7) Outputs -->
+<div class="row">
+  <button type="button" class="btn primary" onclick="appl_generate()">Generate EPM Email</button>
+  <button type="button" class="btn" onclick="appl_copy('appl_email_out')">Copy Email</button>
+  <button type="button" class="btn" onclick="appl_clear()">Clear</button>
+</div>
+
+<div class="field">
+  <label>EPM Email (preview)</label>
+  <textarea id="appl_email_out" readonly style="min-height:220px"></textarea>
+</div>
+
+<div class="row">
+  <button type="button" class="btn" onclick="appl_copy('appl_handoff')">Copy Handoff Comment</button>
+  <button type="button" class="btn" onclick="appl_copy('appl_deferral')">Copy Tenant Deferral Email</button>
+</div>
+
+<div class="field">
+  <label>Handoff Comment (Buildium/Slack)</label>
+  <textarea id="appl_handoff" readonly></textarea>
+</div>
+<div class="field">
+  <label>Tenant Deferral Email (if delinquent & non-essential)</label>
+  <textarea id="appl_deferral" readonly></textarea>
+</div>
+<!-- ========= /APPLIANCE TICKET PROCESSING ========= -->
 
     <!-- Finance VIEW -->
     <div id="viewFinance" class="hidden">
@@ -1524,6 +1677,166 @@ PropertyWize Leasing Team`;
   } else {
     bind();
   }
+})();
+</script>
+<script>
+(function(){
+  if (window._applToolWired) return; window._applToolWired = true;
+
+  // helpers
+  function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
+  function s(id,txt){ var el=document.getElementById(id); if(el){ el.value = txt; } }
+  function c(id){ var el=document.getElementById(id); return !!(el && el.checked); }
+  function money(x){ if(!x) return '$0.00'; x=x.toString().trim(); return x[0]==='$'?x:('$'+x); }
+  function allChecked(){ var ids=['appl_ck_delinquency','appl_ck_ack','appl_ck_details','appl_ck_vendor','appl_ck_options','appl_ck_photos']; for(var i=0;i<ids.length;i++){ if(!c(ids[i])) return false; } return true; }
+  function isEssential(type, override){
+    if(override==='essential') return true;
+    if(override==='nonessential') return false;
+    var t=(type||'').toLowerCase();
+    return (t.indexOf('refrigerator')>-1 || t.indexOf('oven')>-1 || t.indexOf('range')>-1 || t.indexOf('stove')>-1);
+  }
+
+  // Insert a basic troubleshooting template
+  window.appl_insertTroubleshooting = function(){
+    if (g('appl_troubleshoot')) return; // don't overwrite user text
+    var t = [
+      '1) Power/Breaker checked and ON',
+      '2) Verified outlet works (tested with another device)',
+      '3) For fridge: set to “4/5” and wait 24h; confirm condenser coils cleaned',
+      '4) For washer/dryer: cleaned filter/vent; confirmed door fully closed and load size appropriate',
+      '5) Captured error codes (if any) and photos/video',
+      'Result: [Resolved / Not Resolved]'
+    ].join('\n');
+    s('appl_troubleshoot', t);
+  };
+
+  // Copy (with fallback)
+  window.appl_copy = function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).catch(function(){ legacy(); });
+    } else { legacy(); }
+    function legacy(){ try{ if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } }catch(_){ } }
+    try{ var b=event&&event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
+  };
+
+  // Clear
+  window.appl_clear = function(){
+    ['appl_wo','appl_address','appl_unit','appl_tenant','appl_type','appl_balance','appl_priority','appl_epm','appl_complaint','appl_troubleshoot','appl_brand','appl_model','appl_serial','appl_color','appl_age','appl_album','appl_info_source','appl_vendor','appl_vendor_reco','appl_opt1','appl_opt2','appl_opt3','appl_notes'].forEach(function(id){
+      var el=document.getElementById(id); if(!el) return;
+      if(el.tagName==='SELECT'){ el.selectedIndex=0; } else { el.value=''; }
+    });
+    ['appl_sent_vendor','appl_vendor_reviewed','appl_verify_price','appl_ck_delinquency','appl_ck_ack','appl_ck_details','appl_ck_vendor','appl_ck_options','appl_ck_photos'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.checked=false;
+    });
+    s('appl_email_out',''); s('appl_handoff',''); s('appl_deferral','');
+  };
+
+  // Generate EPM Email + Handoff + (optional) Deferral email
+  window.appl_generate = function(){
+    if(!allChecked()){ alert('Please complete the Pre-Handoff Checklist before generating.'); return; }
+
+    // delinquency rule
+    var bal = g('appl_balance').replace(/[^0-9.]/g,''); var balance = parseFloat(bal||'0')||0;
+    var essential = isEssential(g('appl_type'), (function(){ var p=g('appl_priority'); return p? p.toLowerCase():''; })());
+    var mustDefer = (balance>500 && !essential);
+
+    var wo=g('appl_wo')||'[WO#]';
+    var addr=g('appl_address')||'[Address]';
+    var unit=g('appl_unit')||'';
+    var tenant=g('appl_tenant')||'[Tenant]';
+    var type=g('appl_type')||'[Appliance]';
+    var epm=g('appl_epm')||'EPM';
+    var complaint=g('appl_complaint')||'—';
+
+    var brand=g('appl_brand')||'—', model=g('appl_model')||'—', serial=g('appl_serial')||'—', color=g('appl_color')||'—', age=g('appl_age')||'—';
+    var album=g('appl_album')||'—', info=g('appl_info_source')||'—';
+
+    var vendor=g('appl_vendor')||'—', vReco=g('appl_vendor_reco')||'—', sent=c('appl_sent_vendor')?'Yes':'No', reviewed=c('appl_vendor_reviewed')?'Yes':'No';
+
+    var opt1=g('appl_opt1')||'—', opt2=g('appl_opt2')||'—', opt3=g('appl_opt3')||'—', verified=c('appl_verify_price')?'Yes':'No';
+    var notes=g('appl_notes')||'—';
+
+    // Subject & body (EPM)
+    var subj = 'Appliance Ticket – ' + type + ' – ' + tenant + (unit?(' / '+unit):'');
+    var lines = [];
+    lines.push('Subject: ' + subj);
+    lines.push('');
+    lines.push('Dear ' + (epm || 'EPM') + ',');
+    lines.push('');
+    lines.push('We received an appliance ticket for the ' + type + ' at ' + addr + (unit?(', '+unit):'') + '.');
+    lines.push('');
+    lines.push('Tenant Reported:');
+    lines.push('"' + complaint + '"');
+    lines.push('');
+    lines.push('Work Order: ' + wo);
+    lines.push('Delinquency Check: Balance ' + money(balance) + (mustDefer ? ' — Non-essential → DEFER' : (essential ? ' — Essential → PROCEED' : '')));
+    lines.push('');
+    lines.push('Appliance Information:');
+    lines.push('• Brand: ' + brand);
+    lines.push('• Model#: ' + model);
+    lines.push('• Serial#: ' + serial);
+    lines.push('• Color: ' + color);
+    lines.push('• Age (approx): ' + age);
+    lines.push('• Source: ' + info);
+    lines.push('Photo Album: ' + album);
+    lines.push('');
+    lines.push('Troubleshooting Summary:');
+    lines.push((g('appl_troubleshoot')||'—'));
+    lines.push('');
+    lines.push('Vendor Coordination:');
+    lines.push('• Vendor: ' + vendor);
+    lines.push('• Sent Ticket & Photos: ' + sent);
+    lines.push('• Vendor Reviewed: ' + reviewed);
+    lines.push('• Vendor Recommendation: ' + vReco);
+    lines.push('');
+    lines.push('Replacement Options (verify pricing before approval):');
+    lines.push('• Option 1 — Brand NEW: ' + opt1);
+    lines.push('• Option 2 — Brand NEW: ' + opt2);
+    lines.push('• Option 3 — USED: ' + opt3);
+    lines.push('Pricing Verified (delivery/kit): ' + verified);
+    lines.push('');
+    lines.push('Notes: ' + notes);
+    lines.push('');
+    lines.push('Please advise on how to proceed.');
+    lines.push('');
+    lines.push('Thank you,');
+    lines.push('PropertyWize Operations Team');
+
+    s('appl_email_out', lines.join('\n'));
+
+    // Handoff comment
+    var h = [];
+    h.push('APPLIANCE TICKET — ' + type + ' — ' + (addr + (unit?(' '+unit):'')));
+    h.push('WO: ' + wo + ' | Tenant: ' + tenant);
+    h.push('Balance: ' + money(balance) + ' | Essential: ' + (essential?'Yes':'No') + (mustDefer?' | ACTION: DEFER':''));
+    h.push('Brand/Model/Serial/Color: ' + brand + ' / ' + model + ' / ' + serial + ' / ' + color + ' | Age: ' + age);
+    h.push('Troubleshooting: ' + (g('appl_troubleshoot')||'—').split('\n')[0] + '...');
+    h.push('Vendor: ' + vendor + ' | Reviewed: ' + reviewed + ' | Reco: ' + vReco);
+    h.push('Options: [1] ' + (opt1.slice(0,60)) + '… | [2] ' + (opt2.slice(0,60)) + '… | [3] ' + (opt3.slice(0,60)) + '…');
+    h.push('Album: ' + album);
+    s('appl_handoff', h.join('\n'));
+
+    // Tenant deferral email (only if delinquent & non-essential)
+    var def=[];
+    if(mustDefer){
+      def.push('Subject: Your Maintenance Request — Account Action Needed');
+      def.push('');
+      def.push('Hello ' + tenant + ',');
+      def.push('');
+      def.push('We reviewed your maintenance request for the ' + type + '. Because your account balance currently exceeds $500,');
+      def.push('non-essential appliance requests are deferred per policy. Once your balance is below $500, we will proceed.');
+      def.push('');
+      def.push('If the appliance becomes essential for health/safety, or if conditions change, please let us know.');
+      def.push('');
+      def.push('Thank you,');
+      def.push('PropertyWize Operations Team');
+      s('appl_deferral', def.join('\n'));
+    } else {
+      s('appl_deferral',''); // not applicable
+    }
+  };
 })();
 </script>
 </body>
