@@ -995,7 +995,33 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
 </div> <!-- closes final field -->
 </div> <!-- closes #viewDelinquency -->
 <!-- ==== /Delinquency Handoff ==== -->
+<!-- ==== Appliance SOP VIEW ==== -->
+<div id="viewAppliance" class="view-pane hidden">
+  <h2>Appliance SOP</h2>
+  <p class="note">Quick reference for handling appliance-related maintenance issues and owner communication.</p>
 
+  <div class="hr"></div>
+  <h3>Common Appliance Issues</h3>
+  <ul>
+    <li>Refrigerator not cooling — check power, reset breaker, schedule vendor if persists.</li>
+    <li>Washer not draining — inspect filter/pump, confirm no tenant misuse.</li>
+    <li>Dryer not heating — check lint trap and vent before dispatching vendor.</li>
+  </ul>
+
+  <div class="hr"></div>
+  <h3>Vendor / Dispatch Notes</h3>
+  <textarea id="appliance_vendor" placeholder="Record vendor, date, and steps taken"></textarea>
+
+  <div class="hr"></div>
+  <h3>Owner Communication</h3>
+  <textarea id="appliance_owner" placeholder="Draft owner update or follow-up message"></textarea>
+
+  <div class="row" style="margin-top:10px;">
+    <button type="button" class="btn" onclick="copyText('appliance_vendor')">Copy Vendor Notes</button>
+    <button type="button" class="btn" onclick="copyText('appliance_owner')">Copy Owner Message</button>
+  </div>
+</div>
+<!-- ==== /Appliance SOP VIEW ==== -->
 <!-- ==== Stale Listing VIEW ==== -->
 <div id="viewListings" class="view-pane hidden">
   <h2>Stale Listing • Weekly Owner Report</h2>
