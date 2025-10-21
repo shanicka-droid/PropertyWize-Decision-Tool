@@ -116,6 +116,155 @@
       <div class="badge">Owner FYI for emergencies is sent by <b>Maintenance</b></div>
       <div class="badge">Handoff status: <span class="kbd">READY FOR FINANCE</span></div>
       <div class="hr"></div>
+<!-- ===== Maintenance Dispatch Flow (intake) ===== -->
+<div class="card" id="maintDispatchFlow" style="margin-bottom:12px;">
+<h3>Maintenance Dispatch Flow</h3>
+<p class="note">Answer each question in order. The next step will appear automatically.</p>
+
+<!-- Q1 -->
+<div class="flowQ" id="q1">
+<label><strong>Is it an Emergency?</strong></label>
+<div class="row" style="gap:8px;">
+<button type="button" class="btn" data-next="OUT_STANDARD">Yes</button>
+<button type="button" class="btn" data-next="q2">No</button>
+</div>
+</div>
+
+<!-- Q2 -->
+<div class="flowQ hidden" id="q2">
+<label><strong>Is the Property in Delinquent Status?</strong></label>
+<div class="row" style="gap:8px;">
+<button type="button" class="btn" data-next="OUT_DELINQ">Yes</button>
+<button type="button" class="btn" data-next="q3">No</button>
+</div>
+</div>
+
+<!-- Q3 -->
+<div class="flowQ hidden" id="q3">
+<label><strong>Is the Property enrolled in a Home Warranty program?</strong></label>
+<div class="row" style="gap:8px;">
+<button type="button" class="btn" data-next="OUT_HW">Yes</button>
+<button type="button" class="btn" data-next="q4">No</button>
+</div>
+</div>
+
+<!-- Q4 -->
+<div class="flowQ hidden" id="q4">
+<label><strong>Will the Owner complete their own maintenance tickets?</strong></label>
+<div class="row" style="gap:8px;">
+<button type="button" class="btn" data-next="OUT_NOTIFY_OWNER">Yes</button>
+<button type="button" class="btn" data-next="q5">No</button>
+</div>
+</div>
+
+<!-- Q5 -->
+<div class="flowQ hidden" id="q5">
+<label><strong>Was the same issue reported within the last 12 months?</strong></label>
+<div class="row" style="gap:8px;">
+<button type="button" class="btn" data-next="OUT_RECALL">Yes</button>
+<button type="button" class="btn" data-next="OUT_STANDARD">No</button>
+</div>
+</div>
+
+<!-- Outcome -->
+<div id="mdf_out_wrap" class="hidden" style="margin-top:10px;">
+<div class="hr"></div>
+<label><strong>Decision</strong></label>
+<textarea id="mdf_out" readonly style="min-height:110px"></textarea>
+
+<div class="row" style="gap:8px;margin-top:6px;">
+<button type="button" class="btn primary" id="mdf_copy">Copy Decision</button>
+<button type="button" class="btn" id="mdf_reset">Reset</button>
+</div>
+</div>
+</div>
+<!-- ===== /Maintenance Dispatch Flow ===== -->
+
+<script>
+(function(){
+if (window._mdf_wired) return; window._mdf_wired = true;
+
+// tiny helpers
+const $ = (q,ctx=document) => ctx.querySelector(q);
+const $$ = (q,ctx=document) => Array.from(ctx.querySelectorAll(q));
+const hide = el => el && el.classList.add('hidden');
+const show = el => el && el.classList.remove('hidden');
+
+// outcomes (text goes into the textarea)
+const OUT = {
+OUT_STANDARD:
+"Proceed with Standard Dispatch.\n• Send owner FYI (auto-approve where applicable).",
+OUT_DELINQ:
+"Complete Delinquency SOP before dispatching.\n• Follow delinquency checklist and handoff steps.",
+OUT_HW:
+"Proceed with scheduling via Home Warranty.\n• Open warranty portal and follow HW process.",
+OUT_NOTIFY_OWNER:
+"Notify the rental owner of the request.\n• Confirm if the owner will complete the work.\n• Document plan and timeline.",
+OUT_RECALL:
+"Check for recall/warranty within 12 months.\n• Review invoice for warranty coverage (roofing, water proofing, HVAC, carpet, etc.).\n• Begin Recall SOP if applicable."
+};
+
+const flow = $('#maintDispatchFlow');
+if(!flow) return;
+
+const qs = $$('.flowQ', flow);
+const outWrap = $('#mdf_out_wrap', flow);
+const outBox = $('#mdf_out', flow);
+const resetBtn = $('#mdf_reset', flow);
+const copyBtn = $('#mdf_copy', flow);
+
+// reset to first question
+function resetFlow(){
+qs.forEach(q => hide(q));
+show($('#q1', flow));
+hide(outWrap);
+if(outBox) outBox.value = '';
+}
+
+// render outcome
+function setOutcome(key){
+if(!OUT[key]) return;
+outBox.value = OUT[key];
+show(outWrap);
+// hide remaining questions
+qs.forEach(q => hide(q));
+}
+
+// wire buttons
+flow.addEventListener('click', (e)=>{
+const b = e.target.closest('button[data-next]');
+if(!b) return;
+const next = b.getAttribute('data-next');
+
+if(next.startsWith('OUT_')){
+setOutcome(next);
+return;
+}
+// show next question
+qs.forEach(q => hide(q));
+show($('#'+next, flow));
+});
+
+// copy/reset
+copyBtn && copyBtn.addEventListener('click', ()=>{
+const t = outBox.value || '';
+if(navigator.clipboard && navigator.clipboard.writeText){
+navigator.clipboard.writeText(t);
+} else {
+outBox.select && outBox.select();
+document.execCommand && document.execCommand('copy');
+}
+// tiny visual feedback
+const prev = copyBtn.textContent;
+copyBtn.textContent = 'Copied!';
+setTimeout(()=> copyBtn.textContent = prev, 900);
+});
+resetBtn && resetBtn.addEventListener('click', resetFlow);
+
+// init
+resetFlow();
+})();
+</script>
 
       <div class="two-col">
         <div class="soft">
