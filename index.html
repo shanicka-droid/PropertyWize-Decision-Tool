@@ -65,10 +65,9 @@ as
   <label class="pill">
     <input type="radio" name="role" value="maintenance" data-target="viewMaintenance">
     <span>🛠 Maintenance</span>
-  </label>
-  <label class="pill">
+<label class="pill">
   <input type="radio" name="role" value="appliance" data-target="viewAppliance">
-  <span>Appliance SOP</span>
+  <span>Appliance Ticket</span>
 </label>
 
   <label class="pill">
@@ -173,162 +172,7 @@ as
       <div class="check"><input id="mt_forward_fin" type="checkbox" checked>
         <label for="mt_forward_fin">Forward to Finance when complete</label></div>
     </div>
-  </div>
-</details>
-<!-- ========= APPLIANCE TICKET PROCESSING (Maintenance) ========= -->
-<div class="hr"></div>
-<h3>Appliance Ticket Processing</h3>
-<p class="note">Use this tool to process appliance tickets end-to-end: delinquency check, essential vs non-essential, troubleshooting, inspection details, vendor review, options, and EPM email.</p>
-
-<!-- 1) Ticket & Delinquency -->
-<div class="two-col">
-  <div class="soft">
-    <div class="field"><label>WO#</label><input id="appl_wo" type="text" placeholder="e.g., WO-12345"></div>
-    <div class="field"><label>Property Address</label><input id="appl_address" type="text" placeholder="123 Main St, City ST"></div>
-    <div class="field"><label>Unit</label><input id="appl_unit" type="text" placeholder="Apt 2B"></div>
-    <div class="field"><label>Tenant Name</label><input id="appl_tenant" type="text" placeholder="Jane Doe"></div>
-    <div class="field">
-      <label>Appliance Type</label>
-      <select id="appl_type">
-        <option value="">Select…</option>
-        <option>Refrigerator</option>
-        <option>Oven / Stove / Range</option>
-        <option>Dishwasher</option>
-        <option>Microwave</option>
-        <option>Washer</option>
-        <option>Dryer</option>
-      </select>
-    </div>
-  </div>
-  <div class="soft">
-    <div class="field"><label>Tenant Balance (USD)</label><input id="appl_balance" type="text" placeholder="$0.00"></div>
-    <div class="field">
-      <label>Essential vs Non-Essential</label>
-      <select id="appl_priority">
-        <option value="">Auto (based on type)</option>
-        <option value="essential">Essential (Refrigerator, Oven/Stove/Range)</option>
-        <option value="nonessential">Non-Essential (Microwave, Washer, Dryer, Dishwasher)</option>
-      </select>
-    </div>
-    <div class="field"><label>EPM (Manager)</label><input id="appl_epm" type="text" placeholder="(Optional) e.g., Michelle / Shanicka"></div>
-    <div class="field"><label>Tenant Complaint (from WO)</label><input id="appl_complaint" type="text" placeholder="e.g., fridge not cooling"></div>
-  </div>
-</div>
-
-<!-- 2) Troubleshooting -->
-<div class="hr"></div>
-<h4>Tenant Troubleshooting</h4>
-<div class="field">
-  <div class="row" style="margin-bottom:6px;">
-    <button type="button" class="btn" onclick="appl_insertTroubleshooting()">Insert basic troubleshooting template</button>
-  </div>
-  <textarea id="appl_troubleshoot" placeholder="Record steps provided to tenant and result…"></textarea>
-</div>
-
-<!-- 3) Appliance Details (Inspection / Tenant) -->
-<div class="hr"></div>
-<h4>Appliance Details</h4>
-<div class="two-col">
-  <div class="soft">
-    <div class="field"><label>Brand</label><input id="appl_brand" type="text" placeholder="Whirlpool"></div>
-    <div class="field"><label>Model #</label><input id="appl_model" type="text" placeholder="WRS325FDAM"></div>
-    <div class="field"><label>Serial #</label><input id="appl_serial" type="text" placeholder="SER1234567"></div>
-    <div class="field"><label>Color</label><input id="appl_color" type="text" placeholder="Stainless / White"></div>
-    <div class="field"><label>Age (years, approximate)</label><input id="appl_age" type="text" placeholder="e.g., 8"></div>
-  </div>
-  <div class="soft">
-    <div class="field"><label>Photo Album Link (Drive)</label><input id="appl_album" type="text" placeholder="https://drive.google.com/…"></div>
-    <div class="field"><label>Info Source</label>
-      <select id="appl_info_source">
-        <option>PW Inspection</option>
-        <option>Tenant Provided</option>
-        <option>Vendor</option>
-      </select>
-    </div>
-    <div class="row" style="margin-top:6px;">
-      <a class="btn" href="https://www.appliance411.com/service/date-code.php" target="_blank" rel="noopener">Appliance411 (Age Lookup)</a>
-      <a class="btn" href="https://propertywize.managebuilding.com/manager/public/authentication/login?returnUrl=%2Fmanager%2Fapp%2Fdraft-leases%2Fdraft%2F101559%2Fsummary%3FopenSignModal%3Dtrue%26signatureRequestId%3D7cd1654a-b69c-4b35-ab4f-b1580df7a6df" target="_blank" rel="noopener">Open Buildium</a>
-    </div>
-  </div>
-</div>
-
-<!-- 4) Vendor Coordination -->
-<div class="hr"></div>
-<h4>Vendor Coordination</h4>
-<div class="two-col">
-  <div class="soft">
-    <div class="field"><label>Preferred Vendor</label><input id="appl_vendor" type="text" value="NT Appliance – Ahmed"></div>
-    <div class="field"><label>Vendor Recommendation</label>
-      <select id="appl_vendor_reco">
-        <option value="">Select…</option>
-        <option>Repair</option>
-        <option>Replace</option>
-        <option>Unknown / Awaiting review</option>
-      </select>
-    </div>
-  </div>
-  <div class="soft">
-    <div class="check"><input id="appl_sent_vendor" type="checkbox"><label for="appl_sent_vendor">Sent ticket details & photos to vendor</label></div>
-    <div class="check"><input id="appl_vendor_reviewed" type="checkbox"><label for="appl_vendor_reviewed">Vendor reviewed and advised next step</label></div>
-  </div>
-</div>
-
-<!-- 5) Replacement Options (2 NEW + 1 USED) -->
-<div class="hr"></div>
-<h4>Replacement Options (verify pricing & requirements)</h4>
-<p class="note">Provide two <b>Brand New</b> options (≥4.0 rating & ≥500 reviews) and one <b>USED</b> option with photo link. Verify delivery/kit pricing before submission.</p>
-<div class="two-col">
-  <div class="soft">
-    <div class="field"><label>Option 1 — Brand NEW (Name/URL/Price/Rating/Reviews)</label><input id="appl_opt1" type="text" placeholder="LG LDFN4542... | https://... | $699 | 4.3 | 1,204"></div>
-    <div class="field"><label>Option 2 — Brand NEW (Name/URL/Price/Rating/Reviews)</label><input id="appl_opt2" type="text" placeholder="Samsung ... | https://... | $649 | 4.2 | 980"></div>
-    <div class="check"><input id="appl_verify_price" type="checkbox"><label for="appl_verify_price">Verified current delivery/kit pricing (Lowe’s & Home Depot)</label></div>
-  </div>
-  <div class="soft">
-    <div class="field"><label>Option 3 — USED (Name/URL/Price/PhotoLink/Notes)</label><input id="appl_opt3" type="text" placeholder="Whirlpool USED ... | https://... | $350 | Photo: https://..."></div>
-    <div class="field"><label>Notes to EPM (optional)</label><input id="appl_notes" type="text" placeholder="Any context, constraints, measurements, etc."></div>
-  </div>
-</div>
-
-<!-- 6) Pre-Handoff Checklist -->
-<div class="hr"></div>
-<h4>Pre-Handoff Checklist</h4>
-<details open id="appl_checklist">
-  <summary><strong>Complete before Generate</strong></summary>
-  <div class="check"><input id="appl_ck_delinquency" type="checkbox"><label for="appl_ck_delinquency">Delinquency checked in Buildium</label></div>
-  <div class="check"><input id="appl_ck_ack" type="checkbox"><label for="appl_ck_ack">Acknowledgement email sent to tenant</label></div>
-  <div class="check"><input id="appl_ck_details" type="checkbox"><label for="appl_ck_details">Brand/Model/Serial/Color captured (or requested)</label></div>
-  <div class="check"><input id="appl_ck_vendor" type="checkbox"><label for="appl_ck_vendor">Vendor consulted (reviewed ticket & photos)</label></div>
-  <div class="check"><input id="appl_ck_options" type="checkbox"><label for="appl_ck_options">2 NEW + 1 USED options prepared</label></div>
-  <div class="check"><input id="appl_ck_photos" type="checkbox"><label for="appl_ck_photos">Photo album link added</label></div>
-</details>
-
-<!-- 7) Outputs -->
-<div class="row">
-  <button type="button" class="btn primary" onclick="appl_generate()">Generate EPM Email</button>
-  <button type="button" class="btn" onclick="appl_copy('appl_email_out')">Copy Email</button>
-  <button type="button" class="btn" onclick="appl_clear()">Clear</button>
-</div>
-
-<div class="field">
-  <label>EPM Email (preview)</label>
-  <textarea id="appl_email_out" readonly style="min-height:220px"></textarea>
-</div>
-
-<div class="row">
-  <button type="button" class="btn" onclick="appl_copy('appl_handoff')">Copy Handoff Comment</button>
-  <button type="button" class="btn" onclick="appl_copy('appl_deferral')">Copy Tenant Deferral Email</button>
-</div>
-
-<div class="field">
-  <label>Handoff Comment (Buildium/Slack)</label>
-  <textarea id="appl_handoff" readonly></textarea>
-</div>
-<div class="field">
-  <label>Tenant Deferral Email (if delinquent & non-essential)</label>
-  <textarea id="appl_deferral" readonly></textarea>
-</div>
-<!-- ========= /APPLIANCE TICKET PROCESSING ========= -->
-
+ 
         <div class="soft">
           <h3>Controls & Approvals</h3>
           <div class="field"><label class="small">Invoice Amount (USD)</label><input id="amount" type="number" min="0" step="0.01" placeholder="e.g., 425.00" oninput="persist();calcRules()"></div>
@@ -995,33 +839,162 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
 </div> <!-- closes final field -->
 </div> <!-- closes #viewDelinquency -->
 <!-- ==== /Delinquency Handoff ==== -->
-<!-- ==== Appliance SOP VIEW ==== -->
-<div id="viewAppliance" class="view-pane hidden">
-  <h2>Appliance SOP</h2>
-  <p class="note">Quick reference for handling appliance-related maintenance issues and owner communication.</p>
+ </div>
+</details>
+<!-- ========= APPLIANCE TICKET PROCESSING (Maintenance) ========= -->
+<div class="hr"></div>
+<h3>Appliance Ticket Processing</h3>
+<p class="note">Use this tool to process appliance tickets end-to-end: delinquency check, essential vs non-essential, troubleshooting, inspection details, vendor review, options, and EPM email.</p>
 
-  <div class="hr"></div>
-  <h3>Common Appliance Issues</h3>
-  <ul>
-    <li>Refrigerator not cooling — check power, reset breaker, schedule vendor if persists.</li>
-    <li>Washer not draining — inspect filter/pump, confirm no tenant misuse.</li>
-    <li>Dryer not heating — check lint trap and vent before dispatching vendor.</li>
-  </ul>
-
-  <div class="hr"></div>
-  <h3>Vendor / Dispatch Notes</h3>
-  <textarea id="appliance_vendor" placeholder="Record vendor, date, and steps taken"></textarea>
-
-  <div class="hr"></div>
-  <h3>Owner Communication</h3>
-  <textarea id="appliance_owner" placeholder="Draft owner update or follow-up message"></textarea>
-
-  <div class="row" style="margin-top:10px;">
-    <button type="button" class="btn" onclick="copyText('appliance_vendor')">Copy Vendor Notes</button>
-    <button type="button" class="btn" onclick="copyText('appliance_owner')">Copy Owner Message</button>
+<!-- 1) Ticket & Delinquency -->
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>WO#</label><input id="appl_wo" type="text" placeholder="e.g., WO-12345"></div>
+    <div class="field"><label>Property Address</label><input id="appl_address" type="text" placeholder="123 Main St, City ST"></div>
+    <div class="field"><label>Unit</label><input id="appl_unit" type="text" placeholder="Apt 2B"></div>
+    <div class="field"><label>Tenant Name</label><input id="appl_tenant" type="text" placeholder="Jane Doe"></div>
+    <div class="field">
+      <label>Appliance Type</label>
+      <select id="appl_type">
+        <option value="">Select…</option>
+        <option>Refrigerator</option>
+        <option>Oven / Stove / Range</option>
+        <option>Dishwasher</option>
+        <option>Microwave</option>
+        <option>Washer</option>
+        <option>Dryer</option>
+      </select>
+    </div>
+  </div>
+  <div class="soft">
+    <div class="field"><label>Tenant Balance (USD)</label><input id="appl_balance" type="text" placeholder="$0.00"></div>
+    <div class="field">
+      <label>Essential vs Non-Essential</label>
+      <select id="appl_priority">
+        <option value="">Auto (based on type)</option>
+        <option value="essential">Essential (Refrigerator, Oven/Stove/Range)</option>
+        <option value="nonessential">Non-Essential (Microwave, Washer, Dryer, Dishwasher)</option>
+      </select>
+    </div>
+    <div class="field"><label>EPM (Manager)</label><input id="appl_epm" type="text" placeholder="(Optional) e.g., Michelle / Shanicka"></div>
+    <div class="field"><label>Tenant Complaint (from WO)</label><input id="appl_complaint" type="text" placeholder="e.g., fridge not cooling"></div>
   </div>
 </div>
-<!-- ==== /Appliance SOP VIEW ==== -->
+
+<!-- 2) Troubleshooting -->
+<div class="hr"></div>
+<h4>Tenant Troubleshooting</h4>
+<div class="field">
+  <div class="row" style="margin-bottom:6px;">
+    <button type="button" class="btn" onclick="appl_insertTroubleshooting()">Insert basic troubleshooting template</button>
+  </div>
+  <textarea id="appl_troubleshoot" placeholder="Record steps provided to tenant and result…"></textarea>
+</div>
+
+<!-- 3) Appliance Details (Inspection / Tenant) -->
+<div class="hr"></div>
+<h4>Appliance Details</h4>
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>Brand</label><input id="appl_brand" type="text" placeholder="Whirlpool"></div>
+    <div class="field"><label>Model #</label><input id="appl_model" type="text" placeholder="WRS325FDAM"></div>
+    <div class="field"><label>Serial #</label><input id="appl_serial" type="text" placeholder="SER1234567"></div>
+    <div class="field"><label>Color</label><input id="appl_color" type="text" placeholder="Stainless / White"></div>
+    <div class="field"><label>Age (years, approximate)</label><input id="appl_age" type="text" placeholder="e.g., 8"></div>
+  </div>
+  <div class="soft">
+    <div class="field"><label>Photo Album Link (Drive)</label><input id="appl_album" type="text" placeholder="https://drive.google.com/…"></div>
+    <div class="field"><label>Info Source</label>
+      <select id="appl_info_source">
+        <option>PW Inspection</option>
+        <option>Tenant Provided</option>
+        <option>Vendor</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:6px;">
+      <a class="btn" href="https://www.appliance411.com/service/date-code.php" target="_blank" rel="noopener">Appliance411 (Age Lookup)</a>
+      <a class="btn" href="https://propertywize.managebuilding.com/manager/public/authentication/login?returnUrl=%2Fmanager%2Fapp%2Fdraft-leases%2Fdraft%2F101559%2Fsummary%3FopenSignModal%3Dtrue%26signatureRequestId%3D7cd1654a-b69c-4b35-ab4f-b1580df7a6df" target="_blank" rel="noopener">Open Buildium</a>
+    </div>
+  </div>
+</div>
+
+<!-- 4) Vendor Coordination -->
+<div class="hr"></div>
+<h4>Vendor Coordination</h4>
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>Preferred Vendor</label><input id="appl_vendor" type="text" value="NT Appliance – Ahmed"></div>
+    <div class="field"><label>Vendor Recommendation</label>
+      <select id="appl_vendor_reco">
+        <option value="">Select…</option>
+        <option>Repair</option>
+        <option>Replace</option>
+        <option>Unknown / Awaiting review</option>
+      </select>
+    </div>
+  </div>
+  <div class="soft">
+    <div class="check"><input id="appl_sent_vendor" type="checkbox"><label for="appl_sent_vendor">Sent ticket details & photos to vendor</label></div>
+    <div class="check"><input id="appl_vendor_reviewed" type="checkbox"><label for="appl_vendor_reviewed">Vendor reviewed and advised next step</label></div>
+  </div>
+</div>
+
+<!-- 5) Replacement Options (2 NEW + 1 USED) -->
+<div class="hr"></div>
+<h4>Replacement Options (verify pricing & requirements)</h4>
+<p class="note">Provide two <b>Brand New</b> options (≥4.0 rating & ≥500 reviews) and one <b>USED</b> option with photo link. Verify delivery/kit pricing before submission.</p>
+<div class="two-col">
+  <div class="soft">
+    <div class="field"><label>Option 1 — Brand NEW (Name/URL/Price/Rating/Reviews)</label><input id="appl_opt1" type="text" placeholder="LG LDFN4542... | https://... | $699 | 4.3 | 1,204"></div>
+    <div class="field"><label>Option 2 — Brand NEW (Name/URL/Price/Rating/Reviews)</label><input id="appl_opt2" type="text" placeholder="Samsung ... | https://... | $649 | 4.2 | 980"></div>
+    <div class="check"><input id="appl_verify_price" type="checkbox"><label for="appl_verify_price">Verified current delivery/kit pricing (Lowe’s & Home Depot)</label></div>
+  </div>
+  <div class="soft">
+    <div class="field"><label>Option 3 — USED (Name/URL/Price/PhotoLink/Notes)</label><input id="appl_opt3" type="text" placeholder="Whirlpool USED ... | https://... | $350 | Photo: https://..."></div>
+    <div class="field"><label>Notes to EPM (optional)</label><input id="appl_notes" type="text" placeholder="Any context, constraints, measurements, etc."></div>
+  </div>
+</div>
+
+<!-- 6) Pre-Handoff Checklist -->
+<div class="hr"></div>
+<h4>Pre-Handoff Checklist</h4>
+<details open id="appl_checklist">
+  <summary><strong>Complete before Generate</strong></summary>
+  <div class="check"><input id="appl_ck_delinquency" type="checkbox"><label for="appl_ck_delinquency">Delinquency checked in Buildium</label></div>
+  <div class="check"><input id="appl_ck_ack" type="checkbox"><label for="appl_ck_ack">Acknowledgement email sent to tenant</label></div>
+  <div class="check"><input id="appl_ck_details" type="checkbox"><label for="appl_ck_details">Brand/Model/Serial/Color captured (or requested)</label></div>
+  <div class="check"><input id="appl_ck_vendor" type="checkbox"><label for="appl_ck_vendor">Vendor consulted (reviewed ticket & photos)</label></div>
+  <div class="check"><input id="appl_ck_options" type="checkbox"><label for="appl_ck_options">2 NEW + 1 USED options prepared</label></div>
+  <div class="check"><input id="appl_ck_photos" type="checkbox"><label for="appl_ck_photos">Photo album link added</label></div>
+</details>
+
+<!-- 7) Outputs -->
+<div class="row">
+  <button type="button" class="btn primary" onclick="appl_generate()">Generate EPM Email</button>
+  <button type="button" class="btn" onclick="appl_copy('appl_email_out')">Copy Email</button>
+  <button type="button" class="btn" onclick="appl_clear()">Clear</button>
+</div>
+
+<div class="field">
+  <label>EPM Email (preview)</label>
+  <textarea id="appl_email_out" readonly style="min-height:220px"></textarea>
+</div>
+
+<div class="row">
+  <button type="button" class="btn" onclick="appl_copy('appl_handoff')">Copy Handoff Comment</button>
+  <button type="button" class="btn" onclick="appl_copy('appl_deferral')">Copy Tenant Deferral Email</button>
+</div>
+
+<div class="field">
+  <label>Handoff Comment (Buildium/Slack)</label>
+  <textarea id="appl_handoff" readonly></textarea>
+</div>
+<div class="field">
+  <label>Tenant Deferral Email (if delinquent & non-essential)</label>
+  <textarea id="appl_deferral" readonly></textarea>
+</div>
+<!-- ========= /APPLIANCE TICKET PROCESSING ========= -->
+
 <!-- ==== Stale Listing VIEW ==== -->
 <div id="viewListings" class="view-pane hidden">
   <h2>Stale Listing • Weekly Owner Report</h2>
