@@ -746,6 +746,15 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
       <div class="field"><label>Tenant name</label><input id="dlq_tenant" type="text" placeholder="e.g., Jane Doe"></div>
       <div class="field"><label>Address</label><input id="dlq_address" type="text" placeholder="123 Main St, City, ST"></div>
       <div class="field"><label>Rent balance</label><input id="dlq_rent" type="text" placeholder="$2,400.00"></div>
+      <div class="field">
+  <label>Late Fee / Court Charges</label>
+  <input id="dlq_fees" type="number" placeholder="Enter any late or court fees">
+</div>
+<div class="field">
+  <label>Lease End Date</label>
+  <input id="dlq_lease_end" type="text" placeholder="MM/DD/YYYY or MTM">
+  <p class="note">Enter MTM if month-to-month.</p>
+</div>
       <div class="field"><label>Utility balance</label><input id="dlq_util" type="text" placeholder="$175.00"></div>
       <div class="field"><label>Misc. balance</label><input id="dlq_misc" type="text" placeholder="$45.00"></div>
       <div class="field"><label>Last payment received</label><input id="dlq_lastpay" type="text" placeholder="09/01/2025 – $500"></div>
@@ -971,6 +980,16 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
 </script>
 </div>
 <!-- ==== /Delinquency Handoff ==== -->
+<!-- Delinquency Output Box -->
+<div class="field">
+  <label for="dlq_out">Generated Report Output</label>
+  <textarea id="dlq_out" placeholder="Your generated delinquency handoff will appear here…" readonly></textarea>
+</div>
+<div class="row">
+  <button class="btn primary" onclick="dlqGenerate()">Generate Report</button>
+  <button class="btn" onclick="copyOut('dlq_out')">Copy</button>
+  <button class="btn" onclick="s('dlq_out','')">Clear</button>
+</div>
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
 <div id="viewListings" class="view-pane hidden">
   <h2>Stale Listing • Weekly Owner Report</h2>
