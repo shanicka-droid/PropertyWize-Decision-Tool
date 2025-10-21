@@ -440,17 +440,143 @@ function clearFields(inputs=[], checks=[], outId){inputs.forEach(i=>{const el=by
   if(radio){radio.checked=true; hideAll(); show(radio.dataset.target)}
 })();
 
-/* ===== Maintenance ===== */
-function buildMaint(){
-  const ck=['mnt_ck1','mnt_ck2','mnt_ck3'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
-  return [
-    'MAINTENANCE HANDOFF',
-    `WO: ${val('mnt_wo')||'—'}  |  Property: ${val('mnt_prop')||'—'}`,
-    `Issue: ${val('mnt_issue')||'—'}  |  Priority: ${val('mnt_pri')||'—'}`,
-    `Notes: ${val('mnt_notes')||'—'}`,
-    `Checklist: ${ck}`
-  ].join('\\n');
-}
+<!-- ========== Maintenance (Full SOP) ========== -->
+<div id="viewMaintenance" class="view-pane">
+  <h2>Maintenance</h2>
+  <p class="note">End-to-end maintenance intake, approval routing, FYIs, and copy-ready Buildium notes.</p>
+
+  <div class="hr"></div>
+  <h3>Ticket Intake</h3>
+  <div class="two-col">
+    <div class="soft">
+      <div class="field"><label>WO #</label><input id="mnt_wo" type="text" placeholder="WO-12345"></div>
+      <div class="field"><label>Property</label><input id="mnt_prop" type="text" placeholder="123 Main St, City ST"></div>
+      <div class="field"><label>Unit (optional)</label><input id="mnt_unit" type="text" placeholder="2B"></div>
+      <div class="field"><label>Issue Type</label>
+        <select id="mnt_issue_type">
+          <option value="">Select…</option>
+          <option>Emergency</option>
+          <option>Urgent</option>
+          <option>Routine</option>
+          <option>Cosmetic / Upgrade</option>
+          <option>Recall</option>
+          <option>Temp check / 2nd opinion</option>
+          <option>Opt-out maintenance</option>
+          <option>Vendor suggests follow-up work</option>
+          <option>Tenant responsibility</option>
+        </select>
+      </div>
+      <div class="field"><label>Issue Summary</label><input id="mnt_issue" type="text" placeholder="Short description"></div>
+    </div>
+    <div class="soft">
+      <div class="field"><label>Priority</label>
+        <select id="mnt_pri">
+          <option>Routine</option><option>Urgent</option><option>Emergency</option>
+        </select>
+      </div>
+      <div class="field"><label>Photos / Video Link (optional)</label><input id="mnt_media" type="text" placeholder="https://…"></div>
+      <div class="field"><label>Vendor</label><input id="mnt_vendor" type="text" placeholder="ABC Plumbing"></div>
+      <div class="field"><label>Quoted / NTE Amount (USD)</label><input id="mnt_nte" type="text" placeholder="$0.00"></div>
+      <div class="field"><label>Notes</label><textarea id="mnt_notes" placeholder="Context, access instructions, prior history…"></textarea></div>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+  <h3>Owner Plans & Routing</h3>
+  <div class="two-col">
+    <div class="soft">
+      <div class="field"><label>Owner Plan</label>
+        <select id="mnt_plan">
+          <option value="">Select…</option>
+          <option>Approve — proceed now</option>
+          <option>Temp check / 2nd opinion</option>
+          <option>Hold for owner review</option>
+          <option>Opt-out maintenance (owner DIY)</option>
+          <option>Tenant responsibility — do not proceed</option>
+        </select>
+      </div>
+      <div class="field"><label>Approval Type</label>
+        <select id="mnt_approval">
+          <option value="">Select…</option>
+          <option>Owner approval required</option>
+          <option>EPM approval required</option>
+          <option>Auto-approve (under threshold)</option>
+        </select>
+      </div>
+      <div class="field"><label>FYIs (auto copy)</label>
+        <select id="mnt_fyi" multiple>
+          <option>EPM</option>
+          <option>Finance</option>
+          <option>Owner Comms</option>
+          <option>Leasing</option>
+          <option>Maintenance</option>
+        </select>
+        <span class="mini">Hold Ctrl/Cmd to select multiple.</span>
+      </div>
+    </div>
+    <div class="soft">
+      <div class="field"><label>Tenant Responsibility?</label>
+        <select id="mnt_tenant_resp">
+          <option value="">Unknown</option>
+          <option>No — PW responsibility</option>
+          <option>Yes — confirmed by vendor/lease</option>
+        </select>
+      </div>
+      <div class="field"><label>If Tenant-Responsibility Work Completed — Chargeback Plan</label>
+        <input id="mnt_chargeback" type="text" placeholder="Amount & GL; timeline to bill tenant"/>
+      </div>
+      <div class="field"><label>Lease Violation Needed?</label>
+        <select id="mnt_violation">
+          <option>No</option><option>Yes — trigger notice</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+  <h3>Policy Guidance</h3>
+  <details>
+    <summary><strong>Show policy tips</strong></summary>
+    <ul class="mini" style="margin:8px 0 0 18px">
+      <li><strong>Emergency:</strong> Dispatch immediately; notify EPM; owner FYI after stabilization.</li>
+      <li><strong>Urgent:</strong> Vendor within 24–48h; confirm access; NTE up to threshold.</li>
+      <li><strong>Routine:</strong> Schedule per tenant availability; bundle if possible.</li>
+      <li><strong>Recall:</strong> Use same vendor; no new charge unless scope changed.</li>
+      <li><strong>Temp check / 2nd opinion:</strong> Document reason and expected delta in scope/cost.</li>
+      <li><strong>Opt-out maintenance:</strong> Mirror safety rules; ensure liability waiver & coordination note.</li>
+      <li><strong>Tenant responsibility:</strong> Don’t proceed without explicit approval; set chargeback plan if work was performed.</li>
+    </ul>
+  </details>
+
+  <div class="hr"></div>
+  <h3>Pre-Handoff Checklists</h3>
+  <div class="two-col">
+    <div class="soft">
+      <h4 class="mini">Intake</h4>
+      <div class="check"><input id="mnt_ck_int1" type="checkbox"><label for="mnt_ck_int1">Photos/Video captured</label></div>
+      <div class="check"><input id="mnt_ck_int2" type="checkbox"><label for="mnt_ck_int2">Vendor assigned & scheduled</label></div>
+      <div class="check"><input id="mnt_ck_int3" type="checkbox"><label for="mnt_ck_int3">Tenant notified of window</label></div>
+      <div class="check"><input id="mnt_ck_int4" type="checkbox"><label for="mnt_ck_int4">NTE / quote recorded</label></div>
+    </div>
+    <div class="soft">
+      <h4 class="mini">Approvals & Docs</h4>
+      <div class="check"><input id="mnt_ck_app1" type="checkbox"><label for="mnt_ck_app1">Owner/EPM approval saved</label></div>
+      <div class="check"><input id="mnt_ck_app2" type="checkbox"><label for="mnt_ck_app2">FYIs selected</label></div>
+      <div class="check"><input id="mnt_ck_app3" type="checkbox"><label for="mnt_ck_app3">Lease violation generated (if needed)</label></div>
+      <div class="check"><input id="mnt_ck_app4" type="checkbox"><label for="mnt_ck_app4">Chargeback plan captured (if applicable)</label></div>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+  <h3>Generate Handoff</h3>
+  <div class="row">
+    <button class="btn primary" onclick="mntGenerate()">Generate</button>
+    <button class="btn" onclick="copyOut('mnt_out')">Copy</button>
+    <button class="btn" onclick="mntClear()">Clear</button>
+  </div>
+  <div class="field"><label>Handoff / Buildium Note</label><textarea id="mnt_out" readonly></textarea></div>
+</div>
+<!-- ========== /Maintenance (Full SOP) ========== -->
 
 /* ===== Appliance ===== */
 function buildAppliance(){
