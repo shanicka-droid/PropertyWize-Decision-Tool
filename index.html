@@ -567,8 +567,23 @@ var buOut = nb$('ho_out_bu_nb'); if(buOut) buOut.value='';
 var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
 };
 })();
+<!-- ==== Non-Maintenance Bill VIEW ==== -->
+<div id="viewNonMaint" class="view-pane hidden">
+  <h2>Non-Maintenance Bill Handoff</h2>
+  <p class="note">For bills that are not tied to maintenance tickets.</p>
+
+  <div class="field"><label>Bill #</label><input id="nm_bill" type="text"></div>
+  <div class="field"><label>Vendor</label><input id="nm_vendor" type="text"></div>
+  <div class="field"><label>Amount</label><input id="nm_amt" type="text" placeholder="$0.00"></div>
+  <div class="field"><label>Notes</label><input id="nm_notes" type="text"></div>
+
+  <div class="row">
+    <button type="button" class="btn primary" onclick="nm_generate && nm_generate()">Generate</button>
+  </div>
+  <div class="field"><label>Output</label><textarea id="nm_out" readonly></textarea></div>
+</div> <!-- closes #viewNonMaint -->
+<!-- ==== /Non-Maintenance Bill VIEW ==== -->
 </script>
-<!-- ==== /Non-Maintenance Bill Handoff ==== -->
     </div>
     <!-- ==== Delinquency Handoff (inside main card, same level as other views) ==== -->
 <div id="viewDelinquency" class="view-pane hidden">
