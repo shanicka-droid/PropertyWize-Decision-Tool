@@ -1863,18 +1863,28 @@ PropertyWize Leasing Team`;
 </script>
 <!-- Show/hide view panes -->
 <script>
-function showPane(id){
-  document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-  var el = document.getElementById(id);
-  if(el) el.classList.remove('hidden');
-}
+  function showPane(id) {
+    // Hide all view panes first
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
 
-document.querySelectorAll('input[name="role"]').forEach(r=>{
-  r.addEventListener('change', e=>{
-    var target = e.target.getAttribute('data-target');
-    if(target) showPane(target);
+    // Then show only the one requested
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  }
+
+  // Listen for role selection
+  document.querySelectorAll('input[name="role"]').forEach(r => {
+    r.addEventListener('change', e => {
+      const target = e.target.getAttribute('data-target');
+      if (target) showPane(target);
+    });
   });
-});
+
+  // Show the welcome page (or first view) by default when loading
+  document.addEventListener('DOMContentLoaded', () => {
+    showPane('viewWelcome'); // change 'viewWelcome' to your default view if needed
+  });
 </script>
+
 </body>
 </html>
