@@ -3,26 +3,28 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PropertyWize Decision Tool — v3</title>
+<title>PropertyWize Decision Tool — v4 (Full)</title>
 <style>
- :root{
-  /* Light theme to match your earlier white look */
-  --bg:#ffffff;            /* page background */
-  --card:#f7f9fc;          /* cards */
-  --ink:#0b1220;           /* main text (near-black) */
-  --muted:#5e6b7a;         /* muted labels */
-  --hr:#e3e8ef;            /* hairlines */
-  --brand:#2ea043;         /* green action buttons (unchanged) */
-  --brandText:#06150d;
-  --btn:#eef2f7;           /* neutral button background on white */
-}
-  
+  :root{
+    /* Light theme to match your earlier white look */
+    --bg:#ffffff;            /* page background */
+    --card:#f7f9fc;          /* cards */
+    --ink:#0b1220;           /* main text (near-black) */
+    --muted:#5e6b7a;         /* muted labels */
+    --hr:#e3e8ef;            /* hairlines */
+    --brand:#2ea043;         /* green action buttons */
+    --brandText:#06150d;
+    --btn:#eef2f7;           /* neutral button background on white */
+    --btnText:#0b1220;
+    --warn:#f2cc60; --bad:#f85149; --ok:#2ea043;
+  }
   html,body{margin:0;background:var(--bg);color:var(--ink);
     font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;}
   .wrap{max-width:1200px;margin:0 auto;padding:18px}
-  h1{font-size:20px;margin:0 0 16px}
+  h1{font-size:20px;margin:0}
   h2{font-size:18px;margin:16px 0 8px}
   h3{font-size:13px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  h4{font-size:12px;margin:10px 0 6px;color:var(--muted)}
   .grid{display:grid;gap:16px}
   @media(min-width:960px){ .grid{grid-template-columns:260px 1fr} }
   .card{background:var(--card);border:1px solid var(--hr);border-radius:12px;padding:14px}
@@ -34,39 +36,44 @@
   .field{display:grid;gap:6px;margin:8px 0}
   label{color:var(--muted);font-size:12px}
   input,select,textarea,button,a.btn{
-    background:#0b1017;border:1px solid var(--hr);color:var(--ink);
+    background:#fff;border:1px solid var(--hr);color:var(--ink);
     border-radius:9px;padding:9px 10px;outline:none
   }
   textarea{min-height:140px;resize:vertical}
-  .btn{display:inline-block;cursor:pointer;text-decoration:none;background:var(--btn)}
+  .btn{display:inline-block;cursor:pointer;text-decoration:none;background:var(--btn);color:var(--btnText)}
   .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brandText)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
   .check{display:flex;gap:8px;align-items:center;margin:6px 0}
-  details{border:1px solid var(--hr);border-radius:10px;padding:10px;background:#121821}
+  details{border:1px solid var(--hr);border-radius:10px;padding:10px;background:#fff}
   summary{cursor:pointer}
   /* Sidebar pills (left) */
   #rolePicker{display:flex;flex-direction:column;gap:8px}
   .pill{display:block}
   .pill input{display:none}
   .pill span{display:flex;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--hr);
-    border-radius:999px;background:#111723;cursor:pointer}
-  .pill input:checked + span{outline:2px solid var(--brand);background:#0f1a2b}
+    border-radius:999px;background:#f3f6fb;cursor:pointer}
+  .pill input:checked + span{outline:2px solid var(--brand);background:#e8f6ec}
   .icon{font-style:normal;opacity:.95}
   /* Views */
   .view-pane{display:block}
   .hidden{display:none!important}
-  footer{color:var(--muted);text-align:center;margin:22px 0}
-  /* Tiny helper visuals */
-  .soft>h3{margin-top:0}
   .mini{font-size:12px;color:var(--muted)}
-  .tight .field{margin:4px 0}
+  footer{color:var(--muted);text-align:center;margin:22px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>PropertyWize • Decision Tool</h1>
-  <div class="grid">
 
+  <!-- Header with logo -->
+  <header class="row" style="justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <div class="row" style="gap:10px; align-items:center;">
+      <img src="YOUR_LOGO_URL.png" alt="PropertyWize" style="height:36px; width:auto;">
+      <h1>PropertyWize • Decision Tool</h1>
+    </div>
+    <div class="mini">v4 (Full)</div>
+  </header>
+
+  <div class="grid">
     <!-- LEFT: role buttons -->
     <nav id="rolePicker" class="card">
       <label class="pill">
@@ -98,190 +105,142 @@
     <!-- RIGHT: panes -->
     <section id="views" class="card">
 
-   <!-- ========== Maintenance (Full SOP) ========== -->
-<div id="viewMaintenance" class="view-pane">
-  <h2>Maintenance</h2>
-  <p class="note">End-to-end maintenance intake, approval routing, FYIs, and copy-ready Buildium notes.</p>
+      <!-- ========== Maintenance (Full SOP) ========== -->
+      <div id="viewMaintenance" class="view-pane">
+        <h2>Maintenance</h2>
+        <p class="note">End-to-end maintenance intake, approval routing, FYIs, handoff, and policy guidance.</p>
 
-  <div class="hr"></div>
-  <h3>Ticket Intake</h3>
-  <div class="two-col">
-    <div class="soft">
-      <div class="field"><label>WO #</label><input id="mnt_wo" type="text" placeholder="WO-12345"></div>
-      <div class="field"><label>Property</label><input id="mnt_prop" type="text" placeholder="123 Main St, City ST"></div>
-      <div class="field"><label>Unit (optional)</label><input id="mnt_unit" type="text" placeholder="2B"></div>
-      <div class="field"><label>Issue Type</label>
-        <select id="mnt_issue_type">
-          <option value="">Select…</option>
-          <option>Emergency</option>
-          <option>Urgent</option>
-          <option>Routine</option>
-          <option>Cosmetic / Upgrade</option>
-          <option>Recall</option>
-          <option>Temp check / 2nd opinion</option>
-          <option>Opt-out maintenance</option>
-          <option>Vendor suggests follow-up work</option>
-          <option>Tenant responsibility</option>
-        </select>
+        <div class="hr"></div>
+        <h3>Ticket Intake</h3>
+        <div class="two-col">
+          <div class="soft">
+            <div class="field"><label>WO #</label><input id="mnt_wo" type="text" placeholder="WO-12345"></div>
+            <div class="field"><label>Property</label><input id="mnt_prop" type="text" placeholder="123 Main St, City ST"></div>
+            <div class="field"><label>Unit (optional)</label><input id="mnt_unit" type="text" placeholder="2B"></div>
+            <div class="field"><label>Issue Type</label>
+              <select id="mnt_issue_type">
+                <option value="">Select…</option>
+                <option>Emergency</option>
+                <option>Urgent</option>
+                <option>Routine</option>
+                <option>Cosmetic / Upgrade</option>
+                <option>Recall</option>
+                <option>Temp check / 2nd opinion</option>
+                <option>Opt-out maintenance</option>
+                <option>Vendor suggests follow-up work</option>
+                <option>Tenant responsibility</option>
+              </select>
+            </div>
+            <div class="field"><label>Issue Summary</label><input id="mnt_issue" type="text" placeholder="Short description"></div>
+          </div>
+          <div class="soft">
+            <div class="field"><label>Priority</label>
+              <select id="mnt_pri">
+                <option>Routine</option><option>Urgent</option><option>Emergency</option>
+              </select>
+            </div>
+            <div class="field"><label>Photos / Video Link (optional)</label><input id="mnt_media" type="text" placeholder="https://…"></div>
+            <div class="field"><label>Vendor</label><input id="mnt_vendor" type="text" placeholder="ABC Plumbing"></div>
+            <div class="field"><label>Quoted / NTE Amount (USD)</label><input id="mnt_nte" type="text" placeholder="$0.00"></div>
+            <div class="field"><label>Notes</label><textarea id="mnt_notes" placeholder="Context, access, prior history…"></textarea></div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+        <h3>Owner Plans & Routing</h3>
+        <div class="two-col">
+          <div class="soft">
+            <div class="field"><label>Owner Plan</label>
+              <select id="mnt_plan">
+                <option value="">Select…</option>
+                <option>Approve — proceed now</option>
+                <option>Temp check / 2nd opinion</option>
+                <option>Hold for owner review</option>
+                <option>Opt-out maintenance (owner DIY)</option>
+                <option>Tenant responsibility — do not proceed</option>
+              </select>
+            </div>
+            <div class="field"><label>Approval Type</label>
+              <select id="mnt_approval">
+                <option value="">Select…</option>
+                <option>Owner approval required</option>
+                <option>EPM approval required</option>
+                <option>Auto-approve (under threshold)</option>
+              </select>
+            </div>
+            <div class="field"><label>FYIs (multi-select)</label>
+              <select id="mnt_fyi" multiple>
+                <option>EPM</option><option>Finance</option><option>Owner Comms</option><option>Leasing</option><option>Maintenance</option>
+              </select>
+              <span class="mini">Hold Ctrl/Cmd to select multiple.</span>
+            </div>
+          </div>
+          <div class="soft">
+            <div class="field"><label>Tenant Responsibility?</label>
+              <select id="mnt_tenant_resp">
+                <option value="">Unknown</option>
+                <option>No — PW responsibility</option>
+                <option>Yes — confirmed by vendor/lease</option>
+              </select>
+            </div>
+            <div class="field"><label>If Tenant-Responsibility Work Completed — Chargeback Plan</label>
+              <input id="mnt_chargeback" type="text" placeholder="Amount & GL; timeline to bill tenant"/>
+            </div>
+            <div class="field"><label>Lease Violation Needed?</label>
+              <select id="mnt_violation"><option>No</option><option>Yes — trigger notice</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+        <h3>Policy Guidance</h3>
+        <details>
+          <summary><strong>Show policy tips</strong></summary>
+          <ul class="mini" style="margin:8px 0 0 18px">
+            <li><strong>Emergency:</strong> Dispatch immediately; notify EPM; owner FYI after stabilization.</li>
+            <li><strong>Urgent:</strong> Vendor within 24–48h; confirm access; NTE up to threshold.</li>
+            <li><strong>Routine:</strong> Schedule per tenant availability; bundle if possible.</li>
+            <li><strong>Recall:</strong> Use same vendor; no new charge unless scope changed.</li>
+            <li><strong>Temp check / 2nd opinion:</strong> Document reason and expected delta in scope/cost.</li>
+            <li><strong>Opt-out maintenance:</strong> Mirror safety rules; ensure liability waiver & coordination note.</li>
+            <li><strong>Tenant responsibility:</strong> Don’t proceed without explicit approval; set chargeback plan if work was performed.</li>
+          </ul>
+        </details>
+
+        <div class="hr"></div>
+        <h3>Pre-Handoff Checklists</h3>
+        <div class="two-col">
+          <div class="soft">
+            <h4>Intake</h4>
+            <div class="check"><input id="mnt_ck_int1" type="checkbox"><label for="mnt_ck_int1">Photos/Video captured</label></div>
+            <div class="check"><input id="mnt_ck_int2" type="checkbox"><label for="mnt_ck_int2">Vendor assigned & scheduled</label></div>
+            <div class="check"><input id="mnt_ck_int3" type="checkbox"><label for="mnt_ck_int3">Tenant notified of window</label></div>
+            <div class="check"><input id="mnt_ck_int4" type="checkbox"><label for="mnt_ck_int4">NTE / quote recorded</label></div>
+          </div>
+          <div class="soft">
+            <h4>Approvals & Docs</h4>
+            <div class="check"><input id="mnt_ck_app1" type="checkbox"><label for="mnt_ck_app1">Owner/EPM approval saved</label></div>
+            <div class="check"><input id="mnt_ck_app2" type="checkbox"><label for="mnt_ck_app2">FYIs selected</label></div>
+            <div class="check"><input id="mnt_ck_app3" type="checkbox"><label for="mnt_ck_app3">Lease violation generated (if needed)</label></div>
+            <div class="check"><input id="mnt_ck_app4" type="checkbox"><label for="mnt_ck_app4">Chargeback plan captured (if applicable)</label></div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+        <h3>Generate Handoff</h3>
+        <div class="row">
+          <button class="btn primary" onclick="mntGenerate()">Generate</button>
+          <button class="btn" onclick="copyOut('mnt_out')">Copy</button>
+          <button class="btn" onclick="mntClear()">Clear</button>
+        </div>
+        <div class="field"><label>Handoff / Buildium Note</label><textarea id="mnt_out" readonly></textarea></div>
       </div>
-      <div class="field"><label>Issue Summary</label><input id="mnt_issue" type="text" placeholder="Short description"></div>
-    </div>
-    <div class="soft">
-      <div class="field"><label>Priority</label>
-        <select id="mnt_pri">
-          <option>Routine</option><option>Urgent</option><option>Emergency</option>
-        </select>
-      </div>
-      <div class="field"><label>Photos / Video Link (optional)</label><input id="mnt_media" type="text" placeholder="https://…"></div>
-      <div class="field"><label>Vendor</label><input id="mnt_vendor" type="text" placeholder="ABC Plumbing"></div>
-      <div class="field"><label>Quoted / NTE Amount (USD)</label><input id="mnt_nte" type="text" placeholder="$0.00"></div>
-      <div class="field"><label>Notes</label><textarea id="mnt_notes" placeholder="Context, access instructions, prior history…"></textarea></div>
-    </div>
-  </div>
-
-  <div class="hr"></div>
-  <h3>Owner Plans & Routing</h3>
-  <div class="two-col">
-    <div class="soft">
-      <div class="field"><label>Owner Plan</label>
-        <select id="mnt_plan">
-          <option value="">Select…</option>
-          <option>Approve — proceed now</option>
-          <option>Temp check / 2nd opinion</option>
-          <option>Hold for owner review</option>
-          <option>Opt-out maintenance (owner DIY)</option>
-          <option>Tenant responsibility — do not proceed</option>
-        </select>
-      </div>
-      <div class="field"><label>Approval Type</label>
-        <select id="mnt_approval">
-          <option value="">Select…</option>
-          <option>Owner approval required</option>
-          <option>EPM approval required</option>
-          <option>Auto-approve (under threshold)</option>
-        </select>
-      </div>
-      <div class="field"><label>FYIs (auto copy)</label>
-        <select id="mnt_fyi" multiple>
-          <option>EPM</option>
-          <option>Finance</option>
-          <option>Owner Comms</option>
-          <option>Leasing</option>
-          <option>Maintenance</option>
-        </select>
-        <span class="mini">Hold Ctrl/Cmd to select multiple.</span>
-      </div>
-    </div>
-    <div class="soft">
-      <div class="field"><label>Tenant Responsibility?</label>
-        <select id="mnt_tenant_resp">
-          <option value="">Unknown</option>
-          <option>No — PW responsibility</option>
-          <option>Yes — confirmed by vendor/lease</option>
-        </select>
-      </div>
-      <div class="field"><label>If Tenant-Responsibility Work Completed — Chargeback Plan</label>
-        <input id="mnt_chargeback" type="text" placeholder="Amount & GL; timeline to bill tenant"/>
-      </div>
-      <div class="field"><label>Lease Violation Needed?</label>
-        <select id="mnt_violation">
-          <option>No</option><option>Yes — trigger notice</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="hr"></div>
-  <h3>Policy Guidance</h3>
-  <details>
-    <summary><strong>Show policy tips</strong></summary>
-    <ul class="mini" style="margin:8px 0 0 18px">
-      <li><strong>Emergency:</strong> Dispatch immediately; notify EPM; owner FYI after stabilization.</li>
-      <li><strong>Urgent:</strong> Vendor within 24–48h; confirm access; NTE up to threshold.</li>
-      <li><strong>Routine:</strong> Schedule per tenant availability; bundle if possible.</li>
-      <li><strong>Recall:</strong> Use same vendor; no new charge unless scope changed.</li>
-      <li><strong>Temp check / 2nd opinion:</strong> Document reason and expected delta in scope/cost.</li>
-      <li><strong>Opt-out maintenance:</strong> Mirror safety rules; ensure liability waiver & coordination note.</li>
-      <li><strong>Tenant responsibility:</strong> Don’t proceed without explicit approval; set chargeback plan if work was performed.</li>
-    </ul>
-  </details>
-
-  <div class="hr"></div>
-  <h3>Pre-Handoff Checklists</h3>
-  <div class="two-col">
-    <div class="soft">
-      <h4 class="mini">Intake</h4>
-      <div class="check"><input id="mnt_ck_int1" type="checkbox"><label for="mnt_ck_int1">Photos/Video captured</label></div>
-      <div class="check"><input id="mnt_ck_int2" type="checkbox"><label for="mnt_ck_int2">Vendor assigned & scheduled</label></div>
-      <div class="check"><input id="mnt_ck_int3" type="checkbox"><label for="mnt_ck_int3">Tenant notified of window</label></div>
-      <div class="check"><input id="mnt_ck_int4" type="checkbox"><label for="mnt_ck_int4">NTE / quote recorded</label></div>
-    </div>
-    <div class="soft">
-      <h4 class="mini">Approvals & Docs</h4>
-      <div class="check"><input id="mnt_ck_app1" type="checkbox"><label for="mnt_ck_app1">Owner/EPM approval saved</label></div>
-      <div class="check"><input id="mnt_ck_app2" type="checkbox"><label for="mnt_ck_app2">FYIs selected</label></div>
-      <div class="check"><input id="mnt_ck_app3" type="checkbox"><label for="mnt_ck_app3">Lease violation generated (if needed)</label></div>
-      <div class="check"><input id="mnt_ck_app4" type="checkbox"><label for="mnt_ck_app4">Chargeback plan captured (if applicable)</label></div>
-    </div>
-  </div>
-
-  <div class="hr"></div>
-  <h3>Generate Handoff</h3>
-  <div class="row">
-    <button class="btn primary" onclick="mntGenerate()">Generate</button>
-    <button class="btn" onclick="copyOut('mnt_out')">Copy</button>
-    <button class="btn" onclick="mntClear()">Clear</button>
-  </div>
-  <div class="field"><label>Handoff / Buildium Note</label><textarea id="mnt_out" readonly></textarea></div>
-</div>
-<!-- ========== /Maintenance (Full SOP) ========== -->
-      <script>
-function mntGenerate(){
-  // Collect FYIs (multi-select)
-  const fyiSel = byId('mnt_fyi');
-  const fyi = fyiSel ? Array.from(fyiSel.selectedOptions).map(o=>o.value).join(', ') : '';
-
-  const lines = [];
-  lines.push('MAINTENANCE — HANDOFF');
-  lines.push(`WO: ${val('mnt_wo')||'—'} | Property: ${val('mnt_prop')||'—'}${val('mnt_unit')?(' #'+val('mnt_unit')):''}`);
-  lines.push(`Issue: ${val('mnt_issue')||'—'} | Type: ${val('mnt_issue_type')||'—'} | Priority: ${val('mnt_pri')||'—'}`);
-  if (val('mnt_media'))  lines.push(`Media: ${val('mnt_media')}`);
-  lines.push(`Vendor: ${val('mnt_vendor')||'—'} | NTE: ${val('mnt_nte')||'—'}`);
-  lines.push(`Owner Plan: ${val('mnt_plan')||'—'} | Approval: ${val('mnt_approval')||'—'}`);
-  lines.push(`Tenant Responsibility: ${val('mnt_tenant_resp')||'—'}`);
-  if (val('mnt_chargeback')) lines.push(`Chargeback Plan: ${val('mnt_chargeback')}`);
-  lines.push(`Lease Violation: ${val('mnt_violation')||'No'}`);
-  if (fyi) lines.push(`FYIs: ${fyi}`);
-  if (val('mnt_notes')) lines.push(`Notes: ${val('mnt_notes')}`);
-
-  // Checklists summary
-  const intake = ['mnt_ck_int1','mnt_ck_int2','mnt_ck_int3','mnt_ck_int4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
-  const approv = ['mnt_ck_app1','mnt_ck_app2','mnt_ck_app3','mnt_ck_app4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
-  lines.push(`Checklist — Intake: ${intake}`);
-  lines.push(`Checklist — Approvals/Docs: ${approv}`);
-
-  byId('mnt_out').value = lines.join('\n');
-}
-
-function mntClear(){
-  const inputs = ['mnt_wo','mnt_prop','mnt_unit','mnt_issue','mnt_issue_type','mnt_pri','mnt_media','mnt_vendor','mnt_nte','mnt_plan','mnt_approval','mnt_tenant_resp','mnt_chargeback','mnt_violation','mnt_notes'];
-  inputs.forEach(id=>{
-    const el = byId(id);
-    if (!el) return;
-    if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
-  });
-  ['mnt_ck_int1','mnt_ck_int2','mnt_ck_int3','mnt_ck_int4','mnt_ck_app1','mnt_ck_app2','mnt_ck_app3','mnt_ck_app4']
-    .forEach(id=>{ const cb=byId(id); if(cb) cb.checked=false; });
-  const fyiSel = byId('mnt_fyi'); if (fyiSel) Array.from(fyiSel.options).forEach(o=>o.selected=false);
-  const out = byId('mnt_out'); if(out) out.value='';
-}
-</script>
 
       <!-- ========== Appliance (standalone) ========== -->
       <div id="viewAppliance" class="view-pane hidden">
         <h2>Appliance Ticket Processing</h2>
         <p class="note">Follow SOP for refrigerators / ranges / DW / micro / washer / dryer.</p>
-        <div class="two-col tight">
+        <div class="two-col">
           <div class="soft">
             <div class="field"><label>WO #</label><input id="ap_wo" type="text"></div>
             <div class="field"><label>Property</label><input id="ap_prop" type="text"></div>
@@ -306,11 +265,11 @@ function mntClear(){
         <div class="field"><label>Handoff</label><textarea id="ap_out" readonly></textarea></div>
       </div>
 
-      <!-- ========== Finance (includes WATER BILLS) ========== -->
+      <!-- ========== Finance (WO/Invoice + WATER BILLS) ========== -->
       <div id="viewFinance" class="view-pane hidden">
         <h2>Finance</h2>
-        <p class="note">Intake for invoice/WO verification and approvals. Includes Water Bill Processing (Process → Prepare → Pay).</p>
-        <div class="two-col tight">
+        <p class="note">Invoice/WO verification and approvals. Includes Water Bill Processing (Process → Prepare → Pay).</p>
+        <div class="two-col">
           <div class="soft">
             <h3>WO & Invoice</h3>
             <div class="field"><label>WO #</label><input id="fin_wo" type="text"></div>
@@ -329,7 +288,7 @@ function mntClear(){
 
         <div class="hr"></div>
         <h3>Water Bills — Process → Prepare → Pay</h3>
-        <details open class="tight">
+        <details open>
           <summary><strong>1) Process the Bill</strong> <span class="mini">Enter the utility bill details</span></summary>
           <div class="two-col">
             <div class="soft">
@@ -344,7 +303,7 @@ function mntClear(){
             </div>
           </div>
         </details>
-        <details class="tight">
+        <details>
           <summary><strong>2) Prepare</strong> <span class="mini">Split/allocate & add notes</span></summary>
           <div class="two-col">
             <div class="soft">
@@ -357,7 +316,7 @@ function mntClear(){
             </div>
           </div>
         </details>
-        <details class="tight">
+        <details>
           <summary><strong>3) Pay</strong> <span class="mini">Ready to push to payment</span></summary>
           <div class="two-col">
             <div class="soft">
@@ -385,7 +344,7 @@ function mntClear(){
       <div id="viewNonMaint" class="view-pane hidden">
         <h2>Non-Maintenance Bill Handoff</h2>
         <p class="note">For bills not tied to a maintenance WO (software, utilities, fees, etc.).</p>
-        <div class="two-col tight">
+        <div class="two-col">
           <div class="soft">
             <div class="field"><label>Bill #</label><input id="nm_bill" type="text"></div>
             <div class="field"><label>Vendor</label><input id="nm_vendor" type="text"></div>
@@ -408,7 +367,7 @@ function mntClear(){
         <div class="field"><label>Handoff</label><textarea id="nm_out" readonly></textarea></div>
       </div>
 
-      <!-- ========== Delinquency (with ICS + late fee + MTM) ========== -->
+      <!-- ========== Delinquency (full) ========== -->
       <div id="viewDelinquency" class="view-pane hidden">
         <h2>Delinquency Handoff Tool</h2>
         <p class="note">Summarize tenants &gt; 60 days past due and confirm SOP steps.</p>
@@ -422,12 +381,12 @@ function mntClear(){
           <div class="check"><input id="dlq_c3" type="checkbox"><label for="dlq_c3">Court status updated</label></div>
           <div class="check"><input id="dlq_c4" type="checkbox"><label for="dlq_c4">Eviction scheduled or reason noted</label></div>
           <div class="check"><input id="dlq_c5" type="checkbox"><label for="dlq_c5">Tenant set to Collection (blocks partial pay)</label></div>
-          <div class="check"><input id="dlq_c6" type="checkbox"><label for="dlq_c6">Non-emergency auto-dispatch disabled if &gt; $500</label></div>
+          <div class="check"><input id="dlq_c6" type="checkbox"><label for="dlq_c6">Disable non-emergency auto-dispatch if &gt; $500</label></div>
         </details>
 
         <div class="hr"></div>
         <h3>Delinquency Details</h3>
-        <div class="two-col tight">
+        <div class="two-col">
           <div class="soft">
             <div class="field"><label>Tenant</label><input id="dlq_tenant" type="text" placeholder="Jane Doe"></div>
             <div class="field"><label>Address</label><input id="dlq_address" type="text" placeholder="123 Main St, City, ST"></div>
@@ -451,7 +410,7 @@ function mntClear(){
 
         <div class="hr"></div>
         <h3>Notices & Reporting</h3>
-        <div class="two-col tight">
+        <div class="two-col">
           <div class="soft">
             <div class="field">
               <label><strong>Red Notice Posting Window</strong></label>
@@ -502,7 +461,7 @@ function mntClear(){
 
         <div class="hr"></div>
         <h3>Listing Details</h3>
-        <div class="two-col tight">
+        <div class="two-col">
           <div class="soft">
             <div class="field"><label>Property Address</label><input id="sl_address" type="text" placeholder="123 Main St, City ST"></div>
             <div class="field"><label>Owner Name (optional)</label><input id="sl_owner" type="text"></div>
@@ -518,7 +477,7 @@ function mntClear(){
 
         <div class="hr"></div>
         <h3>Applications & Showings (7d)</h3>
-        <div class="two-col tight">
+        <div class="two-col">
           <div class="soft">
             <div class="field"><label>New Apps</label><input id="sl_apps_new" type="number" min="0" value="0"></div>
             <div class="field"><label>Pending</label><input id="sl_apps_pending" type="number" min="0" value="0"></div>
@@ -533,7 +492,7 @@ function mntClear(){
 
         <div class="hr"></div>
         <h3>Market Data & Actions</h3>
-        <div class="two-col tight">
+        <div class="two-col">
           <div class="soft">
             <div class="field"><label>Median</label><input id="sl_med" type="text" placeholder="$1,850"></div>
             <div class="field"><label>Range Low</label><input id="sl_low" type="text" placeholder="$1,700"></div>
@@ -568,7 +527,8 @@ function mntClear(){
       </div>
     </section>
   </div>
-  <footer>© 2025 PropertyWize — v3 single-file build</footer>
+
+  <footer>© 2025 PropertyWize — v4 full single-file build</footer>
 </div>
 
 <script>
@@ -590,143 +550,35 @@ function clearFields(inputs=[], checks=[], outId){inputs.forEach(i=>{const el=by
   if(radio){radio.checked=true; hideAll(); show(radio.dataset.target)}
 })();
 
-<!-- ========== Maintenance (Full SOP) ========== -->
-<div id="viewMaintenance" class="view-pane">
-  <h2>Maintenance</h2>
-  <p class="note">End-to-end maintenance intake, approval routing, FYIs, and copy-ready Buildium notes.</p>
-
-  <div class="hr"></div>
-  <h3>Ticket Intake</h3>
-  <div class="two-col">
-    <div class="soft">
-      <div class="field"><label>WO #</label><input id="mnt_wo" type="text" placeholder="WO-12345"></div>
-      <div class="field"><label>Property</label><input id="mnt_prop" type="text" placeholder="123 Main St, City ST"></div>
-      <div class="field"><label>Unit (optional)</label><input id="mnt_unit" type="text" placeholder="2B"></div>
-      <div class="field"><label>Issue Type</label>
-        <select id="mnt_issue_type">
-          <option value="">Select…</option>
-          <option>Emergency</option>
-          <option>Urgent</option>
-          <option>Routine</option>
-          <option>Cosmetic / Upgrade</option>
-          <option>Recall</option>
-          <option>Temp check / 2nd opinion</option>
-          <option>Opt-out maintenance</option>
-          <option>Vendor suggests follow-up work</option>
-          <option>Tenant responsibility</option>
-        </select>
-      </div>
-      <div class="field"><label>Issue Summary</label><input id="mnt_issue" type="text" placeholder="Short description"></div>
-    </div>
-    <div class="soft">
-      <div class="field"><label>Priority</label>
-        <select id="mnt_pri">
-          <option>Routine</option><option>Urgent</option><option>Emergency</option>
-        </select>
-      </div>
-      <div class="field"><label>Photos / Video Link (optional)</label><input id="mnt_media" type="text" placeholder="https://…"></div>
-      <div class="field"><label>Vendor</label><input id="mnt_vendor" type="text" placeholder="ABC Plumbing"></div>
-      <div class="field"><label>Quoted / NTE Amount (USD)</label><input id="mnt_nte" type="text" placeholder="$0.00"></div>
-      <div class="field"><label>Notes</label><textarea id="mnt_notes" placeholder="Context, access instructions, prior history…"></textarea></div>
-    </div>
-  </div>
-
-  <div class="hr"></div>
-  <h3>Owner Plans & Routing</h3>
-  <div class="two-col">
-    <div class="soft">
-      <div class="field"><label>Owner Plan</label>
-        <select id="mnt_plan">
-          <option value="">Select…</option>
-          <option>Approve — proceed now</option>
-          <option>Temp check / 2nd opinion</option>
-          <option>Hold for owner review</option>
-          <option>Opt-out maintenance (owner DIY)</option>
-          <option>Tenant responsibility — do not proceed</option>
-        </select>
-      </div>
-      <div class="field"><label>Approval Type</label>
-        <select id="mnt_approval">
-          <option value="">Select…</option>
-          <option>Owner approval required</option>
-          <option>EPM approval required</option>
-          <option>Auto-approve (under threshold)</option>
-        </select>
-      </div>
-      <div class="field"><label>FYIs (auto copy)</label>
-        <select id="mnt_fyi" multiple>
-          <option>EPM</option>
-          <option>Finance</option>
-          <option>Owner Comms</option>
-          <option>Leasing</option>
-          <option>Maintenance</option>
-        </select>
-        <span class="mini">Hold Ctrl/Cmd to select multiple.</span>
-      </div>
-    </div>
-    <div class="soft">
-      <div class="field"><label>Tenant Responsibility?</label>
-        <select id="mnt_tenant_resp">
-          <option value="">Unknown</option>
-          <option>No — PW responsibility</option>
-          <option>Yes — confirmed by vendor/lease</option>
-        </select>
-      </div>
-      <div class="field"><label>If Tenant-Responsibility Work Completed — Chargeback Plan</label>
-        <input id="mnt_chargeback" type="text" placeholder="Amount & GL; timeline to bill tenant"/>
-      </div>
-      <div class="field"><label>Lease Violation Needed?</label>
-        <select id="mnt_violation">
-          <option>No</option><option>Yes — trigger notice</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="hr"></div>
-  <h3>Policy Guidance</h3>
-  <details>
-    <summary><strong>Show policy tips</strong></summary>
-    <ul class="mini" style="margin:8px 0 0 18px">
-      <li><strong>Emergency:</strong> Dispatch immediately; notify EPM; owner FYI after stabilization.</li>
-      <li><strong>Urgent:</strong> Vendor within 24–48h; confirm access; NTE up to threshold.</li>
-      <li><strong>Routine:</strong> Schedule per tenant availability; bundle if possible.</li>
-      <li><strong>Recall:</strong> Use same vendor; no new charge unless scope changed.</li>
-      <li><strong>Temp check / 2nd opinion:</strong> Document reason and expected delta in scope/cost.</li>
-      <li><strong>Opt-out maintenance:</strong> Mirror safety rules; ensure liability waiver & coordination note.</li>
-      <li><strong>Tenant responsibility:</strong> Don’t proceed without explicit approval; set chargeback plan if work was performed.</li>
-    </ul>
-  </details>
-
-  <div class="hr"></div>
-  <h3>Pre-Handoff Checklists</h3>
-  <div class="two-col">
-    <div class="soft">
-      <h4 class="mini">Intake</h4>
-      <div class="check"><input id="mnt_ck_int1" type="checkbox"><label for="mnt_ck_int1">Photos/Video captured</label></div>
-      <div class="check"><input id="mnt_ck_int2" type="checkbox"><label for="mnt_ck_int2">Vendor assigned & scheduled</label></div>
-      <div class="check"><input id="mnt_ck_int3" type="checkbox"><label for="mnt_ck_int3">Tenant notified of window</label></div>
-      <div class="check"><input id="mnt_ck_int4" type="checkbox"><label for="mnt_ck_int4">NTE / quote recorded</label></div>
-    </div>
-    <div class="soft">
-      <h4 class="mini">Approvals & Docs</h4>
-      <div class="check"><input id="mnt_ck_app1" type="checkbox"><label for="mnt_ck_app1">Owner/EPM approval saved</label></div>
-      <div class="check"><input id="mnt_ck_app2" type="checkbox"><label for="mnt_ck_app2">FYIs selected</label></div>
-      <div class="check"><input id="mnt_ck_app3" type="checkbox"><label for="mnt_ck_app3">Lease violation generated (if needed)</label></div>
-      <div class="check"><input id="mnt_ck_app4" type="checkbox"><label for="mnt_ck_app4">Chargeback plan captured (if applicable)</label></div>
-    </div>
-  </div>
-
-  <div class="hr"></div>
-  <h3>Generate Handoff</h3>
-  <div class="row">
-    <button class="btn primary" onclick="mntGenerate()">Generate</button>
-    <button class="btn" onclick="copyOut('mnt_out')">Copy</button>
-    <button class="btn" onclick="mntClear()">Clear</button>
-  </div>
-  <div class="field"><label>Handoff / Buildium Note</label><textarea id="mnt_out" readonly></textarea></div>
-</div>
-<!-- ========== /Maintenance (Full SOP) ========== -->
+/* ===== Maintenance (full) ===== */
+function mntGenerate(){
+  const fyiSel = byId('mnt_fyi');
+  const fyi = fyiSel ? Array.from(fyiSel.selectedOptions).map(o=>o.value).join(', ') : '';
+  const lines = [];
+  lines.push('MAINTENANCE — HANDOFF');
+  lines.push(`WO: ${val('mnt_wo')||'—'} | Property: ${val('mnt_prop')||'—'}${val('mnt_unit')?(' #'+val('mnt_unit')):''}`);
+  lines.push(`Issue: ${val('mnt_issue')||'—'} | Type: ${val('mnt_issue_type')||'—'} | Priority: ${val('mnt_pri')||'—'}`);
+  if (val('mnt_media'))  lines.push(`Media: ${val('mnt_media')}`);
+  lines.push(`Vendor: ${val('mnt_vendor')||'—'} | NTE: ${val('mnt_nte')||'—'}`);
+  lines.push(`Owner Plan: ${val('mnt_plan')||'—'} | Approval: ${val('mnt_approval')||'—'}`);
+  lines.push(`Tenant Responsibility: ${val('mnt_tenant_resp')||'—'}`);
+  if (val('mnt_chargeback')) lines.push(`Chargeback Plan: ${val('mnt_chargeback')}`);
+  lines.push(`Lease Violation: ${val('mnt_violation')||'No'}`);
+  if (fyi) lines.push(`FYIs: ${fyi}`);
+  if (val('mnt_notes')) lines.push(`Notes: ${val('mnt_notes')}`);
+  const intake = ['mnt_ck_int1','mnt_ck_int2','mnt_ck_int3','mnt_ck_int4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
+  const approv = ['mnt_ck_app1','mnt_ck_app2','mnt_ck_app3','mnt_ck_app4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
+  lines.push(`Checklist — Intake: ${intake}`);
+  lines.push(`Checklist — Approvals/Docs: ${approv}`);
+  byId('mnt_out').value = lines.join('\n');
+}
+function mntClear(){
+  const inputs = ['mnt_wo','mnt_prop','mnt_unit','mnt_issue','mnt_issue_type','mnt_pri','mnt_media','mnt_vendor','mnt_nte','mnt_plan','mnt_approval','mnt_tenant_resp','mnt_chargeback','mnt_violation','mnt_notes'];
+  inputs.forEach(id=>{const el = byId(id); if (!el) return; if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';});
+  ['mnt_ck_int1','mnt_ck_int2','mnt_ck_int3','mnt_ck_int4','mnt_ck_app1','mnt_ck_app2','mnt_ck_app3','mnt_ck_app4'].forEach(id=>{ const cb=byId(id); if(cb) cb.checked=false;});
+  const fyiSel = byId('mnt_fyi'); if (fyiSel) Array.from(fyiSel.options).forEach(o=>o.selected=false);
+  const out = byId('mnt_out'); if(out) out.value='';
+}
 
 /* ===== Appliance ===== */
 function buildAppliance(){
@@ -738,10 +590,10 @@ function buildAppliance(){
   if (val('ap_sym'))    lines.push(`Symptoms: ${val('ap_sym')}`);
   if (val('ap_photos')) lines.push(`Photos: ${val('ap_photos')}`);
   if (val('ap_notes'))  lines.push(`Notes: ${val('ap_notes')}`);
-  return lines.join('\\n');
+  return lines.join('\n');
 }
 
-/* ===== Finance ===== */
+/* ===== Finance base ===== */
 function buildFinance(){
   const checks=['fin_ck1','fin_ck2','fin_ck3','fin_ck4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
   return [
@@ -749,7 +601,7 @@ function buildFinance(){
     `WO: ${val('fin_wo')||'—'} | Vendor: ${val('fin_vendor')||'—'} | Amount: ${val('fin_amt')||'—'}`,
     `Notes: ${val('fin_notes')||'—'}`,
     `Verification: ${checks}`
-  ].join('\\n');
+  ].join('\n');
 }
 /* Water Bills block */
 function buildWaterBill(){
@@ -762,7 +614,7 @@ function buildWaterBill(){
     `Allocate: ${val('wb_alloc')||'—'} | Rebill: ${val('wb_rebill')||'—'}`,
     `Owner Plan: ${val('wb_plan')||'—'} | Notes: ${val('wb_notes')||'—'}`,
     `Pay: ${val('wb_method')||'—'} on ${val('wb_paydate')||'—'} | Checks: ${cks}`
-  ].join('\\n');
+  ].join('\n');
 }
 
 /* ===== Non-Maintenance ===== */
@@ -773,10 +625,10 @@ function buildNonMaint(){
     `Route: ${val('nm_to')||'—'} | Due: ${val('nm_due')||'—'}`,
     `Ref: ${val('nm_ref')||'—'}`,
     `Notes: ${val('nm_notes')||'—'}`
-  ].join('\\n');
+  ].join('\n');
 }
 
-/* ===== Delinquency ===== */
+/* ===== Delinquency (with ICS + MTM) ===== */
 function dlqAllChecked(){return ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].every(id=>byId(id)?.checked)}
 function dlqGenerate(){
   if(!dlqAllChecked()){ alert('Please complete the checklist before generating.'); return; }
@@ -788,7 +640,7 @@ function dlqGenerate(){
   lines.push(`Eviction: ${val('dlq_eviction')||'—'} ${val('dlq_noevict')?('(reason: '+val('dlq_noevict')+')'):''}`);
   lines.push(`Lease End: ${val('dlq_lease')||'—'} | Last PW Action: ${val('dlq_lastaction')||'—'}`);
   lines.push(`Owner informed on: ${val('dlq_owner_date')||'—'} ${val('dlq_owner_link')?('| '+val('dlq_owner_link')):''}`);
-  byId('dlq_out').value=lines.join('\\n');
+  byId('dlq_out').value=lines.join('\n');
 }
 function dlqOwnerToggle(){ const cb=byId('dlq_owner_informed'), d=byId('dlq_owner_date'); if(cb?.checked && d && !d.value){ const t=new Date(); d.value=t.toISOString().slice(0,10); } }
 /* ICS helpers */
@@ -800,13 +652,13 @@ function downloadICS(summary, description, startYMD, endYMD){
     'UID:'+(Date.now())+'@propertywize',
     'DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z'),
     'SUMMARY:'+summary,
-    'DESCRIPTION:'+(description||'').replace(/\\n/g,'\\\\n'),
+    'DESCRIPTION:'+(description||'').replace(/\n/g,'\\n'),
     'DTSTART;VALUE=DATE:'+startYMD,
     'DTEND;VALUE=DATE:'+endYMD,
     'END:VEVENT','END:VCALENDAR'
-  ].join('\\r\\n');
+  ].join('\r\n');
   const blob=new Blob([lines],{type:'text/calendar;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=summary.replace(/\\s+/g,'_')+'.ics';
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=summary.replace(/\s+/g,'_')+'.ics';
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
 }
 function dlqICSRed(){ const s=val('dlq_red_start'); if(!s){alert('Set Red Notice start date'); return;} const e=val('dlq_red_end')||s; downloadICS('Red Notice Posting Window', `Tenant: ${val('dlq_tenant')||''} — ${val('dlq_address')||''}`, icsDate(s), icsDate(e)); }
@@ -824,7 +676,7 @@ function slGenerate(){
   lines.push(`Showings(7d): ${val('sl_showings')||0} | Feedback: ${val('sl_feedback')||'—'}`);
   lines.push(`Market — Median ${val('sl_med')||'—'} | Range ${val('sl_low')||'—'}–${val('sl_high')||'—'}`);
   if(val('sl_reco')) lines.push(`Recommendation: ${val('sl_reco')}`);
-  byId('sl_out').value=lines.join('\\n');
+  byId('sl_out').value=lines.join('\n');
 }
 function buildSLHandoff(){
   return [
@@ -832,7 +684,7 @@ function buildSLHandoff(){
     `Property: ${val('sl_address')||'—'} | Unit/ID: ${val('sl_unitid')||'—'}`,
     `DOM: ${val('sl_dom')||'—'} | Rent: ${val('sl_rent')||'—'}`,
     `Action: ${val('sl_reco')||'—'}`
-  ].join('\\n');
+  ].join('\n');
 }
 /* Downloads */
 function downloadTxt(textareaId, base){ const txt=val(textareaId); const blob=new Blob([txt||''],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(base||'report')+'.txt'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0); }
@@ -841,7 +693,7 @@ function downloadCsvSL(){
     ['Property','Owner','Listed','DOM','Rent','Apps_New','Pending','Approved','Declined','Showings','Feedback','Median','Low','High','Recommendation'],
     [val('sl_address'),val('sl_owner'),val('sl_listed'),val('sl_dom'),val('sl_rent'),val('sl_apps_new'),val('sl_apps_pending'),val('sl_apps_approved'),val('sl_apps_declined'),val('sl_showings'),val('sl_feedback'),val('sl_med'),val('sl_low'),val('sl_high'),val('sl_reco')]
   ];
-  const csv=rows.map(r=>r.map(x=>(''+(x??'')).replace(/"/g,'""')).map(x=>`"${x}"`).join(',')).join('\\r\\n');
+  const csv=rows.map(r=>r.map(x=>(''+(x??'')).replace(/"/g,'""')).map(x=>`"${x}"`).join(',')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='stale-listing-summary.csv';
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
@@ -858,7 +710,7 @@ function downloadEmlSL(){
     'Content-Transfer-Encoding: 8bit',
     '',
     body
-  ].join('\\r\\n');
+  ].join('\r\n');
   const blob=new Blob([eml],{type:'message/rfc822'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='owner-weekly-update.eml';
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
