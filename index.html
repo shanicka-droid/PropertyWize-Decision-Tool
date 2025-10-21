@@ -146,19 +146,50 @@
           </div>
         </div>
 
-        <div class="hr"></div>
-        <h3>Owner Plans & Routing</h3>
-        <div class="two-col">
-          <div class="soft">
-            <div class="field"><label>Owner Plan</label>
-              <select id="mnt_plan">
-                <option value="">Select…</option>
-                <option>Approve — proceed now</option>
-                <option>Temp check / 2nd opinion</option>
-                <option>Hold for owner review</option>
-                <option>Opt-out maintenance (owner DIY)</option>
-                <option>Tenant responsibility — do not proceed</option>
-              </select>
+    <div class="hr"></div>
+<h3>Owner Plan</h3>
+<p class="note">Select the owner's maintenance plan. This sets approval thresholds, inspections, dispatch rules, and (if selected) warranty workflow.</p>
+
+<div class="field">
+  <label><strong>Select Plan Type</strong></label>
+  <!-- IMPORTANT: calls mntPlanChange() -->
+  <select id="mnt_plan" onchange="mntPlanChange()">
+    <option value="">Select…</option>
+    <option>Standard – $300 Approval Limit</option>
+    <option>Basic – $150 Approval Limit</option>
+    <option>Opt-Out – $0 Approval Limit</option>
+    <option>Home Warranty – Prior Authorization Required</option>
+  </select>
+</div>
+
+<details id="planInfo">
+  <summary><strong>Plan Details</strong></summary>
+  <div class="soft" id="planDetails">
+    <p><em>Standard:</em> 24/7 dispatch, $300 approval limit, annual inspection, diagnostics, recall warranty.</p>
+    <p><em>Basic:</em> $150 approval; owner approves repairs; no annual inspection; Latchel setup as needed.</p>
+    <p><em>Opt-Out:</em> Owner manages vendors; PW notifies tenants PW doesn’t manage maintenance; $0 limit; admin fee may apply.</p>
+    <p><em>Home Warranty:</em> <strong>No work</strong> without prior warranty authorization. Use approved vendor only; collect claim #, authorization amount, deductible/service fee, and appointment date. Owner pays non-covered items.</p>
+  </div>
+</details>
+
+<!-- Home Warranty fields (auto-shown only when plan is "Home Warranty") -->
+<details id="hw_block" class="hidden">
+  <summary><strong>Home Warranty Details</strong></summary>
+  <div class="two-col">
+    <div class="soft">
+      <div class="field"><label>Warranty Provider</label><input id="hw_provider" type="text" placeholder="e.g., AHS / Choice / 2-10"></div>
+      <div class="field"><label>Policy / Contract #</label><input id="hw_policy" type="text"></div>
+      <div class="field"><label>Claim #</label><input id="hw_claim" type="text"></div>
+      <div class="field"><label>Warranty Phone / Portal</label><input id="hw_contact" type="text" placeholder="800-… or https://…"></div>
+    </div>
+    <div class="soft">
+      <div class="field"><label>Authorized Amount (USD)</label><input id="hw_auth" type="text" placeholder="$0.00"></div>
+      <div class="field"><label>Deductible / Service Fee</label><input id="hw_fee" type="text" placeholder="$75.00"></div>
+      <div class="field"><label>Appointment Date</label><input id="hw_appt" type="date"></div>
+      <div class="field"><label>Notes</label><input id="hw_notes" type="text" placeholder="Non-covered items, owner approvals, etc."></div>
+    </div>
+  </div>
+</details>
             </div>
             <div class="field"><label>Approval Type</label>
               <select id="mnt_approval">
