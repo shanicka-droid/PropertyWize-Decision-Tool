@@ -1,82 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PropertyWize Decision Tool — v4 (Full)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PropertyWize • Decision Tool</title>
 <style>
   :root{
-    /* Light theme to match your earlier white look */
-    --bg:#ffffff;            /* page background */
-    --card:#f7f9fc;          /* cards */
-    --ink:#0b1220;           /* main text (near-black) */
-    --muted:#5e6b7a;         /* muted labels */
-    --hr:#e3e8ef;            /* hairlines */
-    --brand:#2ea043;         /* green action buttons */
-    --brandText:#06150d;
-    --btn:#eef2f7;           /* neutral button background on white */
-    --btnText:#0b1220;
-    --warn:#f2cc60; --bad:#f85149; --ok:#2ea043;
+    --bg:#ffffff;              /* white page like v4 */
+    --card:#f7f7f8;            /* soft gray card */
+    --text:#222;
+    --muted:#6b7280;
+    --primary:#2563eb;         /* blue */
+    --primary-ink:#fff;
+    --line:#e5e7eb;
   }
-  html,body{margin:0;background:var(--bg);color:var(--ink);
-    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;}
-  .wrap{max-width:1200px;margin:0 auto;padding:18px}
-  h1{font-size:20px;margin:0}
-  h2{font-size:18px;margin:16px 0 8px}
-  h3{font-size:13px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-  h4{font-size:12px;margin:10px 0 6px;color:var(--muted)}
-  .grid{display:grid;gap:16px}
-  @media(min-width:960px){ .grid{grid-template-columns:260px 1fr} }
-  .card{background:var(--card);border:1px solid var(--hr);border-radius:12px;padding:14px}
-  .hr{height:1px;background:var(--hr);margin:12px 0}
-  .note{color:var(--muted)}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  /* header */
+  header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand img.logo{height:36px;width:auto;display:block}
+  h1{font-size:22px;margin:0;font-weight:700}
+  .mini{color:var(--muted);font-size:12px}
+  /* layout */
+  .grid{display:grid;grid-template-columns:240px 1fr;gap:18px}
+  /* left pills */
+  nav.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+  label.pill{display:block;margin:6px 0}
+  label.pill input{appearance:none}
+  label.pill span{display:block;padding:10px 12px;border-radius:10px;border:1px solid var(--line);cursor:pointer}
+  label.pill input:checked+span{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+  .icon{margin-right:8px}
+  /* right cards */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .view-pane.hidden{display:none}
+  .hr{height:1px;background:var(--line);margin:12px 0}
+  h2{margin:0 0 4px;font-size:20px}
+  h3{margin:10px 0 6px;font-size:16px}
+  p.note{color:var(--muted);margin:0 0 10px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .soft{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}
+  .field{display:grid;margin:8px 0}
+  .field label{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .field input,.field select,.field textarea{
+    border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;background:#fff
+  }
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .two-col{display:grid;gap:14px}
-  @media(min-width:720px){ .two-col{grid-template-columns:1fr 1fr} }
-  .field{display:grid;gap:6px;margin:8px 0}
-  label{color:var(--muted);font-size:12px}
-  input,select,textarea,button,a.btn{
-    background:#fff;border:1px solid var(--hr);color:var(--ink);
-    border-radius:9px;padding:9px 10px;outline:none
-  }
-  textarea{min-height:140px;resize:vertical}
-  .btn{display:inline-block;cursor:pointer;text-decoration:none;background:var(--btn);color:var(--btnText)}
-  .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brandText)}
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  .check{display:flex;gap:8px;align-items:center;margin:6px 0}
-  details{border:1px solid var(--hr);border-radius:10px;padding:10px;background:#fff}
-  summary{cursor:pointer}
-  /* Sidebar pills (left) */
-  #rolePicker{display:flex;flex-direction:column;gap:8px}
-  .pill{display:block}
-  .pill input{display:none}
-  .pill span{display:flex;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--hr);
-    border-radius:999px;background:#f3f6fb;cursor:pointer}
-  .pill input:checked + span{outline:2px solid var(--brand);background:#e8f6ec}
-  .icon{font-style:normal;opacity:.95}
-  /* Views */
-  .view-pane{display:block}
-  .hidden{display:none!important}
-  .mini{font-size:12px;color:var(--muted)}
-  footer{color:var(--muted);text-align:center;margin:22px 0}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;cursor:pointer}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+  textarea[readonly]{background:#fafafa}
+  footer{color:var(--muted);text-align:center;margin:24px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
-
- <!-- Header with logo -->
-<header style="text-align:center; background:white; padding:15px 0; border-bottom:2px solid #0a3d62;">
-  <img src="https://shanicka-droid.github.io/PropertyWize-Decision-Tool/assets/logo.png" 
-       alt="PropertyWize Logo"
-       style="height:80px; max-width:100%; object-fit:contain;">
-  <h1 style="margin-top:8px; font-size:22px; color:#0a3d62;">PropertyWize • Decision Tool</h1>
-</header>
+  <!-- header -->
+  <header>
+    <div class="brand">
+      <img src="./pw-logo.png" alt="PropertyWize Logo" class="logo">
+      <h1>PropertyWize • Decision Tool</h1>
+    </div>
+    <div class="mini">v4 (Full)</div>
+  </header>
 
   <div class="grid">
-    <!-- LEFT: role buttons -->
+    <!-- LEFT: role pills -->
     <nav id="rolePicker" class="card">
       <label class="pill">
-        <input type="radio" name="role" value="maintenance" data-target="viewMaintenance">
+        <input type="radio" name="role" value="maintenance" data-target="viewMaintenance" checked>
         <span><i class="icon">🛠️</i> Maintenance</span>
       </label>
       <label class="pill">
@@ -85,7 +76,7 @@
       </label>
       <label class="pill">
         <input type="radio" name="role" value="finance" data-target="viewFinance">
-        <span><i class="icon">💵</i> Finance</span>
+        <span><i class="icon">🧾</i> Finance</span>
       </label>
       <label class="pill">
         <input type="radio" name="role" value="nonmaint" data-target="viewNonMaint">
@@ -97,202 +88,99 @@
       </label>
       <label class="pill">
         <input type="radio" name="role" value="listings" data-target="viewListings">
-        <span><i class="icon">🏷️</i> Stale Listing</span>
+        <span><i class="icon">📌</i> Stale Listing</span>
       </label>
     </nav>
-<div class="card" id="intakeWizard" style="margin-top:12px;">
-  <h3>Smart Intake (Auto-Route)</h3>
-  <p class="note">Answer these quick questions and we’ll take you to the correct SOP.</p>
 
-  <div class="two-col">
-    <div class="soft">
-      <div class="field">
-        <label>Is it an Emergency?</label>
-        <select id="iw_emergency"><option>No</option><option>Yes</option></select>
-      </div>
-      <div class="field">
-        <label>Is the property in Delinquent status?</label>
-        <select id="iw_delinquent"><option>No</option><option>Yes</option></select>
-      </div>
-      <div class="field">
-        <label>Enrolled in a Home Warranty program?</label>
-        <select id="iw_warranty"><option>No</option><option>Yes</option></select>
-      </div>
-    </div>
-
-    <div class="soft">
-      <div class="field">
-        <label>Owner completes own maintenance?</label>
-        <select id="iw_ownerSelfMaint"><option>No</option><option>Yes</option></select>
-      </div>
-      <div class="field">
-        <label>Same issue within last 12 months?</label>
-        <select id="iw_repeat12"><option>No</option><option>Yes</option></select>
-      </div>
-      <div class="field">
-        <label>Is this specifically an Appliance ticket?</label>
-        <select id="iw_appliance"><option>No</option><option>Yes</option></select>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <button type="button" class="btn primary" onclick="pw_intakeRoute()">Continue</button>
-    <button type="button" class="btn" onclick="pw_intakeClear()">Clear</button>
-  </div>
-</div>
     <!-- RIGHT: panes -->
     <section id="views" class="card">
 
       <!-- ========== Maintenance (Full SOP) ========== -->
       <div id="viewMaintenance" class="view-pane">
         <h2>Maintenance</h2>
-        <p class="note">End-to-end maintenance intake, approval routing, FYIs, handoff, and policy guidance.</p>
+        <p class="note">End-to-end maintenance workflow with Smart Intake.</p>
+
+        <div class="hr"></div>
+        <h3>Smart Intake (Auto-Route)</h3>
+        <p class="note">Answer these quick questions and we’ll take you to the right SOP.</p>
+
+        <div class="two-col soft">
+          <div class="field">
+            <label>Is it an Emergency?</label>
+            <select id="si_emergency">
+              <option>No</option><option>Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Owner completes own maintenance?</label>
+            <select id="si_ownerMaint">
+              <option>No</option><option>Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Property in Delinquent status?</label>
+            <select id="si_delinquent">
+              <option>No</option><option>Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Same issue within last 12 months?</label>
+            <select id="si_recall">
+              <option>No</option><option>Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Enrolled in a Home Warranty program?</label>
+            <select id="si_warranty">
+              <option>No</option><option>Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Is this specifically an Appliance ticket?</label>
+            <select id="si_appliance">
+              <option>No</option><option>Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="si_continue">Continue</button>
+          <button class="btn" id="si_clear">Clear</button>
+        </div>
 
         <div class="hr"></div>
         <h3>Ticket Intake</h3>
         <div class="two-col">
           <div class="soft">
-            <div class="field"><label>WO #</label><input id="mnt_wo" type="text" placeholder="WO-12345"></div>
-            <div class="field"><label>Property</label><input id="mnt_prop" type="text" placeholder="123 Main St, City ST"></div>
-            <div class="field"><label>Unit (optional)</label><input id="mnt_unit" type="text" placeholder="2B"></div>
-            <div class="field"><label>Issue Type</label>
+            <div class="field"><label>WO #</label><input id="mnt_wo" type="text" placeholder="123456"></div>
+            <div class="field"><label>Property Address</label><input id="mnt_addr" type="text"></div>
+            <div class="field"><label>Unit</label><input id="mnt_unit" type="text"></div>
+            <div class="field">
+              <label>Issue Type</label>
               <select id="mnt_issue_type">
                 <option value="">Select…</option>
                 <option>Emergency</option>
                 <option>Urgent</option>
                 <option>Routine</option>
-                <option>Cosmetic / Upgrade</option>
-                <option>Recall</option>
-                <option>Temp check / 2nd opinion</option>
-                <option>Opt-out maintenance</option>
-                <option>Vendor suggests follow-up work</option>
-                <option>Tenant responsibility</option>
+                <option>Appliance</option>
               </select>
             </div>
-            <div class="field"><label>Issue Summary</label><input id="mnt_issue" type="text" placeholder="Short description"></div>
+            <div class="field"><label>Notes</label><textarea id="mnt_notes" rows="4"></textarea></div>
           </div>
+
           <div class="soft">
-            <div class="field"><label>Priority</label>
-              <select id="mnt_pri">
-                <option>Routine</option><option>Urgent</option><option>Emergency</option>
+            <div class="field"><label>Photos / Docs</label><input id="mnt_docs" type="text" placeholder="links (Drive, etc.)"></div>
+            <div class="field"><label>Vendor</label><input id="mnt_vendor" type="text" placeholder="TBD"></div>
+            <div class="field"><label>Quoted / NTE</label><input id="mnt_nte" type="text" placeholder="$"></div>
+            <div class="field"><label>Owner Plan</label>
+              <select id="mnt_plan" onchange="mntPlanChange()">
+                <option value="">Select plan…</option>
+                <option value="warranty">Home Warranty</option>
+                <option value="owner-does">Owner completes own tickets</option>
+                <option value="pw-standard">PW Standard Dispatch</option>
+                <option value="recall">Recall (≤ 12 months)</option>
               </select>
             </div>
-            <div class="field"><label>Photos / Video Link (optional)</label><input id="mnt_media" type="text" placeholder="https://…"></div>
-            <div class="field"><label>Vendor</label><input id="mnt_vendor" type="text" placeholder="ABC Plumbing"></div>
-            <div class="field"><label>Quoted / NTE Amount (USD)</label><input id="mnt_nte" type="text" placeholder="$0.00"></div>
-            <div class="field"><label>Notes</label><textarea id="mnt_notes" placeholder="Context, access, prior history…"></textarea></div>
-          </div>
-        </div>
-
-    <div class="hr"></div>
-<h3>Owner Plan</h3>
-<p class="note">Select the owner's maintenance plan. This sets approval thresholds, inspections, dispatch rules, and (if selected) warranty workflow.</p>
-
-<div class="field">
-  <label><strong>Select Plan Type</strong></label>
-  <!-- IMPORTANT: calls mntPlanChange() -->
-  <select id="mnt_plan" onchange="mntPlanChange()">
-    <option value="">Select…</option>
-    <option>Standard – $300 Approval Limit</option>
-    <option>Basic – $150 Approval Limit</option>
-    <option>Opt-Out – $0 Approval Limit</option>
-    <option>Home Warranty – Prior Authorization Required</option>
-  </select>
-</div>
-
-<details id="planInfo">
-  <summary><strong>Plan Details</strong></summary>
-  <div class="soft" id="planDetails">
-    <p><em>Standard:</em> 24/7 dispatch, $300 approval limit, annual inspection, diagnostics, recall warranty.</p>
-    <p><em>Basic:</em> $150 approval; owner approves repairs; no annual inspection; Latchel setup as needed.</p>
-    <p><em>Opt-Out:</em> Owner manages vendors; PW notifies tenants PW doesn’t manage maintenance; $0 limit; admin fee may apply.</p>
-    <p><em>Home Warranty:</em> <strong>No work</strong> without prior warranty authorization. Use approved vendor only; collect claim #, authorization amount, deductible/service fee, and appointment date. Owner pays non-covered items.</p>
-  </div>
-</details>
-
-<!-- Home Warranty fields (auto-shown only when plan is "Home Warranty") -->
-<details id="hw_block" class="hidden">
-  <summary><strong>Home Warranty Details</strong></summary>
-  <div class="two-col">
-    <div class="soft">
-      <div class="field"><label>Warranty Provider</label><input id="hw_provider" type="text" placeholder="e.g., AHS / Choice / 2-10"></div>
-      <div class="field"><label>Policy / Contract #</label><input id="hw_policy" type="text"></div>
-      <div class="field"><label>Claim #</label><input id="hw_claim" type="text"></div>
-      <div class="field"><label>Warranty Phone / Portal</label><input id="hw_contact" type="text" placeholder="800-… or https://…"></div>
-    </div>
-    <div class="soft">
-      <div class="field"><label>Authorized Amount (USD)</label><input id="hw_auth" type="text" placeholder="$0.00"></div>
-      <div class="field"><label>Deductible / Service Fee</label><input id="hw_fee" type="text" placeholder="$75.00"></div>
-      <div class="field"><label>Appointment Date</label><input id="hw_appt" type="date"></div>
-      <div class="field"><label>Notes</label><input id="hw_notes" type="text" placeholder="Non-covered items, owner approvals, etc."></div>
-    </div>
-  </div>
-</details>
-            </div>
-            <div class="field"><label>Approval Type</label>
-              <select id="mnt_approval">
-                <option value="">Select…</option>
-                <option>Owner approval required</option>
-                <option>EPM approval required</option>
-                <option>Auto-approve (under threshold)</option>
-              </select>
-            </div>
-            <div class="field"><label>FYIs (multi-select)</label>
-              <select id="mnt_fyi" multiple>
-                <option>EPM</option><option>Finance</option><option>Owner Comms</option><option>Leasing</option><option>Maintenance</option>
-              </select>
-              <span class="mini">Hold Ctrl/Cmd to select multiple.</span>
-            </div>
-          </div>
-          <div class="soft">
-            <div class="field"><label>Tenant Responsibility?</label>
-              <select id="mnt_tenant_resp">
-                <option value="">Unknown</option>
-                <option>No — PW responsibility</option>
-                <option>Yes — confirmed by vendor/lease</option>
-              </select>
-            </div>
-            <div class="field"><label>If Tenant-Responsibility Work Completed — Chargeback Plan</label>
-              <input id="mnt_chargeback" type="text" placeholder="Amount & GL; timeline to bill tenant"/>
-            </div>
-            <div class="field"><label>Lease Violation Needed?</label>
-              <select id="mnt_violation"><option>No</option><option>Yes — trigger notice</option></select>
-            </div>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-        <h3>Policy Guidance</h3>
-        <details>
-          <summary><strong>Show policy tips</strong></summary>
-          <ul class="mini" style="margin:8px 0 0 18px">
-            <li><strong>Emergency:</strong> Dispatch immediately; notify EPM; owner FYI after stabilization.</li>
-            <li><strong>Urgent:</strong> Vendor within 24–48h; confirm access; NTE up to threshold.</li>
-            <li><strong>Routine:</strong> Schedule per tenant availability; bundle if possible.</li>
-            <li><strong>Recall:</strong> Use same vendor; no new charge unless scope changed.</li>
-            <li><strong>Temp check / 2nd opinion:</strong> Document reason and expected delta in scope/cost.</li>
-            <li><strong>Opt-out maintenance:</strong> Mirror safety rules; ensure liability waiver & coordination note.</li>
-            <li><strong>Tenant responsibility:</strong> Don’t proceed without explicit approval; set chargeback plan if work was performed.</li>
-          </ul>
-        </details>
-
-        <div class="hr"></div>
-        <h3>Pre-Handoff Checklists</h3>
-        <div class="two-col">
-          <div class="soft">
-            <h4>Intake</h4>
-            <div class="check"><input id="mnt_ck_int1" type="checkbox"><label for="mnt_ck_int1">Photos/Video captured</label></div>
-            <div class="check"><input id="mnt_ck_int2" type="checkbox"><label for="mnt_ck_int2">Vendor assigned & scheduled</label></div>
-            <div class="check"><input id="mnt_ck_int3" type="checkbox"><label for="mnt_ck_int3">Tenant notified of window</label></div>
-            <div class="check"><input id="mnt_ck_int4" type="checkbox"><label for="mnt_ck_int4">NTE / quote recorded</label></div>
-          </div>
-          <div class="soft">
-            <h4>Approvals & Docs</h4>
-            <div class="check"><input id="mnt_ck_app1" type="checkbox"><label for="mnt_ck_app1">Owner/EPM approval saved</label></div>
-            <div class="check"><input id="mnt_ck_app2" type="checkbox"><label for="mnt_ck_app2">FYIs selected</label></div>
-            <div class="check"><input id="mnt_ck_app3" type="checkbox"><label for="mnt_ck_app3">Lease violation generated (if needed)</label></div>
-            <div class="check"><input id="mnt_ck_app4" type="checkbox"><label for="mnt_ck_app4">Chargeback plan captured (if applicable)</label></div>
           </div>
         </div>
 
@@ -303,250 +191,177 @@
           <button class="btn" onclick="copyOut('mnt_out')">Copy</button>
           <button class="btn" onclick="mntClear()">Clear</button>
         </div>
-        <div class="field"><label>Handoff / Buildium Note</label><textarea id="mnt_out" readonly></textarea></div>
+        <div class="field"><label>Handoff / Buildium Note</label><textarea id="mnt_out" readonly style="min-height:160px"></textarea></div>
       </div>
 
-      <!-- ========== Appliance (standalone) ========== -->
+      <!-- ========== Appliance Ticket (standalone) ========== -->
       <div id="viewAppliance" class="view-pane hidden">
         <h2>Appliance Ticket Processing</h2>
         <p class="note">Follow SOP for refrigerators / ranges / DW / micro / washer / dryer.</p>
+
+        <div class="hr"></div>
+        <h3>Smart Intake (Appliances)</h3>
+        <div class="two-col soft">
+          <div class="field">
+            <label>Is the ticket strictly an appliance?</label>
+            <select id="ap_si_yes"><option>Yes</option><option>No</option></select>
+          </div>
+          <div class="field">
+            <label>Under Home Warranty?</label>
+            <select id="ap_si_warranty"><option>No</option><option>Yes</option></select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="ap_si_continue">Continue</button>
+        </div>
+
+        <div class="hr"></div>
+        <h3>Ticket & Tenant</h3>
         <div class="two-col">
           <div class="soft">
             <div class="field"><label>WO #</label><input id="ap_wo" type="text"></div>
-            <div class="field"><label>Property</label><input id="ap_prop" type="text"></div>
+            <div class="field"><label>Property Address</label><input id="ap_addr" type="text"></div>
             <div class="field"><label>Unit</label><input id="ap_unit" type="text"></div>
-            <div class="field"><label>Tenant</label><input id="ap_tenant" type="text"></div>
-            <div class="field"><label>Appliance Type</label>
-              <select id="ap_type"><option value="">Select…</option><option>Refrigerator</option><option>Range / Oven</option><option>Dishwasher</option><option>Microwave</option><option>Washer</option><option>Dryer</option></select>
-            </div>
+            <div class="field"><label>Tenant Name/Phone</label><input id="ap_tenant" type="text"></div>
           </div>
           <div class="soft">
-            <div class="field"><label>Brand / Model</label><input id="ap_model" type="text"></div>
-            <div class="field"><label>Symptoms</label><input id="ap_sym" type="text" placeholder="e.g., not cooling / no heat"></div>
-            <div class="field"><label>Photos Link</label><input id="ap_photos" type="text" placeholder="https://…"></div>
-            <div class="field"><label>Notes</label><textarea id="ap_notes"></textarea></div>
+            <div class="field"><label>Appliance</label>
+              <select id="ap_type">
+                <option value="">Select…</option>
+                <option>Refrigerator</option><option>Oven / Range</option>
+                <option>Dishwasher</option><option>Microwave</option>
+                <option>Washer</option><option>Dryer</option>
+              </select>
+            </div>
+            <div class="field"><label>Issue</label><input id="ap_issue" type="text" placeholder="No cool / won’t start…"></div>
+            <div class="field"><label>Warranty?</label>
+              <select id="ap_warranty"><option>No</option><option>Yes</option></select>
+            </div>
           </div>
         </div>
+
         <div class="hr"></div>
+        <h3>Outputs</h3>
         <div class="row">
-          <button class="btn primary" onclick="copyOut('ap_out', buildAppliance())">Generate</button>
-          <button class="btn" onclick="clearFields(['ap_wo','ap_prop','ap_unit','ap_tenant','ap_type','ap_model','ap_sym','ap_photos','ap_notes'],[],'ap_out')">Clear</button>
+          <button class="btn primary" onclick="apGenerate()">Generate</button>
+          <button class="btn" onclick="copyOut('ap_out')">Copy</button>
+          <button class="btn" onclick="apClear()">Clear</button>
         </div>
-        <div class="field"><label>Handoff</label><textarea id="ap_out" readonly></textarea></div>
+        <div class="field"><label>Handoff / Buildium Note</label><textarea id="ap_out" readonly style="min-height:160px"></textarea></div>
       </div>
 
-      <!-- ========== Finance (WO/Invoice + WATER BILLS) ========== -->
+      <!-- ========== Finance ========== -->
       <div id="viewFinance" class="view-pane hidden">
         <h2>Finance</h2>
-        <p class="note">Invoice/WO verification and approvals. Includes Water Bill Processing (Process → Prepare → Pay).</p>
+        <p class="note">WO & invoice checks, intake verification, spreadsheets, and email output.</p>
+
+        <div class="hr"></div>
+        <h3>WO & Invoice</h3>
         <div class="two-col">
           <div class="soft">
-            <h3>WO & Invoice</h3>
-            <div class="field"><label>WO #</label><input id="fin_wo" type="text"></div>
-            <div class="field"><label>Vendor</label><input id="fin_vendor" type="text"></div>
-            <div class="field"><label>Amount (USD)</label><input id="fin_amt" type="text" placeholder="$0.00"></div>
-            <div class="field"><label>Notes</label><input id="fin_notes" type="text"></div>
+            <div class="field"><label>Invoice Ref / Link</label><input id="fi_ref" type="text"></div>
+            <div class="field"><label>Amount</label><input id="fi_amt" type="text" placeholder="$"></div>
+            <div class="field"><label>Vendor</label><input id="fi_vendor" type="text"></div>
+            <div class="field"><label>Notes</label><textarea id="fi_notes" rows="4"></textarea></div>
           </div>
           <div class="soft">
-            <h3>Verification Checklist</h3>
-            <div class="check"><input id="fin_ck1" type="checkbox"><label for="fin_ck1">Matches WO scope</label></div>
-            <div class="check"><input id="fin_ck2" type="checkbox"><label for="fin_ck2">No duplicate invoice</label></div>
-            <div class="check"><input id="fin_ck3" type="checkbox"><label for="fin_ck3">Vendor W-9 on file</label></div>
-            <div class="check"><input id="fin_ck4" type="checkbox"><label for="fin_ck4">Approval captured (Owner/EPM)</label></div>
+            <h3>Intake Verification</h3>
+            <div class="field"><label><input id="fi_ck_1" type="checkbox"> Scope matches WO</label></div>
+            <div class="field"><label><input id="fi_ck_2" type="checkbox"> Tax & totals correct</label></div>
+            <div class="field"><label><input id="fi_ck_3" type="checkbox"> Backups attached</label></div>
+            <div class="field"><label><input id="fi_ck_4" type="checkbox"> Payee verified</label></div>
           </div>
         </div>
 
         <div class="hr"></div>
-        <h3>Water Bills — Process → Prepare → Pay</h3>
-        <details open>
-          <summary><strong>1) Process the Bill</strong> <span class="mini">Enter the utility bill details</span></summary>
-          <div class="two-col">
-            <div class="soft">
-              <div class="field"><label>Property</label><input id="wb_prop" type="text"></div>
-              <div class="field"><label>Service Period Start</label><input id="wb_start" type="date"></div>
-              <div class="field"><label>Service Period End</label><input id="wb_end" type="date"></div>
-            </div>
-            <div class="soft">
-              <div class="field"><label>Account #</label><input id="wb_acct" type="text"></div>
-              <div class="field"><label>Bill Amount</label><input id="wb_amt" type="text" placeholder="$0.00"></div>
-              <div class="field"><label>Bill Link / PDF</label><input id="wb_link" type="text" placeholder="https://…"></div>
-            </div>
-          </div>
-        </details>
-        <details>
-          <summary><strong>2) Prepare</strong> <span class="mini">Split/allocate & add notes</span></summary>
-          <div class="two-col">
-            <div class="soft">
-              <div class="field"><label>Allocate To (GL/Unit)</label><input id="wb_alloc" type="text" placeholder="e.g., GL 6100 / Unit 2B"></div>
-              <div class="field"><label>Tenant Rebill (if any)</label><input id="wb_rebill" type="text" placeholder="$ or %"></div>
-            </div>
-            <div class="soft">
-              <div class="field"><label>Owner Plan / Approval</label><input id="wb_plan" type="text" placeholder="e.g., Approve full, rebill tenant 50%"></div>
-              <div class="field"><label>Notes</label><input id="wb_notes" type="text"></div>
-            </div>
-          </div>
-        </details>
-        <details>
-          <summary><strong>3) Pay</strong> <span class="mini">Ready to push to payment</span></summary>
-          <div class="two-col">
-            <div class="soft">
-              <div class="field"><label>Pay Method</label>
-                <select id="wb_method"><option>ACH</option><option>Check</option><option>Card</option></select>
-              </div>
-              <div class="field"><label>Pay On</label><input id="wb_paydate" type="date"></div>
-            </div>
-            <div class="soft">
-              <div class="check"><input id="wb_ck1" type="checkbox"><label for="wb_ck1">Matched to property & account</label></div>
-              <div class="check"><input id="wb_ck2" type="checkbox"><label for="wb_ck2">Allocations ready</label></div>
-              <div class="check"><input id="wb_ck3" type="checkbox"><label for="wb_ck3">EPM/Owner approval noted</label></div>
-            </div>
-          </div>
-        </details>
-
-        <div class="row" style="margin-top:8px">
-          <button class="btn primary" onclick="copyOut('fin_out', buildFinance()+ '\\n\\n' + buildWaterBill())">Generate</button>
-          <button class="btn" onclick="clearFields(['fin_wo','fin_vendor','fin_amt','fin_notes'],['fin_ck1','fin_ck2','fin_ck3','fin_ck4'],'fin_out');clearFields(['wb_prop','wb_start','wb_end','wb_acct','wb_amt','wb_link','wb_alloc','wb_rebill','wb_plan','wb_notes','wb_method','wb_paydate'],['wb_ck1','wb_ck2','wb_ck3'])">Clear</button>
+        <h3>Outputs</h3>
+        <div class="row">
+          <button class="btn primary" onclick="fiGenerate()">Generate</button>
+          <button class="btn" onclick="copyOut('fi_out')">Copy</button>
+          <button class="btn" onclick="fiClear()">Clear</button>
         </div>
-        <div class="field"><label>Finance Output</label><textarea id="fin_out" readonly></textarea></div>
+        <div class="field"><label>Email / Handoff</label><textarea id="fi_out" readonly style="min-height:160px"></textarea></div>
       </div>
 
       <!-- ========== Non-Maintenance Bill ========== -->
       <div id="viewNonMaint" class="view-pane hidden">
         <h2>Non-Maintenance Bill Handoff</h2>
-        <p class="note">For bills not tied to a maintenance WO (software, utilities, fees, etc.).</p>
+        <p class="note">For bills not tied to a maintenance ticket.</p>
+
         <div class="two-col">
           <div class="soft">
-            <div class="field"><label>Bill #</label><input id="nm_bill" type="text"></div>
-            <div class="field"><label>Vendor</label><input id="nm_vendor" type="text"></div>
-            <div class="field"><label>Amount</label><input id="nm_amt" type="text" placeholder="$0.00"></div>
-            <div class="field"><label>Notes</label><input id="nm_notes" type="text"></div>
+            <div class="field"><label>Bill #</label><input id="nb_bill" type="text"></div>
+            <div class="field"><label>Vendor</label><input id="nb_vendor" type="text"></div>
+            <div class="field"><label>Amount</label><input id="nb_amt" type="text" placeholder="$"></div>
+            <div class="field"><label>Notes</label><input id="nb_notes" type="text"></div>
           </div>
           <div class="soft">
-            <div class="field"><label>Route To</label>
-              <select id="nm_to"><option>Finance</option><option>Operations/EPM</option><option>Owner Comms</option><option>Maintenance</option><option>Leasing</option></select>
-            </div>
-            <div class="field"><label>Due Date</label><input id="nm_due" type="date"></div>
-            <div class="field"><label>Invoice Ref / Link</label><input id="nm_ref" type="text" placeholder="URL or ref #"></div>
+            <div class="field"><label>Notify (emails)</label><input id="nb_notify" type="text" placeholder="a@b.com; c@d.com"></div>
+            <div class="field"><label>Due date</label><input id="nb_due" type="date"></div>
+            <div class="field"><label>Tags</label><input id="nb_tags" type="text" placeholder="utility,tax,…"></div>
           </div>
         </div>
+
         <div class="hr"></div>
+        <h3>Outputs</h3>
         <div class="row">
-          <button class="btn primary" onclick="copyOut('nm_out', buildNonMaint())">Generate</button>
-          <button class="btn" onclick="clearFields(['nm_bill','nm_vendor','nm_amt','nm_notes','nm_to','nm_due','nm_ref'],[],'nm_out')">Clear</button>
+          <button class="btn primary" onclick="nbGenerate()">Generate</button>
+          <button class="btn" onclick="copyOut('nb_out')">Copy</button>
+          <button class="btn" onclick="nbClear()">Clear</button>
         </div>
-        <div class="field"><label>Handoff</label><textarea id="nm_out" readonly></textarea></div>
+        <div class="field"><label>Handoff / Email</label><textarea id="nb_out" readonly style="min-height:160px"></textarea></div>
       </div>
 
-      <!-- ========== Delinquency (full) ========== -->
+      <!-- ========== Delinquency ========== -->
       <div id="viewDelinquency" class="view-pane hidden">
         <h2>Delinquency Handoff Tool</h2>
-        <p class="note">Summarize tenants &gt; 30+ days past due and confirm SOP steps.</p>
+        <p class="note">Summarize tenants with balances and generate an owner handoff.</p>
 
-        <div class="hr"></div>
-        <h3>✅ Pre-Handoff Checklist</h3>
-        <details open id="dlq_checklist">
-          <summary><strong>Complete before Generate</strong></summary>
-          <div class="check"><input id="dlq_c1" type="checkbox"><label for="dlq_c1">Balance &gt; 60 days verified</label></div>
-          <div class="check"><input id="dlq_c2" type="checkbox"><label for="dlq_c2">FTP notice sent & documented</label></div>
-          <div class="check"><input id="dlq_c3" type="checkbox"><label for="dlq_c3">Court status updated</label></div>
-          <div class="check"><input id="dlq_c4" type="checkbox"><label for="dlq_c4">Eviction scheduled or reason noted</label></div>
-          <div class="check"><input id="dlq_c5" type="checkbox"><label for="dlq_c5">Tenant set to Collection (blocks partial pay)</label></div>
-          <div class="check"><input id="dlq_c6" type="checkbox"><label for="dlq_c6">Disable non-emergency auto-dispatch if &gt; $500</label></div>
-        </details>
-
-        <div class="hr"></div>
-        <h3>Delinquency Details</h3>
         <div class="two-col">
           <div class="soft">
-            <div class="field"><label>Tenant</label><input id="dlq_tenant" type="text" placeholder="Jane Doe"></div>
-            <div class="field"><label>Address</label><input id="dlq_address" type="text" placeholder="123 Main St, City, ST"></div>
-            <div class="field"><label>Rent Balance</label><input id="dlq_rent" type="text" placeholder="$0"></div>
-            <div class="field"><label>Late Fee / Court Charges</label><input id="dlq_fees" type="text" placeholder="$0"></div>
-            <div class="field"><label>Utility Balance</label><input id="dlq_util" type="text" placeholder="$0"></div>
-            <div class="field"><label>Misc. Balance</label><input id="dlq_misc" type="text" placeholder="$0"></div>
-            <div class="field"><label>Last Payment</label><input id="dlq_lastpay" type="text" placeholder="09/01/2025 – $500"></div>
-            <div class="field"><label>Last Communication</label><input id="dlq_lastcomm" type="text" placeholder="09/20/2025 – promised payment"></div>
+            <div class="field"><label>Property</label><input id="dlq_prop" type="text"></div>
+            <div class="field"><label>Tenant</label><input id="dlq_tenant" type="text"></div>
+            <div class="field"><label>Balance</label><input id="dlq_bal" type="text" placeholder="$"></div>
           </div>
           <div class="soft">
-            <div class="field"><label>FTP Date</label><input id="dlq_ftp" type="date"></div>
-            <div class="field"><label>Court Outcome</label><input id="dlq_court" type="text" placeholder="Awaiting / Continued / Won / Dismissed"></div>
-            <div class="field"><label>Judgment Ordered</label><input id="dlq_judgment" type="text" placeholder="Yes – $2,100 on 10/10/2025"></div>
-            <div class="field"><label>Eviction Date Scheduled</label><input id="dlq_eviction" type="text" placeholder="10/28/2025 (set)"></div>
-            <div class="field"><label>Reason if No Eviction</label><input id="dlq_noevict" type="text" placeholder="Payment plan / Court delay / Owner hold"></div>
-            <div class="field"><label>Lease End (allow MTM text)</label><input id="dlq_lease" type="text" placeholder="12/31/2025 or MTM"></div>
-            <div class="field"><label>Last PW Action</label><input id="dlq_lastaction" type="text" placeholder="FTP sent 9/25; court filing 10/01"></div>
+            <div class="field"><label>Status</label><select id="dlq_status"><option>Promise to Pay</option><option>No Response</option><option>Payment Plan</option></select></div>
+            <div class="field"><label>Notes</label><textarea id="dlq_notes" rows="4"></textarea></div>
           </div>
         </div>
 
         <div class="hr"></div>
-        <h3>Notices & Reporting</h3>
-        <div class="two-col">
-          <div class="soft">
-            <div class="field">
-              <label><strong>Red Notice Posting Window</strong></label>
-              <div class="two-col">
-                <div class="soft"><div class="field"><label>Start</label><input id="dlq_red_start" type="date"></div></div>
-                <div class="soft"><div class="field"><label>End (optional)</label><input id="dlq_red_end" type="date"></div></div>
-              </div>
-              <div class="row" style="margin-top:6px;">
-                <button class="btn primary" onclick="dlqICSRed()">📅 Add to Calendar</button>
-              </div>
-            </div>
-          </div>
-          <div class="soft">
-            <div class="field">
-              <label><strong>Credit Bureau Report Submission</strong></label>
-              <div class="field"><label>Report Date</label><input id="dlq_credit_date" type="date"></div>
-              <div class="row" style="margin-top:6px;">
-                <button class="btn primary" onclick="dlqICSCredit()">📅 Add to Calendar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-        <h3>Owner Notification (Tracker)</h3>
-        <div class="check">
-          <input id="dlq_owner_informed" type="checkbox" onchange="dlqOwnerToggle()">
-          <label for="dlq_owner_informed">Owner informed of non-payment in tracker</label>
-        </div>
-        <div class="two-col">
-          <div class="soft"><div class="field"><label>Informed On</label><input id="dlq_owner_date" type="date"></div></div>
-          <div class="soft"><div class="field"><label>Tracker Link (optional)</label><input id="dlq_owner_link" type="text" placeholder="https://…"></div></div>
-        </div>
-
-        <div class="hr"></div>
+        <h3>Outputs</h3>
         <div class="row">
           <button class="btn primary" onclick="dlqGenerate()">Generate</button>
           <button class="btn" onclick="copyOut('dlq_out')">Copy</button>
-          <button class="btn" onclick="byId('dlq_out').value=''">Clear</button>
+          <button class="btn" onclick="dlqClear()">Clear</button>
         </div>
-        <div class="field"><label>Delinquency Comment</label><textarea id="dlq_out" readonly></textarea></div>
+        <div class="field"><label>Owner Handoff</label><textarea id="dlq_out" readonly style="min-height:160px"></textarea></div>
       </div>
 
-      <!-- ========== Stale Listing (DOM + downloads) ========== -->
+      <!-- ========== Stale Listing ========== -->
       <div id="viewListings" class="view-pane hidden">
         <h2>Stale Listing • Weekly Owner Report</h2>
-        <p class="note">For units &gt; 14 days no apps or ≥ 30 days no approved. Drafts go to EPM first.</p>
+        <p class="note">For any unit &gt; 14 days w/ no apps OR ≥ 30 days with no approved applicants. Drafts go to EPM for approval before sending to owner.</p>
 
         <div class="hr"></div>
         <h3>Listing Details</h3>
         <div class="two-col">
           <div class="soft">
-            <div class="field"><label>Property Address</label><input id="sl_address" type="text" placeholder="123 Main St, City ST"></div>
+            <div class="field"><label>Property Address</label><input id="sl_address" type="text"></div>
             <div class="field"><label>Owner Name (optional)</label><input id="sl_owner" type="text"></div>
-            <div class="field"><label>Date Listed</label><input id="sl_listed" type="date" onchange="slCalcDOM()"></div>
+            <div class="field"><label>Date Listed</label><input id="sl_listed" type="date" onchange="sl_calcDOM()"></div>
             <div class="field"><label>List Rent (USD)</label><input id="sl_rent" type="text" placeholder="$1,895"></div>
           </div>
           <div class="soft">
-            <div class="field"><label>Days on Market (DOM)</label><input id="sl_dom" type="number" readonly placeholder="auto"></div>
-            <div class="row"><button class="btn" onclick="slCalcDOM()">Recalculate DOM</button></div>
+            <div class="field"><label>Days on Market (DOM)</label><input id="sl_dom" type="number" placeholder="auto" readonly></div>
+            <div class="row"><button type="button" class="btn" onclick="sl_calcDOM()">Recalculate DOM</button></div>
             <div class="field"><label>Unit/Notes ID (optional)</label><input id="sl_unitid" type="text" placeholder="Buildium Unit # or WO #"></div>
           </div>
         </div>
 
         <div class="hr"></div>
-        <h3>Applications & Showings (7d)</h3>
+        <h3>Applications & Showings</h3>
         <div class="two-col">
           <div class="soft">
             <div class="field"><label>New Apps</label><input id="sl_apps_new" type="number" min="0" value="0"></div>
@@ -555,25 +370,8 @@
             <div class="field"><label>Declined</label><input id="sl_apps_declined" type="number" min="0" value="0"></div>
           </div>
           <div class="soft">
-            <div class="field"><label>Showings</label><input id="sl_showings" type="number" min="0" value="0"></div>
-            <div class="field"><label>Feedback</label><input id="sl_feedback" type="text" placeholder="e.g., Price high / Needs photos"></div>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-        <h3>Market Data & Actions</h3>
-        <div class="two-col">
-          <div class="soft">
-            <div class="field"><label>Median</label><input id="sl_med" type="text" placeholder="$1,850"></div>
-            <div class="field"><label>Range Low</label><input id="sl_low" type="text" placeholder="$1,700"></div>
-            <div class="field"><label>Range High</label><input id="sl_high" type="text" placeholder="$2,050"></div>
-          </div>
-          <div class="soft">
-            <div class="field"><label>Recommendation</label><input id="sl_reco" type="text" placeholder="Price adj. / concession / photo refresh"></div>
-            <div class="row" style="margin-top:6px;">
-              <a class="btn" href="https://propertywize.managebuilding.com/manager/public/authentication/login?returnUrl=%2Fmanager%2Fapp%2Fdraft-leases%2Fdraft%2F101559%2Fsummary%3FopenSignModal%3Dtrue%26signatureRequestId%3D7cd1654a-b69c-4b35-ab4f-b1580df7a6df" target="_blank" rel="noopener">Open Buildium</a>
-              <a class="btn" href="https://www.rentometer.com/" target="_blank" rel="noopener">Open Rentometer</a>
-            </div>
+            <div class="field"><label>Showings (last 7 days)</label><input id="sl_showings" type="number" min="0" value="0"></div>
+            <div class="field"><label>Feedback (short)</label><input id="sl_feedback" type="text" placeholder="Price high / Needs photos"></div>
           </div>
         </div>
 
@@ -583,251 +381,198 @@
           <button class="btn primary" onclick="slGenerate()">Generate Owner Report</button>
           <button class="btn" onclick="copyOut('sl_out')">Copy Email Body</button>
         </div>
-        <div class="row" style="margin-top:6px;">
-          <button class="btn" onclick="downloadTxt('sl_out','stale-listing-report')">Download .txt</button>
-          <button class="btn" onclick="downloadCsvSL()">Download .csv</button>
-          <button class="btn" onclick="downloadEmlSL()">Download .eml</button>
-        </div>
-        <div class="field"><label>Owner Report / Email Body</label><textarea id="sl_out" readonly></textarea></div>
+        <div class="field"><label>Owner Report / Email Body</label><textarea id="sl_out" readonly style="min-height:200px"></textarea></div>
 
         <div class="hr"></div>
         <h3>Handoff</h3>
-        <div class="row"><button class="btn" onclick="copyOut('sl_handoff', buildSLHandoff())">Copy Handoff Comment</button></div>
+        <div class="row"><button type="button" class="btn" onclick="sl_copy('sl_handoff')">Copy Handoff Comment</button></div>
         <div class="field"><textarea id="sl_handoff" readonly></textarea></div>
       </div>
+
     </section>
   </div>
 
-  <footer>© 2025 PropertyWize — v4 full single-file build</footer>
+  <footer>© 2025 PropertyWize • This single-file tool runs entirely in your browser.</footer>
 </div>
 
 <script>
-/* ===== Helpers ===== */
-function byId(id){return document.getElementById(id)}
-function val(id){const el=byId(id);return el?(el.value||'').trim():''}
-function copyOut(id, text){const el=byId(id); if(!el) return; if(typeof text==='string') el.value=text; const data=el.value||''; if(navigator.clipboard?.writeText) navigator.clipboard.writeText(data)}
-function clearFields(inputs=[], checks=[], outId){inputs.forEach(i=>{const el=byId(i); if(el){ if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; }}); checks.forEach(c=>{const el=byId(c); if(el) el.checked=false}); if(outId){const o=byId(outId); if(o) o.value=''}}
+/* ---------- utilities ---------- */
+function showPane(id){
+  document.querySelectorAll('.view-pane').forEach(p=>p.classList.add('hidden'));
+  const t = document.getElementById(id);
+  if(t) t.classList.remove('hidden');
+  try{ localStorage.setItem('pw_role_pane', id);}catch(_){}
+}
 
-/* ===== Role switcher (left pills) ===== */
-(function(){
-  function hideAll(){document.querySelectorAll('.view-pane').forEach(p=>p.classList.add('hidden'))}
-  function show(target){const pane=byId(target); if(pane){pane.classList.remove('hidden')}}
-  document.querySelectorAll('#rolePicker input[name="role"]').forEach(r=>{
-    r.addEventListener('change',e=>{ const t=e.target.dataset.target; if(!t) return; hideAll(); show(t); try{localStorage.setItem('pw_role',e.target.value)}catch(_){}; });
+/* ---------- nav wiring ---------- */
+document.querySelectorAll('#rolePicker input[name="role"]').forEach(r=>{
+  r.addEventListener('change', e=>{
+    const id = e.target.dataset.target;
+    if(id) showPane(id);
   });
-  let role='maintenance'; try{role=localStorage.getItem('pw_role')||'maintenance'}catch(_){}
-  const radio=document.querySelector(`#rolePicker input[value="${role}"]`)||document.querySelector('#rolePicker input[value="maintenance"]');
-  if(radio){radio.checked=true; hideAll(); show(radio.dataset.target)}
+});
+
+/* restore last pane (default Maintenance) */
+(function(){
+  const saved = localStorage.getItem('pw_role_pane') || 'viewMaintenance';
+  const match = document.querySelector(`#rolePicker input[data-target="${saved}"]`);
+  if(match){ match.checked = true; showPane(saved); }
+  else { showPane('viewMaintenance'); }
 })();
 
-/* ===== Maintenance (full) ===== */
+/* ---------- SMART INTAKE (Maintenance) ---------- */
+document.getElementById('si_continue').addEventListener('click', ()=>{
+  const emergency  = val('#si_emergency') === 'Yes';
+  const delinquent = val('#si_delinquent') === 'Yes';
+  const warranty   = val('#si_warranty') === 'Yes';
+  const ownerDoes  = val('#si_ownerMaint') === 'Yes';
+  const recall     = val('#si_recall') === 'Yes';
+  const isAppl     = val('#si_appliance') === 'Yes';
+
+  let target = 'viewMaintenance';
+  if(isAppl){ target = 'viewAppliance'; }
+  else if(delinquent){ target = 'viewDelinquency'; }
+  else { target = 'viewMaintenance'; }
+
+  /* pre-fill Owner Plan when applicable */
+  if(target==='viewMaintenance'){
+    const plan = document.getElementById('mnt_plan');
+    if(recall) plan.value = 'recall';
+    else if(ownerDoes) plan.value = 'owner-does';
+    else if(warranty) plan.value = 'warranty';
+    else plan.value = 'pw-standard';
+  }
+
+  selectNavByTarget(target);
+  showPane(target);
+  document.getElementById(target).scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+document.getElementById('si_clear').addEventListener('click', ()=>{
+  ['#si_emergency','#si_ownerMaint','#si_delinquent','#si_recall','#si_warranty','#si_appliance']
+    .forEach(s=>document.querySelector(s).value='No');
+});
+
+function selectNavByTarget(target){
+  const r = document.querySelector(`#rolePicker input[data-target="${target}"]`);
+  if(r) r.checked = true;
+}
+
+function val(sel){ return document.querySelector(sel)?.value || ''; }
+
+/* ---------- Maintenance handoff ---------- */
+function mntPlanChange(){ /* hook for future behavior */ }
 function mntGenerate(){
-  const fyiSel = byId('mnt_fyi');
-  const fyi = fyiSel ? Array.from(fyiSel.selectedOptions).map(o=>o.value).join(', ') : '';
-  const lines = [];
-  lines.push('MAINTENANCE — HANDOFF');
-  lines.push(`WO: ${val('mnt_wo')||'—'} | Property: ${val('mnt_prop')||'—'}${val('mnt_unit')?(' #'+val('mnt_unit')):''}`);
-  lines.push(`Issue: ${val('mnt_issue')||'—'} | Type: ${val('mnt_issue_type')||'—'} | Priority: ${val('mnt_pri')||'—'}`);
-  if (val('mnt_media'))  lines.push(`Media: ${val('mnt_media')}`);
-  lines.push(`Vendor: ${val('mnt_vendor')||'—'} | NTE: ${val('mnt_nte')||'—'}`);
-  lines.push(`Owner Plan: ${val('mnt_plan')||'—'} | Approval: ${val('mnt_approval')||'—'}`);
-  lines.push(`Tenant Responsibility: ${val('mnt_tenant_resp')||'—'}`);
-  if (val('mnt_chargeback')) lines.push(`Chargeback Plan: ${val('mnt_chargeback')}`);
-  lines.push(`Lease Violation: ${val('mnt_violation')||'No'}`);
-  if (fyi) lines.push(`FYIs: ${fyi}`);
-  if (val('mnt_notes')) lines.push(`Notes: ${val('mnt_notes')}`);
-  const intake = ['mnt_ck_int1','mnt_ck_int2','mnt_ck_int3','mnt_ck_int4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
-  const approv = ['mnt_ck_app1','mnt_ck_app2','mnt_ck_app3','mnt_ck_app4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
-  lines.push(`Checklist — Intake: ${intake}`);
-  lines.push(`Checklist — Approvals/Docs: ${approv}`);
-  byId('mnt_out').value = lines.join('\n');
+  const wo   = val('#mnt_wo');
+  const addr = val('#mnt_addr');
+  const unit = val('#mnt_unit');
+  const type = val('#mnt_issue_type');
+  const plan = val('#mnt_plan');
+  const nte  = val('#mnt_nte');
+  const notes= val('#mnt_notes');
+  const out = [
+    `HANDOFF — Maintenance`,
+    `WO: ${wo||'TBD'} • ${addr}${unit?(' #'+unit):''}`,
+    `Type: ${type||'n/a'} • Plan: ${plan||'n/a'} • NTE: ${nte||'n/a'}`,
+    notes?`Notes: ${notes}`:'',
+    ''
+  ].filter(Boolean).join('\n');
+  setOut('mnt_out', out);
 }
-function mntClear(){
-  const inputs = ['mnt_wo','mnt_prop','mnt_unit','mnt_issue','mnt_issue_type','mnt_pri','mnt_media','mnt_vendor','mnt_nte','mnt_plan','mnt_approval','mnt_tenant_resp','mnt_chargeback','mnt_violation','mnt_notes'];
-  inputs.forEach(id=>{const el = byId(id); if (!el) return; if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';});
-  ['mnt_ck_int1','mnt_ck_int2','mnt_ck_int3','mnt_ck_int4','mnt_ck_app1','mnt_ck_app2','mnt_ck_app3','mnt_ck_app4'].forEach(id=>{ const cb=byId(id); if(cb) cb.checked=false;});
-  const fyiSel = byId('mnt_fyi'); if (fyiSel) Array.from(fyiSel.options).forEach(o=>o.selected=false);
-  const out = byId('mnt_out'); if(out) out.value='';
-}
+function mntClear(){ ['#mnt_wo','#mnt_addr','#mnt_unit','#mnt_issue_type','#mnt_plan','#mnt_nte','#mnt_notes','#mnt_docs','#mnt_vendor'].forEach(s=>{const el=document.querySelector(s); if(el){el.value='';}}); setOut('mnt_out',''); }
 
-/* ===== Appliance ===== */
-function buildAppliance(){
-  const lines=[];
-  lines.push('APPLIANCE TICKET');
-  lines.push(`WO: ${val('ap_wo')||'—'} | Prop: ${val('ap_prop')||'—'} | Unit: ${val('ap_unit')||'—'}`);
-  lines.push(`Tenant: ${val('ap_tenant')||'—'}`);
-  lines.push(`Type: ${val('ap_type')||'—'} | Model: ${val('ap_model')||'—'}`);
-  if (val('ap_sym'))    lines.push(`Symptoms: ${val('ap_sym')}`);
-  if (val('ap_photos')) lines.push(`Photos: ${val('ap_photos')}`);
-  if (val('ap_notes'))  lines.push(`Notes: ${val('ap_notes')}`);
-  return lines.join('\n');
-}
-
-/* ===== Finance base ===== */
-function buildFinance(){
-  const checks=['fin_ck1','fin_ck2','fin_ck3','fin_ck4'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
-  return [
-    'FINANCE INTAKE',
-    `WO: ${val('fin_wo')||'—'} | Vendor: ${val('fin_vendor')||'—'} | Amount: ${val('fin_amt')||'—'}`,
-    `Notes: ${val('fin_notes')||'—'}`,
-    `Verification: ${checks}`
+/* ---------- Appliance handoff ---------- */
+document.getElementById('ap_si_continue').addEventListener('click', ()=>{
+  // If not actually an appliance, bounce them back to Maintenance
+  if(val('#ap_si_yes')==='No'){ selectNavByTarget('viewMaintenance'); showPane('viewMaintenance'); }
+});
+function apGenerate(){
+  const out = [
+    'HANDOFF — Appliance',
+    `WO: ${val('#ap_wo')||'TBD'} • ${val('#ap_addr')}${val('#ap_unit')?(' #'+val('#ap_unit')):''}`,
+    `Appliance: ${val('#ap_type')||'n/a'} • Warranty: ${val('#ap_warranty')||'No'}`,
+    `Tenant: ${val('#ap_tenant')||'n/a'}`,
+    `Issue: ${val('#ap_issue')||'n/a'}`,
+    ''
   ].join('\n');
+  setOut('ap_out', out);
 }
-/* Water Bills block */
-function buildWaterBill(){
-  const cks=['wb_ck1','wb_ck2','wb_ck3'].map(id=>byId(id)?.checked?'✓':'✗').join(' ');
-  return [
-    '— WATER BILL —',
-    `Property: ${val('wb_prop')||'—'}  |  Period: ${val('wb_start')||'—'} → ${val('wb_end')||'—'}`,
-    `Account: ${val('wb_acct')||'—'}  |  Amount: ${val('wb_amt')||'—'}`,
-    `Bill: ${val('wb_link')||'—'}`,
-    `Allocate: ${val('wb_alloc')||'—'} | Rebill: ${val('wb_rebill')||'—'}`,
-    `Owner Plan: ${val('wb_plan')||'—'} | Notes: ${val('wb_notes')||'—'}`,
-    `Pay: ${val('wb_method')||'—'} on ${val('wb_paydate')||'—'} | Checks: ${cks}`
-  ].join('\n');
-}
+function apClear(){ ['#ap_wo','#ap_addr','#ap_unit','#ap_tenant','#ap_type','#ap_warranty','#ap_issue'].forEach(s=>{const el=document.querySelector(s); if(el){el.value='';}}); setOut('ap_out',''); }
 
-/* ===== Non-Maintenance ===== */
-function buildNonMaint(){
-  return [
+/* ---------- Finance ---------- */
+function fiGenerate(){
+  const out = [
+    'FINANCE — Review',
+    `Ref: ${val('#fi_ref')||'n/a'} • Vendor: ${val('#fi_vendor')||'n/a'} • Amount: ${val('#fi_amt')||'n/a'}`,
+    `Checks:`,
+    ` - Scope matches WO: ${document.getElementById('fi_ck_1').checked?'Yes':'No'}`,
+    ` - Tax & totals correct: ${document.getElementById('fi_ck_2').checked?'Yes':'No'}`,
+    ` - Backups attached: ${document.getElementById('fi_ck_3').checked?'Yes':'No'}`,
+    ` - Payee verified: ${document.getElementById('fi_ck_4').checked?'Yes':'No'}`,
+    val('#fi_notes')?('\nNotes: '+val('#fi_notes')):'',
+    ''
+  ].join('\n');
+  setOut('fi_out', out);
+}
+function fiClear(){ ['#fi_ref','#fi_vendor','#fi_amt','#fi_notes'].forEach(s=>{const el=document.querySelector(s); if(el){el.value='';}}); ['fi_ck_1','fi_ck_2','fi_ck_3','fi_ck_4'].forEach(id=>document.getElementById(id).checked=false); setOut('fi_out',''); }
+
+/* ---------- Non-Maintenance Bill ---------- */
+function nbGenerate(){
+  const out = [
     'HANDOFF — Non-Maintenance Bill',
-    `Vendor: ${val('nm_vendor')||'—'} | Amount: ${val('nm_amt')||'—'} | Bill#: ${val('nm_bill')||'—'}`,
-    `Route: ${val('nm_to')||'—'} | Due: ${val('nm_due')||'—'}`,
-    `Ref: ${val('nm_ref')||'—'}`,
-    `Notes: ${val('nm_notes')||'—'}`
+    `Bill: ${val('#nb_bill')||'n/a'} • Vendor: ${val('#nb_vendor')||'n/a'} • Amount: ${val('#nb_amt')||'n/a'}`,
+    `Tags: ${val('#nb_tags')||'n/a'} • Due: ${val('#nb_due')||'n/a'}`,
+    val('#nb_notes')?('Notes: '+val('#nb_notes')):'',
+    `Notify: ${val('#nb_notify')||'n/a'}`,
+    ''
   ].join('\n');
+  setOut('nb_out', out);
 }
+function nbClear(){ ['#nb_bill','#nb_vendor','#nb_amt','#nb_notes','#nb_tags','#nb_due','#nb_notify'].forEach(s=>{const el=document.querySelector(s); if(el){el.value='';}}); setOut('nb_out',''); }
 
-/* ===== Delinquency (with ICS + MTM) ===== */
-function dlqAllChecked(){return ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].every(id=>byId(id)?.checked)}
+/* ---------- Delinquency ---------- */
 function dlqGenerate(){
-  if(!dlqAllChecked()){ alert('Please complete the checklist before generating.'); return; }
-  const lines=[];
-  lines.push(`DELINQUENCY — ${val('dlq_tenant')||'[Tenant]'} | ${val('dlq_address')||'[Address]'}`);
-  lines.push(`Balances — Rent: ${val('dlq_rent')||'$0'} • Late/Court: ${val('dlq_fees')||'$0'} • Utilities: ${val('dlq_util')||'$0'} • Misc: ${val('dlq_misc')||'$0'}`);
-  lines.push(`Last Payment: ${val('dlq_lastpay')||'—'} | Last Comm: ${val('dlq_lastcomm')||'—'}`);
-  lines.push(`FTP: ${val('dlq_ftp')||'—'} | Court: ${val('dlq_court')||'—'} | Judgment: ${val('dlq_judgment')||'—'}`);
-  lines.push(`Eviction: ${val('dlq_eviction')||'—'} ${val('dlq_noevict')?('(reason: '+val('dlq_noevict')+')'):''}`);
-  lines.push(`Lease End: ${val('dlq_lease')||'—'} | Last PW Action: ${val('dlq_lastaction')||'—'}`);
-  lines.push(`Owner informed on: ${val('dlq_owner_date')||'—'} ${val('dlq_owner_link')?('| '+val('dlq_owner_link')):''}`);
-  byId('dlq_out').value=lines.join('\n');
-}
-function dlqOwnerToggle(){ const cb=byId('dlq_owner_informed'), d=byId('dlq_owner_date'); if(cb?.checked && d && !d.value){ const t=new Date(); d.value=t.toISOString().slice(0,10); } }
-/* ICS helpers */
-function icsDate(d){const t=new Date(d); if(isNaN(t)) return ''; const m=('0'+(t.getMonth()+1)).slice(-2), day=('0'+t.getDate()).slice(-2); return ''+t.getFullYear()+m+day;}
-function downloadICS(summary, description, startYMD, endYMD){
-  const lines=[
-    'BEGIN:VCALENDAR','VERSION:2.0','CALSCALE:GREGORIAN','PRODID:-//PropertyWize//Tool//EN',
-    'BEGIN:VEVENT',
-    'UID:'+(Date.now())+'@propertywize',
-    'DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z'),
-    'SUMMARY:'+summary,
-    'DESCRIPTION:'+(description||'').replace(/\n/g,'\\n'),
-    'DTSTART;VALUE=DATE:'+startYMD,
-    'DTEND;VALUE=DATE:'+endYMD,
-    'END:VEVENT','END:VCALENDAR'
-  ].join('\r\n');
-  const blob=new Blob([lines],{type:'text/calendar;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=summary.replace(/\s+/g,'_')+'.ics';
-  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
-}
-function dlqICSRed(){ const s=val('dlq_red_start'); if(!s){alert('Set Red Notice start date'); return;} const e=val('dlq_red_end')||s; downloadICS('Red Notice Posting Window', `Tenant: ${val('dlq_tenant')||''} — ${val('dlq_address')||''}`, icsDate(s), icsDate(e)); }
-function dlqICSCredit(){ const d=val('dlq_credit_date'); if(!d){alert('Set Credit Report date'); return;} const end=icsDate(new Date(new Date(d).getTime()+86400000).toISOString().slice(0,10)); downloadICS('Credit Report Submission', `Tenant: ${val('dlq_tenant')||''}`, icsDate(d), end); }
-
-/* ===== Stale Listing ===== */
-function slCalcDOM(){ const d=val('sl_listed'); if(!d){byId('sl_dom').value=''; return;} const dom=Math.max(0, Math.round((Date.now()-new Date(d).getTime())/86400000)); byId('sl_dom').value=dom; }
-function slGenerate(){
-  slCalcDOM();
-  const lines=[];
-  lines.push('Owner Weekly Update — Applications Summary');
-  lines.push(`Property: ${val('sl_address')||'—'} | Owner: ${val('sl_owner')||'—'}`);
-  lines.push(`Listed: ${val('sl_listed')||'—'} | DOM: ${val('sl_dom')||'—'} | Rent: ${val('sl_rent')||'—'}`);
-  lines.push(`Apps — New:${val('sl_apps_new')||0} Pending:${val('sl_apps_pending')||0} Approved:${val('sl_apps_approved')||0} Declined:${val('sl_apps_declined')||0}`);
-  lines.push(`Showings(7d): ${val('sl_showings')||0} | Feedback: ${val('sl_feedback')||'—'}`);
-  lines.push(`Market — Median ${val('sl_med')||'—'} | Range ${val('sl_low')||'—'}–${val('sl_high')||'—'}`);
-  if(val('sl_reco')) lines.push(`Recommendation: ${val('sl_reco')}`);
-  byId('sl_out').value=lines.join('\n');
-}
-function buildSLHandoff(){
-  return [
-    'Handoff — Stale Listing',
-    `Property: ${val('sl_address')||'—'} | Unit/ID: ${val('sl_unitid')||'—'}`,
-    `DOM: ${val('sl_dom')||'—'} | Rent: ${val('sl_rent')||'—'}`,
-    `Action: ${val('sl_reco')||'—'}`
+  const out = [
+    'DELINQUENCY — Handoff',
+    `Property: ${val('#dlq_prop')||'n/a'}`,
+    `Tenant: ${val('#dlq_tenant')||'n/a'} • Balance: ${val('#dlq_bal')||'n/a'}`,
+    `Status: ${val('#dlq_status')||'n/a'}`,
+    val('#dlq_notes')?('Notes: '+val('#dlq_notes')):'',
+    ''
   ].join('\n');
+  setOut('dlq_out', out);
 }
-/* Downloads */
-function downloadTxt(textareaId, base){ const txt=val(textareaId); const blob=new Blob([txt||''],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(base||'report')+'.txt'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0); }
-function downloadCsvSL(){
-  const rows=[
-    ['Property','Owner','Listed','DOM','Rent','Apps_New','Pending','Approved','Declined','Showings','Feedback','Median','Low','High','Recommendation'],
-    [val('sl_address'),val('sl_owner'),val('sl_listed'),val('sl_dom'),val('sl_rent'),val('sl_apps_new'),val('sl_apps_pending'),val('sl_apps_approved'),val('sl_apps_declined'),val('sl_showings'),val('sl_feedback'),val('sl_med'),val('sl_low'),val('sl_high'),val('sl_reco')]
-  ];
-  const csv=rows.map(r=>r.map(x=>(''+(x??'')).replace(/"/g,'""')).map(x=>`"${x}"`).join(',')).join('\r\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='stale-listing-summary.csv';
-  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
+function dlqClear(){ ['#dlq_prop','#dlq_tenant','#dlq_bal','#dlq_notes'].forEach(s=>{const el=document.querySelector(s); if(el){el.value='';}}); setOut('dlq_out',''); }
+
+/* ---------- Stale Listing ---------- */
+function sl_calcDOM(){
+  const d = document.getElementById('sl_listed').value;
+  if(!d) return;
+  const then = new Date(d), now = new Date();
+  const ms = now - then; const days = Math.max(0, Math.round(ms/86400000));
+  document.getElementById('sl_dom').value = days;
 }
-function downloadEmlSL(){
-  const to='[EPM Name] <epm@propertywize.com>';
-  const subject=`Weekly Applications Summary — ${val('sl_address')||''}`;
-  const body=val('sl_out')||'';
-  const eml=[
-    'From: PropertyWize Operations <ops@propertywize.com>',
-    'To: '+to,
-    'Subject: '+subject,
-    'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    body
-  ].join('\r\n');
-  const blob=new Blob([eml],{type:'message/rfc822'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='owner-weekly-update.eml';
-  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
+function slGenerate(){
+  const out = [
+    'STALE LISTING — Weekly Owner Report',
+    `${val('#sl_address')||'Property'} (${val('#sl_unitid')||'n/a'})`,
+    `Listed: ${val('#sl_listed')||'n/a'} • DOM: ${val('#sl_dom')||'n/a'} • Rent: ${val('#sl_rent')||'n/a'}`,
+    `Apps: New ${val('#sl_apps_new')||0} • Pending ${val('#sl_apps_pending')||0} • Approved ${val('#sl_apps_approved')||0} • Declined ${val('#sl_apps_declined')||0}`,
+    `Showings (7d): ${val('#sl_showings')||0} • Feedback: ${val('#sl_feedback')||'n/a'}`,
+    ''
+  ].join('\n');
+  setOut('sl_out', out);
+}
+function sl_copy(id){ copyOut(id); }
+
+/* ---------- helpers ---------- */
+function setOut(id, text){ const el=document.getElementById(id); if(el){ el.value=text; el.scrollTop=0; } }
+function copyOut(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.select();
+  try{ navigator.clipboard.writeText(el.value); }catch(_){}
 }
 </script>
- <script>
-(function() {
-
-  // Clear dropdowns
-  window.pw_intakeClear = function() {
-    ['iw_emergency', 'iw_delinquent', 'iw_warranty', 'iw_ownerSelfMaint', 'iw_repeat12', 'iw_appliance']
-      .forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.selectedIndex = 0;
-      });
-  };
-
-  // Core routing function
-  window.pw_intakeRoute = function() {
-    const v = id => (document.getElementById(id)?.value || 'No');
-
-    const emergency  = v('iw_emergency') === 'Yes';
-    const delinquent = v('iw_delinquent') === 'Yes';
-    const warranty   = v('iw_warranty') === 'Yes';
-    const ownerSelf  = v('iw_ownerSelfMaint') === 'Yes';
-    const repeat12   = v('iw_repeat12') === 'Yes';
-    const appliance  = v('iw_appliance') === 'Yes';
-
-    // Function to switch to the correct pane
-    function gotoPane(targetId) {
-      document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-      const pane = document.getElementById(targetId);
-      if (pane) pane.classList.remove('hidden');
-      const radio = document.querySelector(`input[name="role"][data-target="${targetId}"]`);
-      if (radio) radio.checked = true;
-      window.scrollTo({ top: 0, behavior: 'smooth' }); // auto-scroll to top
-    }
-
-    // === Routing logic ===
-    if (emergency) return gotoPane('viewMaintenance');
-    if (delinquent) return gotoPane('viewDelinquency');
-    if (appliance) return gotoPane('viewAppliance');
-    if (warranty || ownerSelf || repeat12) return gotoPane('viewMaintenance');
-    gotoPane('viewMaintenance'); // default
-  };
-
-})();
-</script> 
 </body>
 </html>
