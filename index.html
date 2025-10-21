@@ -787,5 +787,48 @@ function downloadEmlSL(){
   document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
 }
 </script>
+ <script>
+(function() {
+
+  // Clear dropdowns
+  window.pw_intakeClear = function() {
+    ['iw_emergency', 'iw_delinquent', 'iw_warranty', 'iw_ownerSelfMaint', 'iw_repeat12', 'iw_appliance']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.selectedIndex = 0;
+      });
+  };
+
+  // Core routing function
+  window.pw_intakeRoute = function() {
+    const v = id => (document.getElementById(id)?.value || 'No');
+
+    const emergency  = v('iw_emergency') === 'Yes';
+    const delinquent = v('iw_delinquent') === 'Yes';
+    const warranty   = v('iw_warranty') === 'Yes';
+    const ownerSelf  = v('iw_ownerSelfMaint') === 'Yes';
+    const repeat12   = v('iw_repeat12') === 'Yes';
+    const appliance  = v('iw_appliance') === 'Yes';
+
+    // Function to switch to the correct pane
+    function gotoPane(targetId) {
+      document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+      const pane = document.getElementById(targetId);
+      if (pane) pane.classList.remove('hidden');
+      const radio = document.querySelector(`input[name="role"][data-target="${targetId}"]`);
+      if (radio) radio.checked = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // auto-scroll to top
+    }
+
+    // === Routing logic ===
+    if (emergency) return gotoPane('viewMaintenance');
+    if (delinquent) return gotoPane('viewDelinquency');
+    if (appliance) return gotoPane('viewAppliance');
+    if (warranty || ownerSelf || repeat12) return gotoPane('viewMaintenance');
+    gotoPane('viewMaintenance'); // default
+  };
+
+})();
+</script> 
 </body>
 </html>
