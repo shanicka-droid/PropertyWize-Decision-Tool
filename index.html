@@ -997,9 +997,16 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
 </div>
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
 <div id="viewListings" class="view-pane hidden">
+
   <h2>Stale Listing • Weekly Owner Report</h2>
-  <p class="note">For any unit &gt; 14 days with no apps OR ≥ 30 days with no approved applicants. Drafts go to EPM for approval before sending to owner.  
+
+  <p class="note">
+    For any unit &gt; 14 days with no apps OR ≥ 30 days with no approved applicants.
+    Drafts go to EPM for approval before sending to owner.
+  </p>
+
   <div class="hr"></div>
+
   <h3>Listing Details</h3>
   <div class="two-col">
     <div class="soft">
@@ -1016,6 +1023,7 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
   </div>
 
   <div class="hr"></div>
+
   <h3>Applications & Showings</h3>
   <div class="two-col">
     <div class="soft">
@@ -1029,40 +1037,42 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
       <div class="field"><label>Feedback (short)</label><input id="sl_feedback" type="text" placeholder="e.g., Price high / Needs photos"></div>
     </div>
   </div>
-  
-
- <div class="row">
-  <a class="btn"
-     id="sl_buildium"
-     href="https://propertywize.managebuilding.com/manager/public/authentication/login?returnUrl=%2Fmanager%2Fapp%2Fdraft-leases%2Fdraft%2F101559%2Fsummary%3FopenSignModal%3Dtrue%26signatureRequestId%3D7cd1654a-b69c-4b35-ab4f-b1580df7a6df"
-     target="_blank" rel="noopener">Open Buildium</a>
-
-  <a class="btn"
-     href="https://www.rentometer.com/"
-     target="_blank" rel="noopener">Open Rentometer</a>
-</div>
-    </div>
-  </div>
-  <div class="two-col">
-  <div class="soft">
-    <div class="field">
-      <label>Median</label>
-      <input id="sl_med" type="text" placeholder="$1,850">
-    </div>
-    <div class="field">
-      <label>Range Low</label>
-      <input id="sl_low" type="text" placeholder="$1,700">
-    </div>
-    <div class="field">
-      <label>Range High</label>
-      <input id="sl_high" type="text" placeholder="$2,050">
-    </div>
-  </div>
-
-
-</div>
 
   <div class="hr"></div>
+
+  <div class="row">
+    <a class="btn"
+       id="sl_buildium"
+       href="https://propertywize.managebuilding.com/manager/public/authentication/login?returnUrl=%2Fmanager%2Fapp%2Fdraft-leases%2Fdraft%2F101559%2Fsummary%3FopenSignModal%3Dtrue%26signatureRequestId%3D7cd1654a-b69c-4b35-ab4f-b1580df7a6df"
+       target="_blank" rel="noopener">Open Buildium</a>
+
+    <a class="btn"
+       href="https://www.rentometer.com/"
+       target="_blank" rel="noopener">Open Rentometer</a>
+  </div>
+
+  <div class="hr"></div>
+
+  <h3>Market Data</h3>
+  <div class="two-col">
+    <div class="soft">
+      <div class="field">
+        <label>Median</label>
+        <input id="sl_med" type="text" placeholder="$1,850">
+      </div>
+      <div class="field">
+        <label>Range Low</label>
+        <input id="sl_low" type="text" placeholder="$1,700">
+      </div>
+      <div class="field">
+        <label>Range High</label>
+        <input id="sl_high" type="text" placeholder="$2,050">
+      </div>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+
   <h3>Pre-Send Checklist</h3>
   <details open>
     <summary><strong>Confirm before drafting</strong></summary>
@@ -1072,23 +1082,26 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
     <div class="check"><input id="sl_ck_epm" type="checkbox"><label for="sl_ck_epm">Sending to EPM for approval first</label></div>
   </details>
 
-<div class="hr"></div>
-<h3>Outputs</h3>
-<div class="row">
-  <button type="button" class="btn primary" id="sl_btnGen">Generate Owner Report</button>
-  <button type="button" class="btn" id="sl_btnCopy">Copy Email Body</button>
-</div>
-<div class="row" style="margin-top:6px;">
-  <button type="button" class="btn" id="sl_btnTxt">Download Report (.txt)</button>
-  <button type="button" class="btn" id="sl_btnCsv">Download Summary (.csv)</button>
-  <button type="button" class="btn" id="sl_btnEml">Download EPM Draft (.eml)</button>
-</div>
+  <div class="hr"></div>
+
+  <h3>Outputs</h3>
+  <div class="row">
+    <button type="button" class="btn primary" id="sl_btnGen">Generate Owner Report</button>
+    <button type="button" class="btn" id="sl_btnCopy">Copy Email Body</button>
+  </div>
+  <div class="row" style="margin-top:6px;">
+    <button type="button" class="btn" id="sl_btnTxt">Download Report (.txt)</button>
+    <button type="button" class="btn" id="sl_btnCsv">Download Summary (.csv)</button>
+    <button type="button" class="btn" id="sl_btnEml">Download EPM Draft (.eml)</button>
+  </div>
+
   <div class="field">
     <label>Owner Report / Email Body</label>
     <textarea id="sl_out" readonly style="min-height:200px"></textarea>
   </div>
 
   <div class="hr"></div>
+
   <h3>Handoff</h3>
   <div class="row">
     <button type="button" class="btn" onclick="sl_copy('sl_handoff')">Copy Handoff Comment</button>
@@ -1096,7 +1109,7 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
   <div class="field">
     <textarea id="sl_handoff" readonly></textarea>
   </div>
-</div>
+
 </div> <!-- closes #viewListings -->
 <!-- ==== /Stale Listing VIEW ==== -->
 <!-- Plans Modal -->
