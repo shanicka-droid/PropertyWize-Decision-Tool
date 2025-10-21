@@ -1302,48 +1302,40 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
     $("#fin_note").focus(); $("#fin_note").select();
   }
 
-  // Init
-  restore(); setRole(null);
 </script>
   <script>
 (function(){
-  if (window._pwRoleSwitch) return; window._pwRoleSwitch = true;
-
-  // guarantee .hidden utility exists
-  if (!document.querySelector('style[data-pw-hidden]')) {
-    var s = document.createElement('style');
-    s.setAttribute('data-pw-hidden','');
-    s.textContent = '.hidden{display:none!important;}';
-    document.head.appendChild(s);
+  // hide all sections
+  function hideAll(){
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
   }
 
-  function show(id){
-    document.querySelectorAll('.view-pane').forEach(function(p){ p.classList.add('hidden'); });
-    var t = document.getElementById(id);
-    if (t) t.classList.remove('hidden');
-  }
-  function fallbackId(val){
-    if (!val) return null;
-    if (val === 'nonmaint') return 'viewNonMaint';
-    return 'view' + val.charAt(0).toUpperCase() + val.slice(1);
+  // show selected section
+  function setRole(role){
+    hideAll();
+    const radio = document.querySelector(`input[name="role"][value="${role}"]`);
+    const target = radio?.getAttribute('data-target');
+    if (target){
+      const pane = document.getElementById(target);
+      if (pane) pane.classList.remove('hidden');
+    }
+    try { localStorage.setItem('pw_role', role); } catch(_){}
   }
 
-  // wire pills
-  document.querySelectorAll('#rolePicker input[type="radio"][name="role"]').forEach(function(r){
-    r.addEventListener('change', function(){
-      var id = this.dataset.target || fallbackId(this.value);
-      if (id) { localStorage.setItem('pw_role', id); show(id); }
-    });
+  // set up radio button change listeners
+  document.querySelectorAll('input[name="role"]').forEach(r=>{
+    r.addEventListener('change', e => setRole(e.target.value));
   });
 
-  // initial view
-  var saved = localStorage.getItem('pw_role');
-  var initial = saved;
-  if (!initial) {
-    var checked = document.querySelector('#rolePicker input[name="role"]:checked');
-    if (checked) initial = checked.dataset.target || fallbackId(checked.value);
-  }
-  if (initial) show(initial);
+  // restore last role or default
+  (function(){
+    let role = null;
+    try { role = localStorage.getItem('pw_role'); } catch(_){}
+    if (!role) role = 'maintenance';
+    const radio = document.querySelector(`input[name="role"][value="${role}"]`) ||
+                  document.querySelector(`input[name="role"][value="maintenance"]`);
+    if (radio){ radio.checked = true; setRole(radio.value); }
+  })();
 })();
 </script>
     <script>
