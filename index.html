@@ -1344,6 +1344,15 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
     if (radio){ radio.checked = true; setRole(radio.value); }
   })();
 })();
+// Reusable text copy helper for Appliance SOP and other sections
+function copyText(id){
+  const el = document.getElementById(id);
+  if (el){
+    el.select();
+    document.execCommand('copy');
+    alert('Copied to clipboard!');
+  }
+}
 </script>
     <script>
 (function(){
