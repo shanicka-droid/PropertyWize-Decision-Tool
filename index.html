@@ -75,10 +75,12 @@ as
     <span>💵 Finance</span>
   </label>
 
-  <label class="pill">
-    <input type="radio" name="role" value="nonmaint" data-target="viewNonMaint">
-    <span>📄 Non-Maintenance Bill</span>
-  </label>
+<label class="pill">
+  <input type="radio" name="role" value="nonmaint" data-target="viewNonMaint">
+  <span>📄 Non-Maintenance Bill</span>
+</label>
+
+
 
   <label class="pill">
     <input type="radio" name="role" value="delinquency" data-target="viewDelinquency">
@@ -583,7 +585,6 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
   <div class="field"><label>Output</label><textarea id="nm_out" readonly></textarea></div>
 </div> <!-- closes #viewNonMaint -->
 <!-- ==== /Non-Maintenance Bill VIEW ==== -->
-</script>
     </div>
     <!-- ==== Delinquency Handoff (inside main card, same level as other views) ==== -->
 <div id="viewDelinquency" class="view-pane hidden">
