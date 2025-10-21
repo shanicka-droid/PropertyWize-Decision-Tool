@@ -728,265 +728,147 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
 <!-- ==== /Non-Maintenance Bill Handoff ==== -->
     </div>
     <!-- ==== Delinquency Handoff (inside main card, same level as other views) ==== -->
+<!-- ==== Delinquency Handoff (inside main card) ==== -->
 <div id="viewDelinquency" class="view-pane hidden">
-  <h2>Delinquency Handoff Tool</h2>
-  <p class="note">Summarize tenants with balances &gt; 60 days and confirm SOP steps. Complete the checklist to enable Generate.</p>
+<h2>Delinquency Handoff Tool</h2>
+<p class="note">
+Summarize tenants with balances over 60 days and confirm SOP steps.
+Complete the checklist to enable Generate.
+</p>
 
-  <div class="hr"></div>
-  <h3>✅ Pre-handoff Checklist</h3>
-  <details open id="dlq_checklist">
-    <summary><strong>Complete before Generate</strong></summary>
-    <div class="check"><input type="checkbox" id="dlq_c1"><label for="dlq_c1">Balance &gt; 30+ days verified in Buildium</label></div>
-    <div class="check"><input type="checkbox" id="dlq_c2"><label for="dlq_c2">FTP notice sent &amp; documented</label></div>
-    <div class="check"><input type="checkbox" id="dlq_c3"><label for="dlq_c3">Court status updated (outcome / judgment)</label></div>
-    <div class="check"><input type="checkbox" id="dlq_c4"><label for="dlq_c4">Eviction step set, or reason if not scheduled</label></div>
-    <div class="check"><input type="checkbox" id="dlq_c5"><label for="dlq_c5">Tenant status = <em>Collection</em> (blocks partial online payments)</label></div>
-    <div class="check"><input type="checkbox" id="dlq_c6"><label for="dlq_c6">Maintenance auto-dispatch disabled for non-emergencies if balance &gt; $500</label></div>
-  </details>
-
-  <div class="hr"></div>
-  <h3>Delinquency Details</h3>
-
-  <div class="two-col">
-    <div class="soft">
-      <div class="field"><label>Tenant name</label><input id="dlq_tenant" type="text" placeholder="e.g., Jane Doe"></div>
-      <div class="field"><label>Address</label><input id="dlq_address" type="text" placeholder="123 Main St, City, ST"></div>
-      <div class="field"><label>Rent balance</label><input id="dlq_rent" type="text" placeholder="$2,400.00"></div>
-      <div class="field">
-  <label>Late Fee / Court Charges</label>
-  <input id="dlq_fees" type="number" placeholder="Enter any late or court fees">
-</div>
-<div class="field">
-  <label>Lease End Date</label>
-  <input id="dlq_lease_end" type="text" placeholder="MM/DD/YYYY or MTM">
-  <p class="note">Enter MTM if month-to-month.</p>
-</div>
-      <div class="field"><label>Utility balance</label><input id="dlq_util" type="text" placeholder="$175.00"></div>
-      <div class="field"><label>Misc. balance</label><input id="dlq_misc" type="text" placeholder="$45.00"></div>
-      <div class="field"><label>Last payment received</label><input id="dlq_lastpay" type="text" placeholder="09/01/2025 – $500"></div>
-      <div class="field"><label>Last communication from tenant</label><input id="dlq_lastcomm" type="text" placeholder="09/20/2025 – promised payment"></div>
-    </div>
-    <div class="soft">
-      <div class="field"><label>FTP date</label><input id="dlq_ftp" type="date"></div>
-      <div class="field"><label>Court outcome</label><input id="dlq_court" type="text" placeholder="Awaiting / Continued / Won / Dismissed"></div>
-      <div class="field"><label>Judgment ordered</label><input id="dlq_judgment" type="text" placeholder="Yes – $2,100 on 10/10/2025"></div>
-      <div class="field"><label>Eviction date scheduled</label><input id="dlq_eviction" type="text" placeholder="10/28/2025 (set)"></div>
-      <div class="field"><label>Reason if no eviction scheduled</label><input id="dlq_noevict_reason" type="text" placeholder="Payment plan / Court delay / Owner hold"></div>
-      <div class="field"><label>Lease end date</label><input id="dlq_leaseend" type="date"></div>
-      <div class="field"><label>Last PW action completed</label><input id="dlq_lastaction" type="text" placeholder="FTP sent 9/25; court filing 10/01"></div>
-    </div>
-  </div>
-<!-- ===== Delinquency • Notices & Reporting ===== -->
 <div class="hr"></div>
-<h3>Notices & Reporting</h3>
+<h3>✅ Pre-handoff Checklist</h3>
+<details open id="dlq_checklist">
+<summary><strong>Complete before Generate</strong></summary>
+<div class="check"><input type="checkbox" id="dlq_c1"><label for="dlq_c1">Balance verified in Buildium</label></div>
+<div class="check"><input type="checkbox" id="dlq_c2"><label for="dlq_c2">FTP notice sent & documented</label></div>
+<div class="check"><input type="checkbox" id="dlq_c3"><label for="dlq_c3">Court status updated</label></div>
+<div class="check"><input type="checkbox" id="dlq_c4"><label for="dlq_c4">Eviction step set or reason given</label></div>
+<div class="check"><input type="checkbox" id="dlq_c5"><label for="dlq_c5">Tenant status = Collection</label></div>
+<div class="check"><input type="checkbox" id="dlq_c6"><label for="dlq_c6">Maintenance auto-dispatch disabled if $500+</label></div>
+</details>
 
-<!-- Red Notice: date range (no time) -->
-<div class="field">
-  <label><strong>Red Notice Posting Window</strong></label>
-  <div class="two-col">
-    <div class="soft">
-      <div class="field">
-        <label>Start Date</label>
-        <input id="dlq_red_start" type="date">
-      </div>
-    </div>
-    <div class="soft">
-      <div class="field">
-        <label>End Date (optional)</label>
-        <input id="dlq_red_end" type="date">
-      </div>
-    </div>
-  </div>
-  <div class="row" style="margin-top:6px;">
-    <button type="button" class="btn primary" onclick="dlq_icsRed()">📅 Add to Calendar</button>
-  </div>
+<div class="hr"></div>
+<h3>Delinquency Details</h3>
+
+<div class="two-col">
+<div class="soft">
+<div class="field"><label>Tenant name</label><input id="dlq_tenant" type="text"></div>
+<div class="field"><label>Address</label><input id="dlq_address" type="text"></div>
+<div class="field"><label>Rent balance</label><input id="dlq_rent" type="text"></div>
+<div class="field"><label>Utility balance</label><input id="dlq_util" type="text"></div>
+<div class="field"><label>Misc balance</label><input id="dlq_misc" type="text"></div>
+<div class="field"><label>Last payment received</label><input id="dlq_lastpay" type="text"></div>
+<div class="field"><label>Last communication</label><input id="dlq_lastcomm" type="text"></div>
 </div>
+
+<div class="soft">
+<div class="field"><label>FTP date</label><input id="dlq_ftp" type="date"></div>
+<div class="field"><label>Court outcome</label><input id="dlq_court" type="text"></div>
+<div class="field"><label>Judgment ordered</label><input id="dlq_judgment" type="text"></div>
+<div class="field"><label>Eviction date</label><input id="dlq_eviction" type="text"></div>
+<div class="field"><label>Reason no eviction</label><input id="dlq_noevict_reason" type="text"></div>
+<div class="field"><label>Lease end date</label><input id="dlq_leaseend" type="text"></div>
+<div class="field"><label>Last PW action</label><input id="dlq_lastaction" type="text"></div>
+</div>
+</div>
+
+<div class="row">
+<button class="btn primary" onclick="dlq_generate()">Generate</button>
+<button class="btn" onclick="dlq_copy('dlq_out')">Copy Comment</button>
+<button class="btn" onclick="dlq_clear()">Clear</button>
+</div>
+
+<div class="field">
+<label>Delinquency Comment (Buildium / Slack)</label>
+<textarea id="dlq_out" readonly></textarea>
+</div>
+
+<div class="hr"></div>
+<h3>Email Draft (Owner)</h3>
+<div class="two-col">
+<div class="soft">
+<div class="field"><label>To</label><input id="dlq_email_to" type="text" placeholder="owner@example.com"></div>
+<div class="field"><label>CC</label><input id="dlq_email_cc" type="text" placeholder="team@propertywize.com"></div>
+</div>
+<div class="soft">
+<div class="field"><label>Subject</label><input id="dlq_email_subj" type="text" placeholder="Delinquency Update – [Tenant]"></div>
+</div>
+</div>
+
+<div class="field">
+<label>Email Body</label>
+<textarea id="dlq_email_body" readonly style="min-height:160px"></textarea>
+</div>
+<div class="row"><button class="btn" onclick="dlq_copy('dlq_email_body')">Copy Email</button></div>
+
+<div class="hr"></div>
+<h3>Handoff</h3>
+<div class="field"><textarea id="dlq_handoff" readonly></textarea></div>
+<div class="row"><button class="btn" onclick="dlq_copy('dlq_handoff')">Copy Handoff</button></div>
+
 <script>
 (function(){
-  if (window._dlqNotices) return; window._dlqNotices = true;
+if(window._dlqReady) return; window._dlqReady = true;
+function g(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
+function s(id,v){var e=document.getElementById(id);if(e)e.value=v;}
+function allChecked(){return ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].every(id=>document.getElementById(id)?.checked);}
+window.dlq_copy=id=>{const e=document.getElementById(id);if(!e)return;navigator.clipboard?.writeText(e.value||'')};
 
-  // Track whether calendar exports were clicked
-  var redCalSet = false, creditCalSet = false;
+window.dlq_generate=function(){
+if(!allChecked()){alert('Complete the checklist first.');return;}
+const tenant=g('dlq_tenant')||'[Tenant]';
+const addr=g('dlq_address')||'[Address]';
+const rent=g('dlq_rent')||'$0';
+const util=g('dlq_util')||'$0';
+const misc=g('dlq_misc')||'$0';
+const last=g('dlq_lastpay')||'—';
+const comm=g('dlq_lastcomm')||'—';
+const ftp=g('dlq_ftp')||'—';
+const court=g('dlq_court')||'—';
+const judg=g('dlq_judgment')||'—';
+const ev=g('dlq_eviction')||'—';
+const reason=g('dlq_noevict_reason')||'—';
+const lease=g('dlq_leaseend')||'—';
+const act=g('dlq_lastaction')||'—';
 
-  // Helpers
-  function byId(id){ return document.getElementById(id); }
-  function val(id){ var el=byId(id); return el ? (el.value||'').trim() : ''; }
-  function fmtDisplay(d){ if(!d) return '—'; try { var t=new Date(d); return (t.getMonth()+1).toString().padStart(2,'0')+'/'+t.getDate().toString().padStart(2,'0')+'/'+t.getFullYear(); } catch(_){ return d; } }
-  function yyyymmdd(d){ var t = new Date(d); if(isNaN(t)) return ''; var m=('0'+(t.getMonth()+1)).slice(-2), day=('0'+t.getDate()).slice(-2); return ''+t.getFullYear()+m+day; }
-  function addDaysISO(d, n){ var t = new Date(d); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); }
+const summary=`Delinquency Report – ${tenant}
+Address: ${addr}
+Balances — Rent: ${rent} • Utilities: ${util} • Misc: ${misc}
+Last Payment: ${last}
+Last Communication: ${comm}
+FTP Date: ${ftp}
+Court Outcome: ${court}
+Judgment Ordered: ${judg}
+Eviction Date: ${ev}
+Reason No Eviction: ${reason}
+Lease End: ${lease}
+Last PW Action: ${act}`;
 
-  // Build ICS file (all-day; DTSTART/DTEND in local date format YYYYMMDD)
-  function makeIcs(options){
-    var lines = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//PropertyWize//Delinquency//EN',
-      'CALSCALE:GREGORIAN',
-      'BEGIN:VEVENT',
-      'UID:' + (Date.now()) + '@propertywize',
-      'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z'),
-      'SUMMARY:' + (options.summary||''),
-      'DESCRIPTION:' + (options.description||'').replace(/\n/g,'\\n'),
-      options.location ? ('LOCATION:' + options.location.replace(/\n/g,' ')) : '',
-      // All-day events use date-only, and DTEND is exclusive; add +1 day to end
-      'DTSTART;VALUE=DATE:' + (options.start),
-      'DTEND;VALUE=DATE:' + (options.end),
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].filter(Boolean).join('\r\n');
+s('dlq_out', summary);
 
-    var blob = new Blob([lines], {type:'text/calendar;charset=utf-8'});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = (options.filename || 'event') + '.ics';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
-  }
+const email=`Hello [Owner],
 
-  // Pull details from Delinquency form for descriptions
-  function tenant(){ return val('dlq_tenant') || '[Tenant]'; }
-  function address(){ return val('dlq_address') || '[Address]'; }
-  function balancesLine(){
-    var rent = val('dlq_rent')||'$0', util = val('dlq_util')||'$0', misc = val('dlq_misc')||'$0';
-    return 'Balances — Rent: ' + rent + ' • Utilities: ' + util + ' • Misc: ' + misc;
-    }
+Below is the current delinquency summary for ${tenant} at ${addr}.
 
-  // Owner informed toggle auto-date
-  window.dlq_ownerToggle = function(){
-    var cb = byId('dlq_owner_informed'), d = byId('dlq_owner_date');
-    if (cb && d && cb.checked && !d.value){
-      var today = new Date(); var iso = today.toISOString().slice(0,10);
-      d.value = iso;
-    }
-  };
+${summary}
 
-  // Red Notice: ICS (date range; all-day)
-  window.dlq_icsRed = function(){
-    var start = val('dlq_red_start'), end = val('dlq_red_end') || val('dlq_red_start');
-    if (!
-<!-- Credit Reporting: single date -->
-<div class="field">
-  <label><strong>Credit Bureau Report Submission</strong></label>
-  <div class="field">
-    <label>Report Date</label>
-    <input id="dlq_credit_date" type="date">
-  </div>
-  <div class="row" style="margin-top:6px;">
-    <button type="button" class="btn primary" onclick="dlq_icsCredit()">📅 Add to Calendar</button>
-  </div>
-</div>
+Our team has confirmed the steps above and is continuing to monitor compliance with Maryland landlord protections.
 
-<!-- Owner informed + tracker -->
-<div class="field">
-  <label><strong>Owner Notification (Tracker)</strong></label>
-  <div class="check">
-    <input id="dlq_owner_informed" type="checkbox" onchange="dlq_ownerToggle()">
-    <label for="dlq_owner_informed">Owner informed of non-payment in tracker</label>
-  </div>
-  <div class="two-col">
-    <div class="soft">
-      <div class="field">
-        <label>Informed On</label>
-        <input id="dlq_owner_date" type="date">
-      </div>
-    </div>
-    <div class="soft">
-      <div class="field">
-        <label>Tracker Link (optional)</label>
-        <input id="dlq_owner_link" type="text" placeholder="https://…">
-      </div>
-    </div>
-  </div>
-</div>
-<!-- ===== /Notices & Reporting ===== -->
-  <div class="two-col">
-    <div class="soft">
-      <div class="field"><label>Collection status in Buildium?</label>
-        <select id="dlq_collection"><option value="Yes">Yes</option><option value="No">No</option></select>
-      </div>
-    </div>
-    <div class="soft">
-      <div class="field"><label>Maintenance auto-dispatch disabled (&gt; $500)?</label>
-        <select id="dlq_maint_disable"><option value="Yes">Yes</option><option value="No">No</option></select>
-      </div>
-    </div>
-  </div>
+Best,
+PropertyWize Collections`;
+s('dlq_email_body', email);
+s('dlq_handoff', `Owner Email Sent for ${tenant} | Balance ${rent} | FTP ${ftp}`);
+};
 
-  <div class="row">
-    <button type="button" class="btn primary" onclick="dlq_generate()">Generate</button>
-    <button type="button" class="btn" onclick="dlq_copy('dlq_out')">Copy Comment</button>
-    <button type="button" class="btn" onclick="dlq_clear()">Clear</button>
-  </div>
-
-  <div class="field">
-    <label>Delinquency Comment (Buildium / Email / Slack)</label>
-    <textarea id="dlq_out" readonly></textarea>
-  </div>
-  <script>
-(function(){
-  if (window._dlqWired) return; window._dlqWired = true;
-
-  // helpers
-  function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
-  function s(id,txt){ var el=document.getElementById(id); if(el) el.value = txt; }
-  function allChecked(){
-    var ids=['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'];
-    for (var i=0;i<ids.length;i++){ var cb=document.getElementById(ids[i]); if(cb && !cb.checked) return false; }
-    return true;
-  }
-
-  // copy with fallback
-  window.dlq_copy = function(id){
-    var el=document.getElementById(id); if(!el) return;
-    var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).catch(function(){ legacy(); });
-    } else { legacy(); }
-    function legacy(){ try{ if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } }catch(_){ } }
-    try{ var b=event&&event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
-  };
-
-  // generate comment (gated by checklist)
-  window.dlq_generate = function(){
-    if(!allChecked()){ alert('Please complete the checklist before generating.'); return; }
-    var lines=[];
-    lines.push('Delinquency Report — ' + (g('dlq_tenant')||'[Tenant]'));
-    lines.push('Address: ' + (g('dlq_address')||'[Address]'));
-    lines.push('Balances — Rent: ' + (g('dlq_rent')||'$0') + '  •  Utilities: ' + (g('dlq_util')||'$0') + '  •  Misc: ' + (g('dlq_misc')||'$0'));
-    lines.push('Last Payment: ' + (g('dlq_lastpay')||'—'));
-    lines.push('Last Communication: ' + (g('dlq_lastcomm')||'—'));
-    lines.push('FTP Date: ' + (g('dlq_ftp')||'—'));
-    lines.push('Court Outcome: ' + (g('dlq_court')||'—'));
-    lines.push('Judgment Ordered: ' + (g('dlq_judgment')||'—'));
-    lines.push('Eviction Date Scheduled: ' + (g('dlq_eviction')||'—'));
-    var r=g('dlq_noevict_reason'); if(r) lines.push('Reason No Eviction Scheduled: ' + r);
-    lines.push('Lease End Date: ' + (g('dlq_leaseend')||'—'));
-    lines.push('Last PW Action: ' + (g('dlq_lastaction')||'—'));
-    lines.push('Collection Status in Buildium: ' + (g('dlq_collection')||'—'));
-    lines.push('Maintenance Auto-Dispatch Disabled (> $500): ' + (g('dlq_maint_disable')||'—'));
-    s('dlq_out', lines.join('\n'));
-  };
-
-  // clear
-  window.dlq_clear = function(){
-    ['dlq_tenant','dlq_address','dlq_rent','dlq_util','dlq_misc','dlq_lastpay','dlq_lastcomm','dlq_ftp','dlq_court','dlq_judgment','dlq_eviction','dlq_noevict_reason','dlq_leaseend','dlq_lastaction'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.value='';
-    });
-    ['dlq_collection','dlq_maint_disable'].forEach(function(id){
-      var el=document.getElementById(id); if(el && el.tagName==='SELECT') el.selectedIndex=0;
-    });
-    ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].forEach(function(id){
-      var cb=document.getElementById(id); if(cb) cb.checked=false;
-    });
-    s('dlq_out','');
-  };
+window.dlq_clear=function(){
+document.querySelectorAll('#viewDelinquency input, #viewDelinquency textarea').forEach(el=>{if(el.type!=='checkbox')el.value='';});
+document.querySelectorAll('#viewDelinquency input[type=checkbox]').forEach(c=>c.checked=false);
+};
 })();
 </script>
 </div>
 <!-- ==== /Delinquency Handoff ==== -->
-
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
 <div id="viewListings" class="view-pane hidden">
 
