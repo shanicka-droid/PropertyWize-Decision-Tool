@@ -101,7 +101,47 @@
         <span><i class="icon">🏷️</i> Stale Listing</span>
       </label>
     </nav>
+<div class="card" id="intakeWizard" style="margin-top:12px;">
+  <h3>Smart Intake (Auto-Route)</h3>
+  <p class="note">Answer these quick questions and we’ll take you to the correct SOP.</p>
 
+  <div class="two-col">
+    <div class="soft">
+      <div class="field">
+        <label>Is it an Emergency?</label>
+        <select id="iw_emergency"><option>No</option><option>Yes</option></select>
+      </div>
+      <div class="field">
+        <label>Is the property in Delinquent status?</label>
+        <select id="iw_delinquent"><option>No</option><option>Yes</option></select>
+      </div>
+      <div class="field">
+        <label>Enrolled in a Home Warranty program?</label>
+        <select id="iw_warranty"><option>No</option><option>Yes</option></select>
+      </div>
+    </div>
+
+    <div class="soft">
+      <div class="field">
+        <label>Owner completes own maintenance?</label>
+        <select id="iw_ownerSelfMaint"><option>No</option><option>Yes</option></select>
+      </div>
+      <div class="field">
+        <label>Same issue within last 12 months?</label>
+        <select id="iw_repeat12"><option>No</option><option>Yes</option></select>
+      </div>
+      <div class="field">
+        <label>Is this specifically an Appliance ticket?</label>
+        <select id="iw_appliance"><option>No</option><option>Yes</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button type="button" class="btn primary" onclick="pw_intakeRoute()">Continue</button>
+    <button type="button" class="btn" onclick="pw_intakeClear()">Clear</button>
+  </div>
+</div>
     <!-- RIGHT: panes -->
     <section id="views" class="card">
 
