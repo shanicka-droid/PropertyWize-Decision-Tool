@@ -1861,5 +1861,20 @@ PropertyWize Leasing Team`;
   };
 })();
 </script>
+<!-- Show/hide view panes -->
+<script>
+function showPane(id){
+  document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+  var el = document.getElementById(id);
+  if(el) el.classList.remove('hidden');
+}
+
+document.querySelectorAll('input[name="role"]').forEach(r=>{
+  r.addEventListener('change', e=>{
+    var target = e.target.getAttribute('data-target');
+    if(target) showPane(target);
+  });
+});
+</script>
 </body>
 </html>
