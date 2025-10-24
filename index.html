@@ -907,7 +907,11 @@ Complete the checklist to enable Generate.
 <div class="field"><label>Rent balance</label><input id="dlq_rent" type="text"></div>
 <div class="field"><label>Utility balance</label><input id="dlq_util" type="text"></div>
 <div class="field"><label>Misc balance</label><input id="dlq_misc" type="text"></div>
-<div class="field"><label>Total Balance</label><input id="dlq_total" type="text" placeholder="$0.00"></div>
+<div class="field">
+<label>Total Balance</label>
+<input id="dlq_total" type="text" placeholder="$0.00" readonly>
+<p class="note">Auto-calculated from Rent + Utilities + Misc + Fees (editable via fields above)</p>
+</div>
 <div class="field"><label>Last payment received</label><input id="dlq_lastpay" type="text"></div>
 <div class="field"><label>Last communication</label><input id="dlq_lastcomm" type="text"></div>
 </div>
@@ -1097,6 +1101,33 @@ set('dlq_email_body', lines.join('\n'));
 // keep whatever you typed for To/CC
 };
 </script>
+function moneyToNumber(txt){
+if(!txt) return 0;
+// strip $, commas, spaces
+return Number((txt+'').replace(/[^0-9.\-]/g,'') || 0);
+}
+function numberToMoney(n){
+try { return n.toLocaleString('en-US', {style:'currency', currency:'USD'}); }
+catch(_){ return '$' + (Math.round(n*100)/100); }
+}
+function dlq_recalcTotal(){
+var rent = moneyToNumber(document.getElementById('dlq_rent')?.value);
+var util = moneyToNumber(document.getElementById('dlq_util')?.value);
+var misc = moneyToNumber(document.getElementById('dlq_misc')?.value);
+var fees = moneyToNumber(document.getElementById('dlq_fees')?.value);
+var total = (rent||0)+(util||0)+(misc||0)+(fees||0);
+var out = document.getElementById('dlq_total');
+if(out) out.value = numberToMoney(total);
+}
+// re-calc when any money field changes
+['dlq_rent','dlq_util','dlq_misc','dlq_fees'].forEach(id=>{
+var el = document.getElementById(id);
+if(el){
+el.addEventListener('input', dlq_recalcTotal);
+el.addEventListener('blur', dlq_recalcTotal);
+}
+});
+setTimeout(dlq_recalcTotal,0);  
 })();
 </script>
 </div>
