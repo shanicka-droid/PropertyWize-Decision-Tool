@@ -1526,10 +1526,15 @@ target="_blank" rel="noopener">Open Rentometer</a>
   }
 
   function fallbackId(val){
-    if (!val) return null;
-    if (val === 'nonmaint') return 'viewNonMaint';
-    return 'view' + val.charAt(0).toUpperCase() + val.slice(1);
-  }
+  if (!val) return null;
+
+  // Handle special mappings manually
+  if (val === 'nonmaint') return 'viewNonMaint';
+  if (val === 'appliance') return 'viewAppliance'; // 👈 added this line
+
+  // Default rule for others (maintenance, finance, delinquency, listings, etc.)
+  return 'view' + val.charAt(0).toUpperCase() + val.slice(1);
+}
 
   document.querySelectorAll('#rolePicker input[type="radio"][name="role"]').forEach(function(r){
     r.addEventListener('change', function(){
@@ -2084,6 +2089,9 @@ PropertyWize Leasing Team`;
   document.addEventListener('DOMContentLoaded', () => {
     showPane('viewWelcome'); // change 'viewWelcome' to your default view if needed
   });
+</script>
+<script>
+  localStorage.removeItem('pw_role');
 </script>
 
 </body>
