@@ -2073,26 +2073,34 @@ PropertyWize Leasing Team`;
     document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
 
     // Then show only the one requested
+ <script>
+(function () {
+  function showPane(id) {
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
     const el = document.getElementById(id);
     if (el) el.classList.remove('hidden');
   }
 
   // Listen for role selection
-  document.querySelectorAll('input[name="role"]').forEach(r => {
+  document.querySelectorAll('#rolePicker input[name="role"]').forEach(r => {
     r.addEventListener('change', e => {
       const target = e.target.getAttribute('data-target');
-      if (target) showPane(target);
+      if (target) {
+        localStorage.setItem('pw_role', target);
+        showPane(target);
+      }
     });
   });
 
-  // Show the welcome page (or first view) by default when loading
+  // Restore previous selection (or show Welcome if none)
   document.addEventListener('DOMContentLoaded', () => {
-    showPane('viewWelcome'); // change 'viewWelcome' to your default view if needed
+    const saved = localStorage.getItem('pw_role');
+    const initial = (saved && document.getElementById(saved)) ? saved : 'viewWelcome';
+    showPane(initial);
   });
+})();
 </script>
-<script>
-  localStorage.removeItem('pw_role');
-</script>
-#viewDelinquency, #viewListings { display:block !important; }
 </body>
 </html>
+
+
