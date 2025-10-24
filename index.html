@@ -83,7 +83,7 @@
   <label class="pill">
     <input type="radio" name="role" value="delinquency" data-target="viewDelinquency">
     <span>Delinquency</span>
-  <label>
+  </label>
 
   <label class="pill">
    <input type="radio" name="role"  value="listings" data-target="viewListings"> 
@@ -1182,7 +1182,7 @@ setTimeout(dlq_recalcTotal, 0);
 </script>
 </div><!-- ==== /Delinquency Handoff ==== -->
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
-<div id="s" class="view-pane hidden">
+<div id="viewListings" class="view-pane hidden">
  <h2>Stale Listing • Weekly Owner Report</h2>
  <p class="note">
     For any unit &gt; 14 days with no apps OR ≥ 30 days with no approved applicants.
@@ -1501,11 +1501,11 @@ target="_blank" rel="noopener">Open Rentometer</a>
   // Init
   restore(); setRole(null);
 </script>
-
+<script>
 (function(){
-  if (window._pwRoleSwitch) return; window._pwRoleSwitch = true;
+  if (window._pwRoleSwitch) return; 
+  window._pwRoleSwitch = true;
 
-  // guarantee .hidden utility exists
   if (!document.querySelector('style[data-pw-hidden]')) {
     var s = document.createElement('style');
     s.setAttribute('data-pw-hidden','');
@@ -1518,13 +1518,13 @@ target="_blank" rel="noopener">Open Rentometer</a>
     var t = document.getElementById(id);
     if (t) t.classList.remove('hidden');
   }
+
   function fallbackId(val){
     if (!val) return null;
     if (val === 'nonmaint') return 'viewNonMaint';
     return 'view' + val.charAt(0).toUpperCase() + val.slice(1);
   }
 
-  // wire pills
   document.querySelectorAll('#rolePicker input[type="radio"][name="role"]').forEach(function(r){
     r.addEventListener('change', function(){
       var id = this.dataset.target || fallbackId(this.value);
@@ -1532,7 +1532,6 @@ target="_blank" rel="noopener">Open Rentometer</a>
     });
   });
 
-  // initial view
   var saved = localStorage.getItem('pw_role');
   var initial = saved;
   if (!initial) {
@@ -1542,7 +1541,7 @@ target="_blank" rel="noopener">Open Rentometer</a>
   if (initial) show(initial);
 })();
 </script>
-    <script>
+
 (function(){
   // helpers local to Delinquency
   function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
