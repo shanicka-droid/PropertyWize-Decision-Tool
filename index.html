@@ -83,11 +83,12 @@
   <label class="pill">
     <input type="radio" name="role" value="delinquency" data-target="viewDelinquency">
     <span>Delinquency</span>
-  </label>
+  <label>
+
   <label class="pill">
-  <input type="radio" name="role" value="listings" data-target="s">
-  <span>Stale Listing</span>
-</label>
+   <input type="radio" name="role"  value="listings" data-target="viewListings"> 
+    <span>Stale Listing</span>
+  </label>
 </div>
     <div class="hr"></div>
     <div class="section-title">Quick Actions</div>
@@ -1182,16 +1183,12 @@ setTimeout(dlq_recalcTotal, 0);
 </div><!-- ==== /Delinquency Handoff ==== -->
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
 <div id="s" class="view-pane hidden">
-
-  <h2>Stale Listing • Weekly Owner Report</h2>
-
-  <p class="note">
+ <h2>Stale Listing • Weekly Owner Report</h2>
+ <p class="note">
     For any unit &gt; 14 days with no apps OR ≥ 30 days with no approved applicants.
     Drafts go to EPM for approval before sending to owner.
   </p>
-
   <div class="hr"></div>
-
   <h3>Listing Details</h3>
   <div class="two-col">
     <div class="soft">
