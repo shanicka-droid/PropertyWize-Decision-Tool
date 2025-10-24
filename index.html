@@ -907,18 +907,22 @@ Complete the checklist to enable Generate.
 <div class="field"><label>Rent balance</label><input id="dlq_rent" type="text"></div>
 <div class="field"><label>Utility balance</label><input id="dlq_util" type="text"></div>
 <div class="field"><label>Misc balance</label><input id="dlq_misc" type="text"></div>
+<div class="field"><label>Total Balance</label><input id="dlq_total" type="text" placeholder="$0.00"></div>
 <div class="field"><label>Last payment received</label><input id="dlq_lastpay" type="text"></div>
 <div class="field"><label>Last communication</label><input id="dlq_lastcomm" type="text"></div>
 </div>
 
 <div class="soft">
-<div class="field"><label>FTP date</label><input id="dlq_ftp" type="date"></div>
+<div class="field"><label>FTP date</label><input id="dlq_ftp" type="text" placeholder="MM/DD/YYYY or Not yet scheduled">
 <div class="field"><label>Court outcome</label><input id="dlq_court" type="text"></div>
 <div class="field"><label>Judgment ordered</label><input id="dlq_judgment" type="text"></div>
 <div class="field"><label>Eviction date</label><input id="dlq_eviction" type="text"></div>
 <div class="field"><label>Reason no eviction</label><input id="dlq_noevict_reason" type="text"></div>
 <div class="field"><label>Lease end date</label><input id="dlq_leaseend" type="text"></div>
 <div class="field"><label>Last PW action</label><input id="dlq_lastaction" type="text"></div>
+<div class="field"><label>Collection Notes</label><textarea id="dlq_notes" placeholder="Freeform notes (contact attempts, promises, special circumstances)…"></textarea>
+</div>
+
 </div>
 </div>
 
@@ -949,7 +953,10 @@ Complete the checklist to enable Generate.
 <label>Email Body</label>
 <textarea id="dlq_email_body" readonly style="min-height:160px"></textarea>
 </div>
-<div class="row"><button class="btn" onclick="dlq_copy('dlq_email_body')">Copy Email</button></div>
+<div class="row">
+<button type="button" class="btn primary" onclick="dlq_makeEmail()">Generate Email</button>
+<button type="button" class="btn" onclick="dlq_copy('dlq_email_body')">Copy Email</button>
+</div>
 
 <div class="hr"></div>
 <h3>Handoff</h3>
