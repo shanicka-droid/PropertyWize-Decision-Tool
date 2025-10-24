@@ -11,7 +11,7 @@
 .hidden { display:none; }
   .sl-only { display: none; }
   #viewListings .sl-only { display: block; }
-
+#viewListings { display:block !important; }
   :root{ --brand:#1b8e5a; --brand2:#1b6fb8; --ink:#18202a; --muted:#6b7785; --border:#e3e8ef; --bg:#f6f8fb; --ok:#1b8e5a; --warn:#b86f1b; --danger:#b81b3b; --card:#ffffff; }
   *{box-sizing:border-box}
   body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f7fafc,#eef3f9 40%,#e9f3ef)}
@@ -86,7 +86,7 @@
     <span>Delinquency</span>
   </label>
   <label class="pill">
-  <input type="radio" name="role" value="listings" data-target="viewListings">
+  <input type="radio" name="role" value="listings" data-target="s">
   <span>Stale Listing</span>
 </label>
 </div>
@@ -1182,7 +1182,7 @@ setTimeout(dlq_recalcTotal, 0);
 </script>
 </div><!-- ==== /Delinquency Handoff ==== -->
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
-<div id="viewListings" class="view-pane hidden">
+<div id="s" class="view-pane hidden">
 
   <h2>Stale Listing • Weekly Owner Report</h2>
 
@@ -1305,7 +1305,7 @@ target="_blank" rel="noopener">Open Rentometer</a>
     <textarea id="sl_handoff" readonly></textarea>
   </div>
 
-</div> <!-- closes #viewListings -->
+</div> <!-- closes #s -->
 <!-- ==== /Stale Listing VIEW ==== -->
 <!-- Plans Modal -->
 <div id="plansModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:center;padding:14px">
