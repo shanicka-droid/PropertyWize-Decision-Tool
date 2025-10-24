@@ -1100,34 +1100,38 @@ set('dlq_email_subj', subject);
 set('dlq_email_body', lines.join('\n'));
 // keep whatever you typed for To/CC
 };
-function moneyToNumber(txt){
+// --- Delinquency: Auto-calc Total Balance ---
+function dlq_moneyToNumber(txt){
 if(!txt) return 0;
-// strip $, commas, spaces
-return Number((txt+'').replace(/[^0-9.\-]/g,'') || 0);
+return Number((txt+'').replace(/[^0-9.\-]/g,'')) || 0;
 }
-function numberToMoney(n){
-try { return n.toLocaleString('en-US', {style:'currency', currency:'USD'}); }
-catch(_){ return '$' + (Math.round(n*100)/100); }
+
+function dlq_numberToMoney(n){
+try { return n.toLocaleString('en-US',{style:'currency',currency:'USD'}); }
+catch(_){ return '$' + (Math.round((n||0)*100)/100); }
 }
+
 function dlq_recalcTotal(){
-var rent = moneyToNumber(document.getElementById('dlq_rent')?.value);
-var util = moneyToNumber(document.getElementById('dlq_util')?.value);
-var misc = moneyToNumber(document.getElementById('dlq_misc')?.value);
-var fees = moneyToNumber(document.getElementById('dlq_fees')?.value);
+var rent = dlq_moneyToNumber(document.getElementById('dlq_rent')?.value);
+var util = dlq_moneyToNumber(document.getElementById('dlq_util')?.value);
+var misc = dlq_moneyToNumber(document.getElementById('dlq_misc')?.value);
+var fees = dlq_moneyToNumber(document.getElementById('dlq_fees')?.value);
 var total = (rent||0)+(util||0)+(misc||0)+(fees||0);
 var out = document.getElementById('dlq_total');
-if(out) out.value = numberToMoney(total);
+if(out) out.value = dlq_numberToMoney(total);
 }
-// re-calc when any money field changes
-['dlq_rent','dlq_util','dlq_misc','dlq_fees'].forEach(id=>{
+
+['dlq_rent','dlq_util','dlq_misc','dlq_fees'].forEach(function(id){
 var el = document.getElementById(id);
 if(el){
 el.addEventListener('input', dlq_recalcTotal);
 el.addEventListener('blur', dlq_recalcTotal);
 }
 });
-setTimeout(dlq_recalcTotal,0);  
-  <script>
+
+// run once when the section loads
+setTimeout(dlq_recalcTotal, 500);
+
 (function(){
 const showInput = document.getElementById('sl_show_start');
 const daysField = document.getElementById('sl_days_since');
