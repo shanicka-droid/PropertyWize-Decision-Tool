@@ -1021,6 +1021,82 @@ window.dlq_clear=function(){
 document.querySelectorAll('#viewDelinquency input, #viewDelinquency textarea').forEach(el=>{if(el.type!=='checkbox')el.value='';});
 document.querySelectorAll('#viewDelinquency input[type=checkbox]').forEach(c=>c.checked=false);
 };
+  <script>
+/* put this inside the existing Delinquency IIFE (the one with dlq_generate / dlq_clear) */
+
+window.dlq_makeEmail = function () {
+// helpers you already use elsewhere
+function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
+function set(id,txt){ var el=document.getElementById(id); if(el) el.value = txt; }
+
+// parse as currency (handles $ and commas; empty -> 0)
+function money(v){
+if(!v) return 0;
+var n = (''+v).replace(/[^\d.\-]/g,'');
+var x = parseFloat(n);
+return isNaN(x) ? 0 : x;
+}
+function fmt(n){
+return '$' + (Math.round(n*100)/100).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// form values
+var ownerName = g('sl_owner') || g('dlq_owner') || 'Owner';
+var toEmail = g('dlq_email_to') || '';
+var ccEmail = g('dlq_email_cc') || '';
+var tenant = g('dlq_tenant') || '[Tenant]';
+var addr = g('dlq_address') || '[Address]';
+
+var rent = money(g('dlq_rent'));
+var fees = money(g('dlq_fees'));
+var util = money(g('dlq_util'));
+var misc = money(g('dlq_misc'));
+var total = rent + fees + util + misc;
+
+var lastPay = g('dlq_lastpay') || '—';
+var ftp = g('dlq_ftp') || g('dlq_leaseend') || '—';
+var court = g('dlq_court') || '—';
+var judgment = g('dlq_judgment') || '—';
+var eviction = g('dlq_eviction') || '—';
+var reasonNoEv = g('dlq_noevict_reason');
+var lastComm = g('dlq_lastcomm') || '—';
+var lastAction = g('dlq_lastaction') || '—';
+var collStat = g('dlq_collection') || '—';
+var maintDis = g('dlq_maint_disable') || '—';
+
+// subject + body
+var subject = `Delinquency Update: ${tenant} – ${fmt(total)} balance`;
+
+var lines = [];
+lines.push(`Hi ${ownerName},`);
+lines.push('');
+lines.push(`Here is the delinquency status for ${tenant} at ${addr}.`);
+lines.push('');
+lines.push(`Current Balances`);
+lines.push(`• Rent: ${fmt(rent)} • Utilities: ${fmt(util)} • Misc: ${fmt(misc)} • Fees: ${fmt(fees)}`);
+lines.push(`• Total Balance: ${fmt(total)}`);
+lines.push('');
+lines.push(`Recent Activity`);
+lines.push(`• Last Payment: ${lastPay}`);
+lines.push(`• Last Communication: ${lastComm}`);
+lines.push(`• FTP Date / Lease End: ${ftp}`);
+lines.push(`• Court Outcome: ${court} • Judgment: ${judgment}`);
+lines.push(`• Eviction Scheduled: ${eviction}` + (reasonNoEv ? ` (Reason if not: ${reasonNoEv})` : ''));
+lines.push(`• Collection Status in Buildium: ${collStat}`);
+lines.push(`• Maintenance Auto-Dispatch Disabled (> $500): ${maintDis}`);
+lines.push('');
+lines.push(`Next Steps`);
+lines.push(`• We will continue to follow the SOP and keep you updated.`);
+lines.push('');
+lines.push(`Thanks,`);
+lines.push(`PropertyWize Delinquency Team`);
+
+// set fields
+set('dlq_email_subj', subject);
+set('dlq_email_body', lines.join('\n'));
+// keep whatever you typed for To/CC
+};
+</script>
 })();
 </script>
 </div>
