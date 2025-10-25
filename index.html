@@ -2081,14 +2081,36 @@ PropertyWize Leasing Team`;
     console.log('Switching to:', id);
    }
 
-  // Listen for role selection
-  document.querySelectorAll('#rolePicker input[name="role"]').forEach(r => {
-    r.addEventListener('change', e => {
-      const target = e.target.getAttribute('data-target');
-      if (target) {
+  <script>
+(function () {
+  function showPane(id) {
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  }
+
+  // Listen for role selection (radios, buttons, pills—anything with data-target)
+  document.querySelectorAll('#rolePicker [data-target]').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = el.getAttribute('data-target');
+      console.log('role click ->', target);
+      if (target && document.getElementById(target)) {
         localStorage.setItem('pw_role', target);
         showPane(target);
+      } else {
+        alert('Bad data-target: ' + target);
       }
+    });
+  });
+
+  // (Optional) debug: list what we bound
+  console.log(
+    'role buttons:',
+    [...document.querySelectorAll('#rolePicker [data-target]')]
+      .map(b => (b.textContent || b.value || '(no text)').trim() + ' → ' + b.getAttribute('data-target'))
+  );
+})();
+</script>
     });
   });
 
@@ -2108,6 +2130,64 @@ PropertyWize Leasing Team`;
   banner.textContent = ids.map(id => id+':'+ !!d.getElementById(id)).join('  |  ');
   d.body.appendChild(banner);
   setTimeout(()=> banner.remove(), 6000);
+})();
+</script>
+<script>
+(function () {
+  // Hide all panes, then show only the chosen one
+  function showPane(id) {
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  }
+
+  // Handle clicks or selections on any role button with data-target
+  document.querySelectorAll('#rolePicker [data-target]').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = el.getAttribute('data-target');
+      console.log('Clicked:', target);
+
+      if (target && document.getElementById(target)) {
+        localStorage.setItem('pw_role', target);
+        showPane(target);
+      } else {
+        alert('Bad data-target: ' + target);
+      }
+    });
+  });
+
+  // Optional debug
+  console.log(
+    'Bound role buttons:',
+    [...document.querySelectorAll('#rolePicker [data-target]')]
+      .map(b => (b.textContent || b.value || '(no text)').trim() + ' → ' + b.getAttribute('data-target'))
+  );
+})();
+</script>
+<script>
+(function () {
+  // Hide all panes, then show only the chosen one
+  function showPane(id) {
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  }
+
+  // Bind to ANY element that has data-target (works for radios, buttons, etc.)
+  document.querySelectorAll('[data-target]').forEach(el => {
+    ['change', 'click'].forEach(evt => {
+      el.addEventListener(evt, () => {
+        const target = el.getAttribute('data-target');
+        console.log('Role select →', target);
+        if (target && document.getElementById(target)) {
+          localStorage.setItem('pw_role', target);
+          showPane(target);
+        } else {
+          alert('Bad data-target: ' + target);
+        }
+      });
+    });
+  });
 })();
 </script>
 </body>
