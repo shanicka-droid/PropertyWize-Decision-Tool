@@ -110,7 +110,7 @@
 
   <!-- RIGHT COLUMN -->
   <section class="card">
-    <div id="viewWelcome">
+  <div id="viewWelcome" class="view-pane">
       <h2>Welcome</h2>
       <p><strong>PropertyWize Operations Team:</strong> The PropertyWize Decision Tool centralizes our most critical workflows into one smart system that empowers every department — Maintenance, Finance, Leasing, and Delinquency — to work faster and more accurately. It provides step-by-step guidance for complex tasks, ensures approvals and communications are handled consistently, and automatically generates formatted notes, owner updates, and internal handoffs. This tool was built to simplify decisions, reduce errors, and keep the entire PropertyWize team aligned, informed, and accountable from start to finish.</p>
       <p class="note">Tip: Add to Home Screen in Safari/Chrome to use like an app.</p>
@@ -2078,7 +2078,8 @@ PropertyWize Leasing Team`;
     document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
     const el = document.getElementById(id);
     if (el) el.classList.remove('hidden');
-  }
+    console.log('Switching to:', id);
+   }
 
   // Listen for role selection
   document.querySelectorAll('#rolePicker input[name="role"]').forEach(r => {
