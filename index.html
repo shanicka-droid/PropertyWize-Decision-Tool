@@ -2099,7 +2099,14 @@ PropertyWize Leasing Team`;
   });
 })();
 </script>
+<script>
+setTimeout(()=> {
+  const ids = ['viewWelcome','viewDelinquency','viewListings'];
+  alert(ids.map(id => id+':' + !!document.getElementById(id)).join('\n'));
+}, 200);
+</script>
 </body>
 </html>
+
 
 
