@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PropertyWize Decision Tool 2.0</title>
+<title>PropertyWize Decision Tool 3.0</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
@@ -82,18 +82,18 @@
 
   <label class="pill">
     <input type="radio" name="role" value="delinquency" data-target="viewDelinquency">
-    <span>Delinquency</span>
+    <span>💸 Delinquency</span>
   </label>
 
   <label class="pill">
    <input type="radio" name="role"  value="listings" data-target="viewListings"> 
-    <span>Stale Listing</span>
+    <span>🏡 Stale Listing</span>
   </label>
   
   <label class="pill">
   <input type="radio" name="role" value="appliance" data-target="viewAppliance">
   <span>🔌 Appliance</span>
-</label>
+  </label>
 </div>
     <div class="hr"></div>
     <div class="section-title">Quick Actions</div>
@@ -2072,126 +2072,34 @@ PropertyWize Leasing Team`;
     document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
 
     // Then show only the one requested
- <script>
+    <script>
 (function () {
-  function showPane(id) {
-    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('hidden');
-    console.log('Switching to:', id);
-   }
+function showPane(id) {
+document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+const el = document.getElementById(id);
+if (el) el.classList.remove('hidden');
+}
 
-  <script>
-(function () {
-  function showPane(id) {
-    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('hidden');
-  }
+document.querySelectorAll('#rolePicker input[type="radio"][name="role"]').forEach(r => {
+r.addEventListener('change', function () {
+const id = this.dataset.target;
+if (id && document.getElementById(id)) {
+localStorage.setItem('pw_role', id);
+showPane(id);
+} else {
+alert('Bad data-target: ' + id);
+}
+});
+});
 
-  // Listen for role selection (radios, buttons, pills—anything with data-target)
-  document.querySelectorAll('#rolePicker [data-target]').forEach(el => {
-    el.addEventListener('click', () => {
-      const target = el.getAttribute('data-target');
-      console.log('role click ->', target);
-      if (target && document.getElementById(target)) {
-        localStorage.setItem('pw_role', target);
-        showPane(target);
-      } else {
-        alert('Bad data-target: ' + target);
-      }
-    });
-  });
-
-  // (Optional) debug: list what we bound
-  console.log(
-    'role buttons:',
-    [...document.querySelectorAll('#rolePicker [data-target]')]
-      .map(b => (b.textContent || b.value || '(no text)').trim() + ' → ' + b.getAttribute('data-target'))
-  );
-})();
-</script>
-    });
-  });
-
-  // Restore previous selection (or show Welcome if none)
-  document.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('pw_role');
-    const initial = (saved && document.getElementById(saved)) ? saved : 'viewWelcome';
-    showPane(initial);
-  });
-})();
-</script>
-<script>
-(function(){
-  const d=document, ids=['viewWelcome','viewDelinquency','viewListings'];
-  const banner=d.createElement('div');
-  banner.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;padding:10px 12px;background:#ffeb3b;z-index:999999;font:14px/1.25 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2)';
-  banner.textContent = ids.map(id => id+':'+ !!d.getElementById(id)).join('  |  ');
-  d.body.appendChild(banner);
-  setTimeout(()=> banner.remove(), 6000);
-})();
-</script>
-<script>
-(function () {
-  // Hide all panes, then show only the chosen one
-  function showPane(id) {
-    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('hidden');
-  }
-
-  // Handle clicks or selections on any role button with data-target
-  document.querySelectorAll('#rolePicker [data-target]').forEach(el => {
-    el.addEventListener('click', () => {
-      const target = el.getAttribute('data-target');
-      console.log('Clicked:', target);
-
-      if (target && document.getElementById(target)) {
-        localStorage.setItem('pw_role', target);
-        showPane(target);
-      } else {
-        alert('Bad data-target: ' + target);
-      }
-    });
-  });
-
-  // Optional debug
-  console.log(
-    'Bound role buttons:',
-    [...document.querySelectorAll('#rolePicker [data-target]')]
-      .map(b => (b.textContent || b.value || '(no text)').trim() + ' → ' + b.getAttribute('data-target'))
-  );
-})();
-</script>
-<script>
-(function () {
-  // Hide all panes, then show only the chosen one
-  function showPane(id) {
-    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('hidden');
-  }
-
-  // Bind to ANY element that has data-target (works for radios, buttons, etc.)
-  document.querySelectorAll('[data-target]').forEach(el => {
-    ['change', 'click'].forEach(evt => {
-      el.addEventListener(evt, () => {
-        const target = el.getAttribute('data-target');
-        console.log('Role select →', target);
-        if (target && document.getElementById(target)) {
-          localStorage.setItem('pw_role', target);
-          showPane(target);
-        } else {
-          alert('Bad data-target: ' + target);
-        }
-      });
-    });
-  });
+const saved = localStorage.getItem('pw_role');
+const initial = (saved && document.getElementById(saved)) ? saved : 'viewWelcome';
+showPane(initial);
 })();
 </script>
 </body>
 </html>
+ 
 
 
 
