@@ -2100,10 +2100,14 @@ PropertyWize Leasing Team`;
 })();
 </script>
 <script>
-setTimeout(()=> {
-  const ids = ['viewWelcome','viewDelinquency','viewListings'];
-  alert(ids.map(id => id+':' + !!document.getElementById(id)).join('\n'));
-}, 200);
+(function(){
+  const d=document, ids=['viewWelcome','viewDelinquency','viewListings'];
+  const banner=d.createElement('div');
+  banner.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;padding:10px 12px;background:#ffeb3b;z-index:999999;font:14px/1.25 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2)';
+  banner.textContent = ids.map(id => id+':'+ !!d.getElementById(id)).join('  |  ');
+  d.body.appendChild(banner);
+  setTimeout(()=> banner.remove(), 6000);
+})();
 </script>
 </body>
 </html>
