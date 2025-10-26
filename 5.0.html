@@ -521,7 +521,7 @@ resetFlow();
 </div>
 
 <div class="field">
-  <label>Handoff Comment (Buildium/Slack)</label>
+  <label>Handoff Comment (Buildium/)</label>
   <textarea id="appl_handoff" readonly></textarea>
 </div>
 <div class="field">
@@ -936,7 +936,7 @@ Complete the checklist to enable Generate.
 </div>
 
 <div class="field">
-<label>Delinquency Comment (Buildium / Slack)</label>
+<label>Delinquency Comment (Buildium)</label>
 <textarea id="dlq_out" readonly></textarea>
 </div>
 
@@ -1037,7 +1037,7 @@ Address: ${addr}
 Balances — Rent: ${rent} • Utilities: ${util} • Misc: ${misc}
 Last Payment: ${last}
 Last Communication: ${comm}
-FTP Date: ${ftp}
+FTP Date: ${ftpStatus}
 Court Outcome: ${court}
 Judgment Ordered: ${judg}
 Eviction Date: ${ev}
@@ -1059,7 +1059,7 @@ Best,
 PropertyWize Collections`;
 s('dlq_email_body', email);
 s('dlq_handoff', `Owner Email Sent for ${tenant} | Balance ${rent} | FTP ${ftp}`);
-};
+}; //
 
 window.dlq_clear=function(){
 document.querySelectorAll('#viewDelinquency input, #viewDelinquency textarea').forEach(el=>{if(el.type!=='checkbox')el.value='';});
