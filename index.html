@@ -1305,55 +1305,37 @@ target="_blank" rel="noopener">Open Rentometer</a>
     localStorage.setItem("pw_plans", JSON.stringify(lines));
     loadPlans();
     closePlans();
-  }
+    // Buttons (RESTORED)
+$("#btnReset").addEventListener("click", ()=>{
+  localStorage.removeItem("pw_state");
+  $$("input[type=checkbox]").forEach(c=>c.checked=false);
+  $$("input[type=text], input[type=number]").forEach(i=>i.value="");
+  $$("select").forEach(s=>s.selectedIndex=0);
+  $("#handoff").value = ""; $("#fin_note").value = "";
+  // The original code called setRole here, but since we deleted setRole,
+  // the core role-switching is now handled by your working script block.
+  calcRules();
+});
+$("#btnPrint").addEventListener("click", ()=>window.print());
+$("#btnPlans").addEventListener("click", openPlans);
 
-  // Role switching
-  $("#rolePicker").addEventListener("change", e=>{
-    const role = $("#rolePicker input[name=role]:checked")?.value || null;
-    setRole(role);
-  });
-  function setRole(role){
-    activeRole = role;
-    pills.forEach(p=>p.classList.toggle("active", p.querySelector("input").value===role));
-    Object.values(views).forEach(v=>v.classList.add("hidden"));
-    if(role==="maintenance") views.maintenance.classList.remove("hidden");
-    else if(role==="finance") views.finance.classList.remove("hidden");
-    else if(role==="nonmaint") views.nonmaint.classList.remove("hidden");
-    else views.welcome.classList.remove("hidden");
-    updateProgress();
-    window.scrollTo(0,0);
-    // sync finance WO fields from maintenance if present
-    $("#fin_wo").value = $("#wo").value; $("#fin_addr").value = $("#addr").value; $("#fin_vendor").value = $("#vendor").value;
-    $("#fin_amount").value = $("#amount").value;
-  }
+// Final calls to ensure persistence starts and state is loaded
+restore();
+setInterval(persist, 2000);
+} //
+// Buttons (RESTORED)
+$("#btnReset").addEventListener("click", ()=>{
+  localStorage.removeItem("pw_state");
+  $$("input[type=checkbox]").forEach(c=>c.checked=false);
+  $$("input[type=text], input[type=number]").forEach(i=>i.value="");
+  $$("select").forEach(s=>s.selectedIndex=0);
+  $("#handoff").value = ""; $("#fin_note").value = "";
+  // setRole(null); // setRole is deleted, so we remove this call
+  calcRules();
+});
+$("#btnPrint").addEventListener("click", ()=>window.print());
+$("#btnPlans").addEventListener("click", openPlans);
 
-  // Buttons
-  $("#btnReset").addEventListener("click", ()=>{
-    localStorage.removeItem("pw_state");
-    $$("input[type=checkbox]").forEach(c=>c.checked=false);
-    $$("input[type=text], input[type=number]").forEach(i=>i.value="");
-    $$("select").forEach(s=>s.selectedIndex=0);
-    $("#handoff").value = ""; $("#fin_note").value = "";
-    setRole(null);
-    calcRules();
-  });
-  $("#btnPrint").addEventListener("click", ()=>window.print());
-  $("#btnPlans").addEventListener("click", openPlans);
-
-  // Progress
-  function updateProgress(){
-    let checks = $$("section.card input[type=checkbox]");
-    let total = checks.length || 1;
-    let done = checks.filter(c=>c.checked).length;
-    let pct = Math.round(100*done/total);
-    $("#progressBar").style.width = pct+"%";
-    $("#progressNote").textContent = pct+"% complete";
-  }
-  document.addEventListener("change", e=>{
-    if(e.target.matches("input[type=checkbox]")) updateProgress();
-  });
-
-  // Policy cues
   function calcRules(){
     const amt = parseFloat($("#amount").value||"0");
     const issue = $("#issue").value;
