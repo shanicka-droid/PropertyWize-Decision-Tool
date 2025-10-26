@@ -970,7 +970,42 @@ function g(id){var e=document.getElementById(id);return e?(e.value||'').trim():'
 function s(id,v){var e=document.getElementById(id);if(e)e.value=v;}
 function allChecked(){return ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].every(id=>document.getElementById(id)?.checked);}
 window.dlq_copy=id=>{const e=document.getElementById(id);if(!e)return;navigator.clipboard?.writeText(e.value||'')};
+// --- Delinquency Auto-Calculation Helper Functions ---
 
+// 1. Safely converts currency strings (like "$1,200.00") to pure numbers
+function dlq_moneyToNumber(txt){
+    if(!txt) return 0;
+    // Remove all non-numeric characters except the period and minus sign
+    return Number((txt+'').replace(/[^0-9.\-]/g,'')) || 0;
+}
+
+// 2. Formats a number back into USD currency string
+function dlq_numberToMoney(n){
+    try { 
+        return (n || 0).toLocaleString('en-US', {style:'currency', currency:'USD'});
+    }
+    catch(_){ 
+        return '$' + (Math.round((n||0)*100)/100).toFixed(2); 
+    }
+}
+
+// 3. Core calculation and display function
+function dlq_recalcTotal(){
+    // Get values from the input fields (Rent, Utility, Misc, and Fees if you have that input)
+    var rent = dlq_moneyToNumber(document.getElementById('dlq_rent')?.value);
+    var util = dlq_moneyToNumber(document.getElementById('dlq_util')?.value);
+    var misc = dlq_moneyToNumber(document.getElementById('dlq_misc')?.value);
+    // Assuming a 'dlq_fees' input exists; set to 0 if not needed
+    var fees = dlq_moneyToNumber(document.getElementById('dlq_fees')?.value || 0); 
+    
+    // Calculate the grand total
+    var total = (rent||0) + (util||0) + (misc||0) + (fees||0);
+    
+    // Display the formatted total back into the 'dlq_total' input field
+    var out = document.getElementById('dlq_total');
+    if(out) out.value = dlq_numberToMoney(total);
+}
+// --- End of Auto-Calculation Helper Functions ---
 window.dlq_generate=function(){
 if(!allChecked()){alert('Complete the checklist first.');return;}
 const tenant=g('dlq_tenant')||'[Tenant]';
@@ -1021,6 +1056,21 @@ window.dlq_clear=function(){
 document.querySelectorAll('#viewDelinquency input, #viewDelinquency textarea').forEach(el=>{if(el.type!=='checkbox')el.value='';});
 document.querySelectorAll('#viewDelinquency input[type=checkbox]').forEach(c=>c.checked=false);
 };
+// --- Wire Inputs to Trigger Recalculation ---
+
+['dlq_rent','dlq_util','dlq_misc','dlq_fees'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){
+        // Run the calculation whenever the user types something
+        el.addEventListener('input', dlq_recalcTotal); 
+        // Run the calculation when the user tabs out or clicks away
+        el.addEventListener('blur', dlq_recalcTotal);
+    }
+});
+
+// Run the calculation once immediately when the page loads (in case of saved data)
+setTimeout(dlq_recalcTotal, 0); 
+// --- End of Wiring ---
 })();
 </script>
 </div>
