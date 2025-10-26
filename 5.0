@@ -376,7 +376,7 @@ resetFlow();
     </div>
     <!-- ========= APPLIANCE TICKET PROCESSING (Maintenance) ========= -->
 <!-- Appliance VIEW -->
-<input type="radio" name="role" value="appliance" data-target="viewAppliance">
+<div id="viewAppliance" class="view-pane hidden">
 <div class="hr"></div>
 <h3>Appliance Ticket Processing</h3>
 <p class="note">Use this tool to process appliance tickets end-to-end: delinquency check, essential vs non-essential, troubleshooting, inspection details, vendor review, options, and EPM email.</p>
