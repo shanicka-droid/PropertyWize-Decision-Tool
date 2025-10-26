@@ -1058,10 +1058,11 @@ Our team has confirmed the steps above and is continuing to monitor compliance w
 Best,
 PropertyWize Collections`;
 s('dlq_email_body', email);
-s('dlq_handoff', `Owner Email Sent for ${tenant} | Balance ${rent} | FTP ${ftp}`);
-}; //
-
+s('dlq_handoff', `Owner Email Sent for ${tenant} | Balance ${rent} | FTP ${ftpStatus}`);
+} //
 window.dlq_clear=function(){
+//
+
 document.querySelectorAll('#viewDelinquency input, #viewDelinquency textarea').forEach(el=>{if(el.type!=='checkbox')el.value='';});
 document.querySelectorAll('#viewDelinquency input[type=checkbox]').forEach(c=>c.checked=false);
 };
