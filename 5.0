@@ -85,10 +85,12 @@
     <input type="radio" name="role" value="delinquency" data-target="viewDelinquency">
     <span>💸 Delinquency</span>
   </label>
+
   <label class="pill">
   <input type="radio" name="role" value="listings" data-target="viewListings">
   <span>🏡 Stale Listing</span>
 </label>
+
 <label class="pill">
   <input type="radio" name="role" value="appliance" data-target="viewAppliance">
   <span>🔌 Appliance</span>
