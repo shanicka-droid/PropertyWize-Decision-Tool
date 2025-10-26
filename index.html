@@ -1347,30 +1347,10 @@ $("#btnReset").addEventListener("click", ()=>{
     }
   </script>
 })();
-});
-$("#btnPrint").addEventListener("click", ()=>window.print());
-$("#btnPlans").addEventListener("click", openPlans);
 
-// Final calls to ensure persistence starts and state is loaded
-restore();
 setInterval(persist, 2000);
 } //
 // Buttons (RESTORED)
-$("#btnReset").addEventListener("click", ()=>{
-  localStorage.removeItem("pw_state");
-  $$("input[type=checkbox]").forEach(c=>c.checked=false);
-  $$("input[type=text], input[type=number]").forEach(i=>i.value="");
-  $$("select").forEach(s=>s.selectedIndex=0);
-  $("#handoff").value = ""; $("#fin_note").value = "";
-  // setRole(null); // setRole is deleted, so we remove this call
-  calcRules();
-});
-$("#btnPrint").addEventListener("click", ()=>window.print());
-$("#btnPlans").addEventListener("click", openPlans);
-
-  function calcRules(){
-    const amt = parseFloat($("#amount").value||"0");
-    const issue = $("#issue").value;
     let msg = [];
     if(!isNaN(amt) && issue){
       if(issue==="Emergency") {
@@ -1382,6 +1362,30 @@ $("#btnPlans").addEventListener("click", openPlans);
       } else {
         msg.push("Cosmetic/Upgrade → Requires owner authorization regardless of amount.");
       }
+          // Add the clean button wiring here:
+$("#btnPrint").addEventListener("click", ()=>window.print());
+$("#btnReset").addEventListener("click", resetApplication);
+$("#btnPlans").addEventListener("click", openPlans); 
+
+// FINAL CLEAN INIT BLOCK: Place at the bottom of all script logic.
+(function () {
+    // 1. Get the last saved view, or default to the Welcome screen.
+    const savedViewId = localStorage.getItem('pw_role');
+    const initialId = (savedViewId && document.getElementById(savedViewId)) ? savedViewId : 'viewWelcome';
+
+    // 2. Hide all pages first (safe cleanup)
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+
+    // 3. Show the initial page
+    const initialEl = document.getElementById(initialId);
+    if (initialEl) {
+        initialEl.classList.remove('hidden');
+    }
+
+    // 4. Run the persistence/restore functions once
+    restore();
+    setInterval(persist, 2000); 
+})();
     } else {
       msg.push("Enter Amount and select Issue Type to see rules.");
     }
