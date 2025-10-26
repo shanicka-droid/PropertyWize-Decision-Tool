@@ -1024,7 +1024,7 @@ const util=g('dlq_util')||'$0';
 const misc=g('dlq_misc')||'$0';
 const last=g('dlq_lastpay')||'—';
 const comm=g('dlq_lastcomm')||'—';
-const ftp = dlq_formatFTPStatus(g('dlq_ftp')); 
+const ftpStatus = dlq_formatFTPStatus(g('dlq_ftp'));
 const court=g('dlq_court')||'—';
 const judg=g('dlq_judgment')||'—';
 const ev=g('dlq_eviction')||'—';
@@ -1077,7 +1077,7 @@ document.querySelectorAll('#viewDelinquency input[type=checkbox]').forEach(c=>c.
     }
 });
 
-// Run the calculation once immediately when the page loads (in case of saved data)
+// Run the calculation once immediately when the page loads (initial calc)
 setTimeout(dlq_recalcTotal, 0); 
 // --- End of Wiring ---
 })();
@@ -1469,7 +1469,7 @@ setTimeout(dlq_recalcTotal, 0);
     lines.push('Balances — Rent: ' + (g('dlq_rent')||'$0') + '  •  Utilities: ' + (g('dlq_util')||'$0') + '  •  Misc: ' + (g('dlq_misc')||'$0'));
     lines.push('Last Payment: ' + (g('dlq_lastpay')||'—'));
     lines.push('Last Communication: ' + (g('dlq_lastcomm')||'—'));
-    lines.push('FTP Date: ' + ftp);
+    lines.push('FTP Date: ' + ftpStatus);
     lines.push('Court Outcome: ' + (g('dlq_court')||'—'));
     lines.push('Judgment Ordered: ' + (g('dlq_judgment')||'—'));
     lines.push('Eviction Date Scheduled: ' + (g('dlq_eviction')||'—'));
