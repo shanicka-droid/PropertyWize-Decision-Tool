@@ -2046,6 +2046,41 @@ PropertyWize Leasing Team`;
   showPane(initial);
 })();
 </script>
+<script>
+(function () {
+
+  // 1) Show the requested panel
+  function showPane(id) {
+    // hide all panels
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+    // show the one we want
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  }
+
+  // 2) Wire every role radio that has a data-target
+  document.querySelectorAll('#rolePicker input[type="radio"][name="role"][data-target]')
+    .forEach(r => {
+      r.addEventListener('change', function () {
+        const id = this.dataset.target;                // the panel id to show
+        const ok = !!document.getElementById(id);      // does it exist?
+        if (ok) {
+          localStorage.setItem('pw_role', id);
+          showPane(id);
+        } else {
+          alert('Missing panel with id="' + id + '"');
+        }
+      });
+    });
+
+  // 3) On load: restore last view or show Welcome
+  const saved = localStorage.getItem('pw_role');
+  const initial = (saved && document.getElementById(saved)) ? saved : 'viewWelcome';
+  showPane(initial);
+
+})();
+</script>
+
 </body>
 </html>
  
