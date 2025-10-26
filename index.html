@@ -2064,6 +2064,35 @@ PropertyWize Leasing Team`;
     }
   };
 </script>
+<script>
+(function () {
+  // Step 1: Hide all panes first
+  function showPane(id) {
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+    console.log('Switching to:', id);
+  }
+
+  // Step 2: Listen for radio button changes
+  document.querySelectorAll('#rolePicker input[type="radio"][name="role"]').forEach(r => {
+    r.addEventListener('change', function () {
+      const id = this.dataset.target;
+      if (id && document.getElementById(id)) {
+        localStorage.setItem('pw_role', id);
+        showPane(id);
+      } else {
+        alert('Bad data-target: ' + id);
+      }
+    });
+  });
+
+  // Step 3: Load the last viewed section on reload
+  const saved = localStorage.getItem('pw_role');
+  const initial = (saved && document.getElementById(saved)) ? saved : 'viewWelcome';
+  showPane(initial);
+})();
+</script>
 </body>
 </html>
  
