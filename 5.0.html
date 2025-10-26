@@ -956,13 +956,11 @@ Complete the checklist to enable Generate.
 <label>Email Body</label>
 <textarea id="dlq_email_body" readonly style="min-height:160px"></textarea>
 </div>
-<div class="row"><button class="btn" onclick="dlq_copy('dlq_email_body')">Copy Email</button></div>
-
+<button class="btn" onclick="dlq_copy('dlq_email_body')">Copy Email</button>
 <div class="hr"></div>
 <h3>Handoff</h3>
 <div class="field"><textarea id="dlq_handoff" readonly></textarea></div>
 <div class="row"><button class="btn" onclick="dlq_copy('dlq_handoff')">Copy Handoff</button></div>
-
 <script>
 (function(){
 if(window._dlqReady) return; window._dlqReady = true;
