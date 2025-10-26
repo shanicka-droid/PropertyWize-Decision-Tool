@@ -735,7 +735,6 @@ em.push(''); em.push('Thanks,'); em.push('[Your Name]'); var oe=$('ho_out_em_wb'
 };
 window.pw_clearWB = function(){ var ids=['ho_from_wb','ho_to_wb','ho_person_wb','ho_due_wb','ho_ref_wb','ho_tags_wb','ho_decision_wb','ho_threshold_wb','ho_summary_wb','ho_block_wb','ho_attach_wb','ho_notify_wb']; for(var i=0;i<ids.length;i++){ var el=$(ids[i]); if(!el) continue; if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; } var ob=$('ho_out_bu_wb'); if(ob) ob.value=''; var oe=$('ho_out_em_wb'); if(oe) oe.value=''; };
 })();
-</script>
         </div>
       </div>
     </div>
@@ -1125,13 +1124,7 @@ var total = (rent||0)+(util||0)+(misc||0)+(fees||0);
 var out = document.getElementById('dlq_total');
 if(out) out.value = dlq_numberToMoney(total);
 }
-// re-calc on input/blur
-['dlq_rent','dlq_util','dlq_misc','dlq_fees'].forEach(function(id){
-var el = document.getElementById(id);
-if(el){
-el.addEventListener('input', dlq_recalcTotal);
-el.addEventListener('blur', dlq_recalcTotal);
-}
+
 });
 // initial calc
 setTimeout(dlq_recalcTotal, 0);
@@ -1290,11 +1283,11 @@ $('input[name="role"]').on('change', function() {
     const targetViewKey = targetViewIdWithHash.substring(1); 
     
     // 3. Hide all views currently visible
-    Object.keys(views).forEach(key => views[key].hide());
+   Object.keys(views).forEach(key => views[key].classList.add('hidden'));
     
     // 4. Show the view that matches the selected role
     if (views[targetViewKey]) { 
-        views[targetViewKey].show();
+        views[targetViewKey].classList.remove('hidden');
     } 
     
     // 5. Update activeRole variable
@@ -1360,6 +1353,23 @@ $("#btnReset").addEventListener("click", ()=>{
   // The original code called setRole here, but since we deleted setRole,
   // the core role-switching is now handled by your working script block.
   calcRules();
+  // ADD THIS CODE HERE to ensure the page loads correctly:
+
+(function () {
+    // 1. Get the last saved view, or default to the Welcome screen.
+    const savedViewId = localStorage.getItem('pw_role');
+    const initialId = (savedViewId && document.getElementById(savedViewId)) ? savedViewId : 'viewWelcome';
+
+    // 2. Hide all pages first (safe cleanup)
+    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+
+    // 3. Show the initial page
+    const initialEl = document.getElementById(initialId);
+    if (initialEl) {
+        initialEl.classList.remove('hidden');
+    }
+  </script>
+})();
 });
 $("#btnPrint").addEventListener("click", ()=>window.print());
 $("#btnPlans").addEventListener("click", openPlans);
