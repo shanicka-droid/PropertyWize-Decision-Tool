@@ -1350,22 +1350,6 @@ $("#btnReset").addEventListener("click", ()=>{
 
 setInterval(persist, 2000);
 } //
-// Buttons (RESTORED)
-    let msg = [];
-    if(!isNaN(amt) && issue){
-      if(issue==="Emergency") {
-        if(amt>300) msg.push("Emergency > $300 → FYI to Owner required (Maintenance sends). No prior approval needed.");
-        else msg.push("Emergency ≤ $300 → FYI recommended; follow emergency SOP.");
-      } else if(issue==="Non‑Emergency") {
-        if(amt>300) msg.push("Non‑Emergency > $300 → Owner Approval required BEFORE dispatch.");
-        else msg.push("Non‑Emergency ≤ $300 → Auto‑approve per plan.");
-      } else {
-        msg.push("Cosmetic/Upgrade → Requires owner authorization regardless of amount.");
-      }
-          // Add the clean button wiring here:
-$("#btnPrint").addEventListener("click", ()=>window.print());
-$("#btnReset").addEventListener("click", resetApplication);
-$("#btnPlans").addEventListener("click", openPlans); 
 
 // FINAL CLEAN INIT BLOCK: Place at the bottom of all script logic.
 (function () {
@@ -1386,37 +1370,55 @@ $("#btnPlans").addEventListener("click", openPlans);
     restore();
     setInterval(persist, 2000); 
 })();
-    } else {
-      msg.push("Enter Amount and select Issue Type to see rules.");
-    }
-    $("#policy").innerHTML = msg.join("<br>");
-  }
-
   // Persist state
-  function persist(){
+// ====== PERSISTENCE FUNCTIONS (CLEAN & COMPLETE) ======
+
+function persist(){
     const ids = ["wo","addr","vendor","plan","issue","amount","chkPhotos","chkTenant","chkFYI","chkOwnerOK","chkVendorApproved","chkWOStatus","chkInvoiceWO","chkAllDocs","chkReady",
                  "fin_wo","fin_addr","fin_vendor","fin_amount","fin_date","fin_invwo","fin_approve","fin_photos","fin_tenant","fin_temp","fin_enter","fin_link","fin_sheet","fin_epm","fin_pay","fin_upload","fin_done",
                  "nm_record","nm_epm","nm_pay"];
     const st = {};
+    // Iterate through IDs and collect values
     ids.forEach(id=>{
-      const el = $("#"+id); if(!el) return;
-      if(el.type==="checkbox") st[id]=el.checked;
-      else st[id]=el.value;
-    });
+        const el = $("#"+id); if(!el) return;
+        if(el.type==="checkbox") st[id]=el.checked;
+        else st[id]=el.value;}); //
+} //
     localStorage.setItem("pw_state", JSON.stringify(st));
-    calcRules(); updateProgress();
-  }
-  function restore(){
+    calcRules();
+    updateProgress();
+}
+function restore(){
     loadPlans();
     const raw = localStorage.getItem("pw_state"); if(!raw) return;
     try { var st = JSON.parse(raw); } catch(e){ return; }
-    Object.entries(st).forEach(([id,val])=>{
-      const el = $("#"+id); if(!el) return;
-      if(el.type==="checkbox") el.checked = !!val; else el.value = val;
-  }
-    calcRules(); updateProgress();
-  } //
+          Object.entries(st).forEach(([id,val])=>{
+const el = $("#"+id); if(!el) return;
+if(el.type==="checkbox") el.checked = !!val; else el.value = val;
+});
+calcRules();
+updateProgress();
+}
+    localStorage.setItem("pw_state", JSON.stringify(st));
+    calcRules();
+    updateProgress();
+} // 
 
+
+function restore(){
+    loadPlans();
+    const raw = localStorage.getItem("pw_state"); if(!raw) return;
+    try { var st = JSON.parse(raw); } catch(e){ return; }
+    
+    // Iterate through saved values and restore them to the correct inputs
+    Object.entries(st).forEach(([id,val])=>{
+        const el = $("#"+id); if(!el) return;
+        if(el.type==="checkbox") el.checked = !!val; else el.value = val;
+    }); // <-- CORRECTLY CLOSES THE FOREACH LOOP
+    
+    calcRules();
+    updateProgress();
+} // <-- CORRECTLY CLOSES THE ENTIRE RESTORE FUNCTION
   // Note generators
   function genHandoff(){
     const req = ["chkAllDocs","chkReady"];
