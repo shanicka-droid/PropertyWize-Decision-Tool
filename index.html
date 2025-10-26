@@ -1107,53 +1107,6 @@ set('dlq_email_subj', subject);
 set('dlq_email_body', lines.join('\n'));
 // keep whatever you typed for To/CC
 };
-// --- Delinquency: Auto-calc Total Balance ---
-function dlq_moneyToNumber(txt){
-if(!txt) return 0;
-return Number((txt+'').replace(/[^0-9.\-]/g,'')) || 0;
-}
-
-function dlq_numberToMoney(n){
-try { return n.toLocaleString('en-US',{style:'currency',currency:'USD'}); }
-catch(_){ return '$' + (Math.round((n||0)*100)/100); }
-}
-
-function dlq_recalcTotal(){
-var rent = dlq_moneyToNumber(document.getElementById('dlq_rent')?.value);
-var util = dlq_moneyToNumber(document.getElementById('dlq_util')?.value);
-var misc = dlq_moneyToNumber(document.getElementById('dlq_misc')?.value);
-var fees = dlq_moneyToNumber(document.getElementById('dlq_fees')?.value);
-var total = (rent||0)+(util||0)+(misc||0)+(fees||0);
-var out = document.getElementById('dlq_total');
-if(out) out.value = dlq_numberToMoney(total);
-}
-
-['dlq_rent','dlq_util','dlq_misc','dlq_fees'].forEach(function(id){
-var el = document.getElementById(id);
-if(el){
-el.addEventListener('input', dlq_recalcTotal);
-el.addEventListener('blur', dlq_recalcTotal);
-}
-});
-
-// run once when the section loads
-setTimeout(dlq_recalcTotal, 500);
-
-(function(){
-const showInput = document.getElementById('sl_show_start');
-const daysField = document.getElementById('sl_days_since');
-if (showInput && daysField){
-showInput.addEventListener('change', function(){
-const start = new Date(this.value);
-const now = new Date();
-if (!isNaN(start)){
-const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-daysField.value = 'On market for ' + diff + ' days';
-} else {
-daysField.value = '';
-}
-});
-}
   // --- Delinquency: Auto-calc Total Balance ---
 function dlq_moneyToNumber(txt){
 if(!txt) return 0;
