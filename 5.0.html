@@ -975,24 +975,10 @@ window.dlq_copy=id=>{const e=document.getElementById(id);if(!e)return;navigator.
 // 1. Safely converts currency strings (like "$1,200.00") to pure numbers
 function dlq_moneyToNumber(txt){
     if(!txt) return 0;
-    // Remove all non-numeric characters except the period and minus sign
     return Number((txt+'').replace(/[^0-9.\-]/g,'')) || 0;
 }
-  // New helper function to handle the empty date field
-function dlq_formatFTPDate(isoDate) {
-    if (!isoDate || isoDate.trim() === '') {
-        return 'Not yet scheduled';
-    }
-    // Convert ISO date (YYYY-MM-DD) to a readable format (MM/DD/YYYY)
-    try {
-        const parts = isoDate.split('-');
-        return `${parts[1]}/${parts[2]}/${parts[0]}`;
-    } catch (e) {
-        return isoDate; // return original if formatting fails
-    }
-}
 
-// 2. Formats a number back into USD currency string
+// 2. Helper to format a number back into USD currency string
 function dlq_numberToMoney(n){
     try { 
         return (n || 0).toLocaleString('en-US', {style:'currency', currency:'USD'});
@@ -1002,19 +988,29 @@ function dlq_numberToMoney(n){
     }
 }
 
-// 3. Core calculation and display function
+// 3. Helper to format the FTP date/status
+function dlq_formatFTPStatus(isoDate) {
+    if (!isoDate || isoDate.trim() === '') {
+        return 'Not yet scheduled';
+    }
+    // Convert ISO date (YYYY-MM-DD) to a readable format (MM/DD/YYYY)
+    try {
+        const parts = isoDate.split('-');
+        return `${parts[1]}/${parts[2]}/${parts[0]}`;
+    } catch (e) {
+        return isoDate; 
+    }
+}
+
+// 4. Core calculation and display function
 function dlq_recalcTotal(){
-    // Get values from the input fields (Rent, Utility, Misc, and Fees if you have that input)
     var rent = dlq_moneyToNumber(document.getElementById('dlq_rent')?.value);
     var util = dlq_moneyToNumber(document.getElementById('dlq_util')?.value);
     var misc = dlq_moneyToNumber(document.getElementById('dlq_misc')?.value);
-    // Assuming a 'dlq_fees' input exists; set to 0 if not needed
     var fees = dlq_moneyToNumber(document.getElementById('dlq_fees')?.value || 0); 
     
-    // Calculate the grand total
     var total = (rent||0) + (util||0) + (misc||0) + (fees||0);
     
-    // Display the formatted total back into the 'dlq_total' input field
     var out = document.getElementById('dlq_total');
     if(out) out.value = dlq_numberToMoney(total);
 }
@@ -1028,7 +1024,7 @@ const util=g('dlq_util')||'$0';
 const misc=g('dlq_misc')||'$0';
 const last=g('dlq_lastpay')||'—';
 const comm=g('dlq_lastcomm')||'—';
-const ftp = dlq_formatFTPStatus(g('dlq_ftp')); //
+const ftp = dlq_formatFTPStatus(g('dlq_ftp')); 
 const court=g('dlq_court')||'—';
 const judg=g('dlq_judgment')||'—';
 const ev=g('dlq_eviction')||'—';
