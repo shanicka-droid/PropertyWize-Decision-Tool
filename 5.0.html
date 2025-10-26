@@ -1059,8 +1059,8 @@ Best,
 PropertyWize Collections`;
 s('dlq_email_body', email);
 s('dlq_handoff', `Owner Email Sent for ${tenant} | Balance ${rent} | FTP ${ftpStatus}`);
-} 
-window.dlq_clear=function(){
+} // <-- close window.dlq_generate here
+window.dlq_clear = function () {
 //
 
 document.querySelectorAll('#viewDelinquency input, #viewDelinquency textarea').forEach(el=>{if(el.type!=='checkbox')el.value='';});
@@ -1773,23 +1773,24 @@ PropertyWize Leasing Team`;
     download(`EPM_Review_${name}_${todayISO()}.eml`, 'message/rfc822', eml);
   };
 
-  // --- bind buttons after DOM is ready (even inside view panes) ---
-  function bind(){
+<script>
+(function () {
+  function bind() {
     const map = [
-      ['sl_btnGen',  window.sl_generate],
-      ['sl_btnCopy', ()=> window.sl_copy('sl_out')],
-      ['sl_btnTxt',  window.sl_downloadTXT],
-      ['sl_btnCsv',  window.sl_downloadCSV],
-      ['sl_btnEml',  window.sl_downloadEML],
+      ['sl_btnGen', () => window.dlq_generate && window.dlq_generate()],
+      ['sl_btnCopy', () => window.sl_copy && window.sl_copy('sl_out')],
+      ['sl_btnTxt',  () => window.sl_downloadTXT && window.sl_downloadTXT()],
+      ['sl_btnCsv',  () => window.sl_downloadCSV && window.sl_downloadCSV()],
+      ['sl_btnEml',  () => window.sl_downloadEML && window.sl_downloadEML()],
     ];
-    map.forEach(([id, fn])=>{ const el = $(id); if(el && !el._pwBound){ el.addEventListener('click', fn); el._pwBound = true; } });
+
+    map.forEach(([id, fn]) => {
+      const el = document.getElementById(id);          // <— real element
+      if (!el) { console.warn('Missing element:', id); return; }
+      if (!el._pwBound) { el.addEventListener('click', fn); el._pwBound = true; }
+    });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bind, {once:true});
-  } else {
-    bind();
-  }
 })();
 </script>
 <script>
