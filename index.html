@@ -14,7 +14,7 @@
   :root{ --brand:#1b8e5a; --brand2:#1b6fb8; --ink:#18202a; --muted:#6b7785; --border:#e3e8ef; --bg:#f6f8fb; --ok:#1b8e5a; --warn:#b86f1b; --danger:#b81b3b; --card:#ffffff; }
   *{box-sizing:border-box}
   body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f7fafc,#eef3f9 40%,#e9f3ef)}
-  header{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.85);backdrop-filter:saturate(120%) blur(6px);border-bottom:1px solid var(--border)}
+  header{position:sticky;top:0;z-index:3;background:rgba(255,255,255,.85);-webkit-backdrop-filter:saturate(120%) blur(8px);backdrop-filter:saturate(120%) blur(8px);border-bottom:1px solid var(--border)}
   .wrap{max-width:1080px;margin:0 auto;padding:14px 16px}
   .brand{display:flex;gap:12px;align-items:center}
   .logo{width:44px;height:44px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid var(--border);box-shadow:0 6px 20px rgba(24,32,42,.08)}
@@ -26,7 +26,7 @@
   @media(min-width:920px){.grid{grid-template-columns:320px 1fr}}
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 6px 20px rgba(24,32,42,.08);padding:14px}
   .section-title{font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.1em;color:var(--muted);margin:0 0 8px}
-  .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;border:1px solid var(--border);cursor:pointer;user-select:none;background:#fff;font-weight:700;margin:0 8px 8px 0}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;border:1px solid var(--border);cursor:pointer;-webkit-user-select:none;user-select:none;background:#fff;font-weight:700;margin:0 8px 8px 0}
   .pill.active{border-color:var(--brand);box-shadow:inset 0 0 0 2px rgba(27,142,90,.15);background:linear-gradient(#fff,#f6fffb)}
   .btn{appearance:none;border:1px solid var(--border);background:#fff;color:#0b1420;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;margin-right:8px}
   .btn.primary{background:linear-gradient(180deg,#30b37a,#1b8e5a);color:#fff;border-color:#138254}
@@ -98,9 +98,9 @@
     <div class="hr"></div>
     <div class="section-title">Quick Actions</div>
     <div class="row">
-      <button class="btn" id="btnReset">Reset</button>
+      <button onclick="resetApplication()">Reset</button>
       <button class="btn blue" id="btnPrint">Print / Save PDF</button>
-      <button class="btn warn" id="btnPlans">Manage Owner Plans</button>
+      <button onclick="showPlansModal()">Manage Owner Plans</button>
     </div>
     <div class="hr"></div>
     <div class="section-title">Progress</div>
@@ -1269,10 +1269,54 @@ target="_blank" rel="noopener">Open Rentometer</a>
   // ====== State & helpers ======
   const $ = (q,ctx=document)=>ctx.querySelector(q);
   const $$ = (q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
-  const views = { welcome: $("#viewWelcome"), maintenance: $("#viewMaintenance"), finance: $("#viewFinance"), nonmaint: $("#viewNonMaint") };
+ const views = { 
+    welcome: $('#viewWelcome'), 
+    maintenance: $('#viewMaintenance'), 
+    finance: $('#viewFinance'), 
+    nonmaint: $('#viewNonMaint'),
+    // ADD THESE TWO LINES (based on your HTML data-target names):
+    delinquency: $('#viewDelinquency'),     
+    stalelisting: $('#viewStaleListing'), 
+    appliance: $('#viewAppliance')         // Assuming 'appliance' also needs a view
+};
   const pills = $$("#rolePicker .pill");
   let activeRole = null;
+  // This code listens for a change in the radio buttons named "role"
+$('input[name="role"]').on('change', function() {
+    // 1. Get the target view ID from the data-target attribute (e.g., "#viewDelinquency")
+    const targetViewIdWithHash = $(this).data('target');
+    
+    // 2. Remove the '#' and get the key name (e.g., "viewDelinquency")
+    const targetViewKey = targetViewIdWithHash.substring(1); 
+    
+    // 3. Hide all views currently visible
+    Object.keys(views).forEach(key => views[key].hide());
+    
+    // 4. Show the view that matches the selected role
+    if (views[targetViewKey]) { 
+        views[targetViewKey].show();
+    } 
+    
+    // 5. Update activeRole variable
+    activeRole = $(this).val(); 
+    
+    // 6. Update the visual "active" state on the button's label (the pill)
+    $('.pill').removeClass('active');
+    $(this).closest('label').addClass('active');
+});
+// Add these functions to the end of your <script> block
 
+function resetApplication() {
+    // This is the simplest way to clear the entire application state and views
+    window.location.reload(); 
+}
+
+function showPlansModal() {
+    // This function runs when "Manage Owner Plans" is clicked
+    alert("Plans Management screen would open now!"); 
+    // This logs the plan list to the browser's developer console for confirmation
+    console.log("Plans available:", DEFAULT_PLANS); 
+}
   // Plans
   const DEFAULT_PLANS = [
     "Standard- (Ownner Approval >300+)",
@@ -1305,6 +1349,19 @@ target="_blank" rel="noopener">Open Rentometer</a>
     localStorage.setItem("pw_plans", JSON.stringify(lines));
     loadPlans();
     closePlans();
+    // Add this code to the end of your <script> block
+
+function resetApplication() {
+    // This is the simplest way to clear the entire application state
+    window.location.reload(); 
+}
+
+function showPlansModal() {
+    // This function will run when "Manage Owner Plans" is clicked
+    alert("Plans Management screen would open now!"); 
+    // This logs the list of plans to the developer console for confirmation
+    console.log("Plans available:", DEFAULT_PLANS); 
+}
     // Buttons (RESTORED)
 $("#btnReset").addEventListener("click", ()=>{
   localStorage.removeItem("pw_state");
