@@ -1011,13 +1011,17 @@ Complete the checklist to enable Generate.
     try { return (n||0).toLocaleString('en-US',{style:'currency',currency:'USD'}); }
     catch(_) { return '$' + (Math.round((n||0)*100)/100).toFixed(2); }
   }
-  function formatFTPStatus(isoDate){
+ function formatFTPStatus(isoDate){
     if(!isoDate) return 'Not yet scheduled';
+    // If the input is not a recognized date format, return it as a status text
+    if (isoDate.indexOf('-') === -1) return isoDate; 
+    
     try {
       var parts = String(isoDate).split('-');
       if (parts.length !== 3) return isoDate;
       return parts[1] + '/' + parts[2] + '/' + parts[0];
-    } catch(_) { return isoDate; }
+    } catch(_) { return isoDate;
+    }
   }
 
   // === live total calculator ===
@@ -1042,7 +1046,7 @@ Complete the checklist to enable Generate.
     var misc   = g('dlq_misc') || '$0';
     var last   = g('dlq_lastpay') || '—';
     var comm   = g('dlq_lastcomm') || '—';
-    var ftp    = formatFTPStatus(g('dlq_ftp'));
+    var ftp    = g('dlq_ftp');
     var court  = g('dlq_court') || '—';
     var judg   = g('dlq_judgment') || '—';
     var ev     = g('dlq_eviction') || '—';
