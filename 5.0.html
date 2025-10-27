@@ -1037,35 +1037,34 @@ Complete the checklist to enable Generate.
 
   // === public API (same function names you already use) ===
  window.dlq_generate = function () {
-    // --- NO CHECKLIST GATE --- 
-    // The previous issues with the button are resolved by ensuring all
-    // variables below are correctly initialized.
+    // === LOCAL HELPERS (Override any corrupted external ones) ===
+    function g(id) { var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+    function s(id, v) { var e = document.getElementById(id); if (e) e.value = v; }
 
+    // --- Core Logic Starts Here ---
+    
     var tenant = g('dlq_tenant') || '[Tenant]';
     var addr   = g('dlq_address') || '[Address]';
     var rent   = g('dlq_rent') || '0';
     var util   = g('dlq_util') || '0';
     var misc   = g('dlq_misc') || '0';
-    var fees   = g('dlq_fees') || '0'; // Includes the new fees field
+    var fees   = g('dlq_fees') || '0'; 
+    var total  = g('dlq_total') || '—'; // Use the displayed total
     var last   = g('dlq_lastpay') || '—';
     var comm   = g('dlq_lastcomm') || '—';
-    var ftp    = g('dlq_ftp') || '—'; // Uses raw text, avoids crashing date function
+    var ftp    = g('dlq_ftp') || '—'; 
     var court  = g('dlq_court') || '—';
     var judg   = g('dlq_judgment') || '—';
     var ev     = g('dlq_eviction') || '—';
     var reason = g('dlq_noevict_reason') || '—';
     var lease  = g('dlq_leaseend') || '—';
     var act    = g('dlq_lastaction') || '—';
-    
-    // Total calculation (required for output, but uses moneyToNumber from other script)
-    // We will just use the displayed total to be safe.
-    var total  = g('dlq_total') || '—';
 
     var summary =
       'Delinquency Report – ' + tenant + '\n' +
       'Address: ' + addr + '\n' +
-      'Balances — Rent: ' + rent + ' • Utilities: ' + util + ' • Misc: ' + misc + ' • Fees: ' + fees + '\n' + // Added Fees to summary
-      'Total Balance: ' + total + '\n' + // Added Total to summary
+      'Balances — Rent: ' + rent + ' • Utilities: ' + util + ' • Misc: ' + misc + ' • Fees: ' + fees + '\n' +
+      'Total Balance: ' + total + '\n' + 
       'Last Payment: ' + last + '\n' +
       'Last Communication: ' + comm + '\n' +
       'FTP Date: ' + ftp + '\n' + 
@@ -1077,7 +1076,6 @@ Complete the checklist to enable Generate.
       'Last PW Action: ' + act;
     s('dlq_out', summary);
 
-    // Also generate email and handoff text based on the summary
     var email =
       'Hello [Owner],\n\n' +
       'Below is the current delinquency summary for ' + tenant + ' at ' + addr + '.\n\n' +
