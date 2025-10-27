@@ -1035,60 +1035,58 @@ Complete the checklist to enable Generate.
     if (out) out.value = numberToMoney(total);
   }
 
-  // === public API (same function names you already use) ===
- window.dlq_generate = function () {
-    // === LOCAL HELPERS (Override any corrupted external ones) ===
-    function g(id) { var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
-    function s(id, v) { var e = document.getElementById(id); if (e) e.value = v; }
-
-    // --- Core Logic Starts Here ---
-    
-    var tenant = g('dlq_tenant') || '[Tenant]';
-    var addr   = g('dlq_address') || '[Address]';
-    var rent   = g('dlq_rent') || '0';
-    var util   = g('dlq_util') || '0';
-    var misc   = g('dlq_misc') || '0';
-    var fees   = g('dlq_fees') || '0'; 
-    var total  = g('dlq_total') || '—'; // Use the displayed total
-    var last   = g('dlq_lastpay') || '—';
-    var comm   = g('dlq_lastcomm') || '—';
-    var ftp    = g('dlq_ftp') || '—'; 
-    var court  = g('dlq_court') || '—';
-    var judg   = g('dlq_judgment') || '—';
-    var ev     = g('dlq_eviction') || '—';
-    var reason = g('dlq_noevict_reason') || '—';
-    var lease  = g('dlq_leaseend') || '—';
-    var act    = g('dlq_lastaction') || '—';
-
-    var summary =
-      'Delinquency Report – ' + tenant + '\n' +
-      'Address: ' + addr + '\n' +
-      'Balances — Rent: ' + rent + ' • Utilities: ' + util + ' • Misc: ' + misc + ' • Fees: ' + fees + '\n' +
-      'Total Balance: ' + total + '\n' + 
-      'Last Payment: ' + last + '\n' +
-      'Last Communication: ' + comm + '\n' +
-      'FTP Date: ' + ftp + '\n' + 
-      'Court Outcome: ' + court + '\n' +
-      'Judgment Ordered: ' + judg + '\n' +
-      'Eviction Date: ' + ev + '\n' +
-      'Reason No Eviction: ' + reason + '\n' +
-      'Lease End: ' + lease + '\n' +
-      'Last PW Action: ' + act;
-    s('dlq_out', summary);
-
-    var email =
-      'Hello [Owner],\n\n' +
-      'Below is the current delinquency summary for ' + tenant + ' at ' + addr + '.\n\n' +
-      summary + '\n\n' +
-      'Our team has confirmed the steps above and is continuing to monitor compliance with Maryland landlord protections.\n\n' +
-      'Best,\n' +
-      'PropertyWize Collections';
-    s('dlq_email_body', email);
-
-    s('dlq_handoff', 'Owner Email Sent for ' + tenant + ' | Balance ' + rent + ' | FTP ' + ftp);
-};
+// === public API (same function names you already use) ===
+window.dlq_generate = function () {
+  // === Re-implementing Helpers locally to avoid external corruption ===
+  function g(id) { var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+  function s(id, v) { var e = document.getElementById(id); if (e) e.value = v; }
   
+  // No checklist gate, allowing generation without checking boxes.
+  
+  var tenant = g('dlq_tenant') || '[Tenant]';
+  var addr   = g('dlq_address') || '[Address]';
+  var rent   = g('dlq_rent') || '0';
+  var util   = g('dlq_util') || '0';
+  var misc   = g('dlq_misc') || '0';
+  var fees   = g('dlq_fees') || '0'; // Include the new fees field
+  var total  = g('dlq_total') || '—'; // Use the displayed total
+  var last   = g('dlq_lastpay') || '—';
+  var comm   = g('dlq_lastcomm') || '—';
+  var ftp    = g('dlq_ftp') || '—'; // Raw text input, CRITICAL FIX
+  var court  = g('dlq_court') || '—';
+  var judg   = g('dlq_judgment') || '—';
+  var ev     = g('dlq_eviction') || '—';
+  var reason = g('dlq_noevict_reason') || '—';
+  var lease  = g('dlq_leaseend') || '—';
+  var act    = g('dlq_lastaction') || '—';
 
+  var summary =
+    'Delinquency Report – ' + tenant + '\n' +
+    'Address: ' + addr + '\n' +
+    'Balances — Rent: ' + rent + ' • Utilities: ' + util + ' • Misc: ' + misc + ' • Fees: ' + fees + '\n' +
+    'Total Balance: ' + total + '\n' + 
+    'Last Payment: ' + last + '\n' +
+    'Last Communication: ' + comm + '\n' +
+    'FTP Date: ' + ftp + '\n' + 
+    'Court Outcome: ' + court + '\n' +
+    'Judgment Ordered: ' + judg + '\n' +
+    'Eviction Date: ' + ev + '\n' +
+    'Reason No Eviction: ' + reason + '\n' +
+    'Lease End: ' + lease + '\n' +
+    'Last PW Action: ' + act;
+  s('dlq_out', summary);
+
+  var email =
+    'Hello [Owner],\n\n' +
+    'Below is the current delinquency summary for ' + tenant + ' at ' + addr + '.\n\n' +
+    summary + '\n\n' +
+    'Our team has confirmed the steps above and is continuing to monitor compliance with Maryland landlord protections.\n\n' +
+    'Best,\n' +
+    'PropertyWize Collections';
+  s('dlq_email_body', email);
+
+  s('dlq_handoff', 'Owner Email Sent for ' + tenant + ' | Balance ' + rent + ' | FTP ' + ftp);
+};
   window.dlq_clear = function () {
     var scope = document.getElementById('viewDelinquency');
     if (!scope) return;
