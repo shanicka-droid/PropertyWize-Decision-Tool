@@ -957,17 +957,15 @@ Complete the checklist to enable Generate.
 </div>
 </div>
 
-<div class="field">
-<label>Email Body</label>
-<textarea id="dlq_email_body" readonly style="min-height:160px"></textarea>
-</div>
 <div class="row">
-<button type="button" class="btn primary" id="dlq_btnGen" onclick="dlq_generateEmail()">
-Generate Owner Report
-</button>
-<button type="button" class="btn" onclick="dlq_copy('dlq_email_body')">
-Copy Email
-</button>
+    <button type="button" class="btn primary" id="dlq_btnGen" onclick="window.dlq_generate()"> 
+    Generate Owner Report 
+    </button>
+    
+    <button type="button" class="btn" onclick="window.dlq_copy('dlq_email_body')"> 
+    Copy Email
+    </button>
+</div>
 
 <div class="hr"></div>
 <h3>Handoff</h3>
