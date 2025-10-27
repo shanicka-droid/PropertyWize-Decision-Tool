@@ -887,7 +887,7 @@ var emOut = nb$('ho_out_em_nb'); if(emOut) emOut.value='';
 <div id="viewDelinquency" class="view-pane hidden">
 <h2>Delinquency Handoff Tool</h2>
 <p class="note">
-Summarize tenants with balances over 60 days and confirm SOP steps.
+Summarize tenants with balances over 30+ days and confirm SOP steps.
 Complete the checklist to enable Generate.
 </p>
 
@@ -962,125 +962,202 @@ Complete the checklist to enable Generate.
 <div class="field"><textarea id="dlq_handoff" readonly></textarea></div>
 <div class="row"><button class="btn" onclick="dlq_copy('dlq_handoff')">Copy Handoff</button></div>
 <script>
-(function(){
-if(window._dlqReady) return; window._dlqReady = true;
-function g(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
-function s(id,v){var e=document.getElementById(id);if(e)e.value=v;}
-function allChecked(){return ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].every(id=>document.getElementById(id)?.checked);}
-window.dlq_copy=id=>{const e=document.getElementById(id);if(!e)return;navigator.clipboard?.writeText(e.value||'')};
-// --- Delinquency Auto-Calculation Helper Functions ---
+(function () {
+  // Guard against double-load
+  if (window._dlqReady) return;
+  window._dlqReady = true;
 
-// 1. Safely converts currency strings (like "$1,200.00") to pure numbers
-function dlq_moneyToNumber(txt){
+  // === tiny DOM helpers ===
+  function g(id) { var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+  function s(id, v) { var e = document.getElementById(id); if (e) e.value = v; }
+
+  // === checklist gating ===
+  function allChecked() {
+    var ids = ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'];
+    for (var i=0;i<ids.length;i++) {
+      var el = document.getElementById(ids[i]);
+      if (!el || !el.checked) return false;
+    }
+    return true;
+  }
+
+  // === copy helper with fallback (no inline onclick needed) ===
+  function copyText(text) {
+    text = String(text || '');
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function(){ legacy(); });
+    }
+    legacy();
+    function legacy(){
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.setAttribute('readonly','');
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch(_) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  // === $ helpers for totals/formatting ===
+  function moneyToNumber(txt){
     if(!txt) return 0;
-    return Number((txt+'').replace(/[^0-9.\-]/g,'')) || 0;
-}
-
-// 2. Helper to format a number back into USD currency string
-function dlq_numberToMoney(n){
-    try { 
-        return (n || 0).toLocaleString('en-US', {style:'currency', currency:'USD'});
-    }
-    catch(_){ 
-        return '$' + (Math.round((n||0)*100)/100).toFixed(2); 
-    }
-}
-
-// 3. Helper to format the FTP date/status
-function dlq_formatFTPStatus(isoDate) {
-    if (!isoDate || isoDate.trim() === '') {
-        return 'Not yet scheduled';
-    }
-    // Convert ISO date (YYYY-MM-DD) to a readable format (MM/DD/YYYY)
+    return Number(String(txt).replace(/[^0-9.\-]/g,'')) || 0;
+  }
+  function numberToMoney(n){
+    try { return (n||0).toLocaleString('en-US',{style:'currency',currency:'USD'}); }
+    catch(_) { return '$' + (Math.round((n||0)*100)/100).toFixed(2); }
+  }
+  function formatFTPStatus(isoDate){
+    if(!isoDate) return 'Not yet scheduled';
     try {
-        const parts = isoDate.split('-');
-        return `${parts[1]}/${parts[2]}/${parts[0]}`;
-    } catch (e) {
-        return isoDate; 
-    }
-}
+      var parts = String(isoDate).split('-');
+      if (parts.length !== 3) return isoDate;
+      return parts[1] + '/' + parts[2] + '/' + parts[0];
+    } catch(_) { return isoDate; }
+  }
 
-// 4. Core calculation and display function
-function dlq_recalcTotal(){
-    var rent = dlq_moneyToNumber(document.getElementById('dlq_rent')?.value);
-    var util = dlq_moneyToNumber(document.getElementById('dlq_util')?.value);
-    var misc = dlq_moneyToNumber(document.getElementById('dlq_misc')?.value);
-    var fees = dlq_moneyToNumber(document.getElementById('dlq_fees')?.value || 0); 
-    
+  // === live total calculator ===
+  function recalcTotal(){
+    var rent = moneyToNumber((document.getElementById('dlq_rent')||{}).value);
+    var util = moneyToNumber((document.getElementById('dlq_util')||{}).value);
+    var misc = moneyToNumber((document.getElementById('dlq_misc')||{}).value);
+    var fees = moneyToNumber((document.getElementById('dlq_fees')||{}).value || 0);
     var total = (rent||0) + (util||0) + (misc||0) + (fees||0);
-    
     var out = document.getElementById('dlq_total');
-    if(out) out.value = dlq_numberToMoney(total);
-}
-// --- End of Auto-Calculation Helper Functions ---
-window.dlq_generate=function(){
-if(!allChecked()){alert('Complete the checklist first.');return;}
-const tenant=g('dlq_tenant')||'[Tenant]';
-const addr=g('dlq_address')||'[Address]';
-const rent=g('dlq_rent')||'$0';
-const util=g('dlq_util')||'$0';
-const misc=g('dlq_misc')||'$0';
-const last=g('dlq_lastpay')||'—';
-const comm=g('dlq_lastcomm')||'—';
-const ftpStatus = dlq_formatFTPStatus(g('dlq_ftp'));
-const court=g('dlq_court')||'—';
-const judg=g('dlq_judgment')||'—';
-const ev=g('dlq_eviction')||'—';
-const reason=g('dlq_noevict_reason')||'—';
-const lease=g('dlq_leaseend')||'—';
-const act=g('dlq_lastaction')||'—';
+    if (out) out.value = numberToMoney(total);
+  }
 
-const summary=`Delinquency Report – ${tenant}
-Address: ${addr}
-Balances — Rent: ${rent} • Utilities: ${util} • Misc: ${misc}
-Last Payment: ${last}
-Last Communication: ${comm}
-FTP Date: ${ftpStatus}
-Court Outcome: ${court}
-Judgment Ordered: ${judg}
-Eviction Date: ${ev}
-Reason No Eviction: ${reason}
-Lease End: ${lease}
-Last PW Action: ${act}`;
+  // === public API (same function names you already use) ===
+  window.dlq_generate = function () {
+    if (!allChecked()) { alert('Complete the checklist first.'); return; }
 
-s('dlq_out', summary);
+    var tenant = g('dlq_tenant') || '[Tenant]';
+    var addr   = g('dlq_address') || '[Address]';
+    var rent   = g('dlq_rent') || '$0';
+    var util   = g('dlq_util') || '$0';
+    var misc   = g('dlq_misc') || '$0';
+    var last   = g('dlq_lastpay') || '—';
+    var comm   = g('dlq_lastcomm') || '—';
+    var ftp    = formatFTPStatus(g('dlq_ftp'));
+    var court  = g('dlq_court') || '—';
+    var judg   = g('dlq_judgment') || '—';
+    var ev     = g('dlq_eviction') || '—';
+    var reason = g('dlq_noevict_reason') || '—';
+    var lease  = g('dlq_leaseend') || '—';
+    var act    = g('dlq_lastaction') || '—';
 
-const email=`Hello [Owner],
+    var summary =
+      'Delinquency Report – ' + tenant + '\n' +
+      'Address: ' + addr + '\n' +
+      'Balances — Rent: ' + rent + ' • Utilities: ' + util + ' • Misc: ' + misc + '\n' +
+      'Last Payment: ' + last + '\n' +
+      'Last Communication: ' + comm + '\n' +
+      'FTP Date: ' + ftp + '\n' +
+      'Court Outcome: ' + court + '\n' +
+      'Judgment Ordered: ' + judg + '\n' +
+      'Eviction Date: ' + ev + '\n' +
+      'Reason No Eviction: ' + reason + '\n' +
+      'Lease End: ' + lease + '\n' +
+      'Last PW Action: ' + act;
 
-Below is the current delinquency summary for ${tenant} at ${addr}.
+    s('dlq_out', summary);
 
-${summary}
+    var email =
+      'Hello [Owner],\n\n' +
+      'Below is the current delinquency summary for ' + tenant + ' at ' + addr + '.\n\n' +
+      summary + '\n\n' +
+      'Our team has confirmed the steps above and is continuing to monitor compliance with Maryland landlord protections.\n\n' +
+      'Best,\n' +
+      'PropertyWize Collections';
+    s('dlq_email_body', email);
 
-Our team has confirmed the steps above and is continuing to monitor compliance with Maryland landlord protections.
+    s('dlq_handoff', 'Owner Email Sent for ' + tenant + ' | Balance ' + rent + ' | FTP ' + ftp);
+  };
 
-Best,
-PropertyWize Collections`;
-s('dlq_email_body', email);
-s('dlq_handoff', `Owner Email Sent for ${tenant} | Balance ${rent} | FTP ${ftpStatus}`);
-} // <-- close window.dlq_generate here
-window.dlq_clear = function () {
-//
+  window.dlq_clear = function () {
+    var scope = document.getElementById('viewDelinquency');
+    if (!scope) return;
 
-document.querySelectorAll('#viewDelinquency input, #viewDelinquency textarea').forEach(el=>{if(el.type!=='checkbox')el.value='';});
-document.querySelectorAll('#viewDelinquency input[type=checkbox]').forEach(c=>c.checked=false);
-};
-// --- Wire Inputs to Trigger Recalculation ---
-
-['dlq_rent','dlq_util','dlq_misc','dlq_fees'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el){
-        // Run the calculation whenever the user types something
-        el.addEventListener('input', dlq_recalcTotal); 
-        // Run the calculation when the user tabs out or clicks away
-        el.addEventListener('blur', dlq_recalcTotal);
+    var inputs = scope.querySelectorAll('input, textarea');
+    for (var i=0;i<inputs.length;i++){
+      var el = inputs[i];
+      if (el.type === 'checkbox') { el.checked = false; }
+      else { el.value = ''; }
     }
-});
+    // keep totals accurate after clear
+    recalcTotal();
+  };
 
-// Run the calculation once immediately when the page loads (initial calc)
-setTimeout(dlq_recalcTotal, 0); 
-// --- End of Wiring ---
+  // === replace blocked inline onclick with safe listeners ===
+  function bindButtons(){
+    // Generate
+    var btnGen = document.querySelector('button[onclick*="dlq_generate"]');
+    if (btnGen && !btnGen._pwBound) {
+      btnGen.addEventListener('click', function(){ window.dlq_generate && window.dlq_generate(); });
+      btnGen._pwBound = true;
+    }
+    // Clear
+    var btnClr = document.querySelector('button[onclick*="dlq_clear"]');
+    if (btnClr && !btnClr._pwBound) {
+      btnClr.addEventListener('click', function(){ window.dlq_clear && window.dlq_clear(); });
+      btnClr._pwBound = true;
+    }
+    // Copy Comment
+    var btnCopyComment = document.querySelector('button[onclick*="dlq_copy(\'dlq_out\')"]');
+    if (btnCopyComment && !btnCopyComment._pwBound) {
+      btnCopyComment.addEventListener('click', function(){
+        var el = document.getElementById('dlq_out'); copyText(el ? el.value : '');
+      });
+      btnCopyComment._pwBound = true;
+    }
+    // Copy Email
+    var btnCopyEmail = document.querySelector('button[onclick*="dlq_copy(\'dlq_email_body\')"]');
+    if (btnCopyEmail && !btnCopyEmail._pwBound) {
+      btnCopyEmail.addEventListener('click', function(){
+        var el = document.getElementById('dlq_email_body'); copyText(el ? el.value : '');
+      });
+      btnCopyEmail._pwBound = true;
+    }
+    // Copy Handoff
+    var btnCopyHandoff = document.querySelector('button[onclick*="dlq_copy(\'dlq_handoff\')"]');
+    if (btnCopyHandoff && !btnCopyHandoff._pwBound) {
+      btnCopyHandoff.addEventListener('click', function(){
+        var el = document.getElementById('dlq_handoff'); copyText(el ? el.value : '');
+      });
+      btnCopyHandoff._pwBound = true;
+    }
+  }
+
+  // === wire inputs to recalc total ===
+  function bindRecalc(){
+    var ids = ['dlq_rent','dlq_util','dlq_misc','dlq_fees'];
+    for (var i=0;i<ids.length;i++){
+      var el = document.getElementById(ids[i]);
+      if (el) {
+        el.addEventListener('input', recalcTotal);
+        el.addEventListener('blur', recalcTotal);
+      }
+    }
+    // initial calc after DOM
+    setTimeout(recalcTotal, 0);
+  }
+
+  function init(){
+    bindButtons();
+    bindRecalc();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 })();
 </script>
+
 </div>
 <!-- ==== /Delinquency Handoff ==== -->
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
