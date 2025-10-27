@@ -1037,22 +1037,18 @@ Complete the checklist to enable Generate.
 
   // === public API (same function names you already use) ===
   window.dlq_generate = function () {
-    if (!allChecked()) { alert('Complete the checklist first.'); return; }
+ 
 
-    var tenant = g('dlq_tenant') || '[Tenant]';
-    var addr   = g('dlq_address') || '[Address]';
-    var rent   = g('dlq_rent') || '$0';
-    var util   = g('dlq_util') || '$0';
-    var misc   = g('dlq_misc') || '$0';
+    var rent   = g('dlq_rent') || '0';
+    var util   = g('dlq_util') || '0';
+    var misc   = g('dlq_misc') || '0';
+    var fees   = g('dlq_fees') || '0'; // 
     var last   = g('dlq_lastpay') || '—';
     var comm   = g('dlq_lastcomm') || '—';
-    var ftp    = g('dlq_ftp') || '—'; 
+    var ftp    = g('dlq_ftp') || '—'; // 
     var court  = g('dlq_court') || '—';
     var judg   = g('dlq_judgment') || '—';
     var ev     = g('dlq_eviction') || '—';
-    var reason = g('dlq_noevict_reason') || '—';
-    var lease  = g('dlq_leaseend') || '—';
-    var act    = g('dlq_lastaction') || '—';
 
     var summary =
       'Delinquency Report – ' + tenant + '\n' +
@@ -1256,14 +1252,14 @@ Complete the checklist to enable Generate.
 
   <h3>Outputs</h3>
   <div class="row">
-    <button type="button" class="btn primary" id="sl_btnGen">Generate Owner Report</button>
-    <button type="button" class="btn" id="sl_btnCopy">Copy Email Body</button>
-  </div>
-  <div class="row" style="margin-top:6px;">
-    <button type="button" class="btn" id="sl_btnTxt">Download Report (.txt)</button>
-    <button type="button" class="btn" id="sl_btnCsv">Download Summary (.csv)</button>
-    <button type="button" class="btn" id="sl_btnEml">Download EPM Draft (.eml)</button>
-  </div>
+  <button type="button" class="btn primary" id="sl_btnGen" onclick="window.sl_generate()">Generate Owner Report</button>
+  <button type="button" class="btn" id="sl_btnCopy" onclick="window.sl_copy('sl_out')">Copy Email Body</button>
+</div>
+<div class="row" style="margin-top:6px;">
+  <button type="button" class="btn" id="sl_btnTxt" onclick="window.sl_downloadTXT()">Download Report (.txt)</button>
+  <button type="button" class="btn" id="sl_btnCsv" onclick="window.sl_downloadCSV()">Download Summary (.csv)</button>
+  <button type="button" class="btn" id="sl_btnEml" onclick="window.sl_downloadEML()">Download EPM Draft (.eml)</button>
+</div>
 
   <div class="field">
     <label>Owner Report / Email Body</label>
