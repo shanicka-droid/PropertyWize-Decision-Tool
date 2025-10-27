@@ -932,8 +932,8 @@ Complete the checklist to enable Generate.
 
 <div class="row">
 <button class="btn primary" onclick="window.dlq_generate()">Generate</button>
-<button class="btn" onclick="dlq_copy('dlq_out')">Copy Comment</button>
-<button class="btn" onclick="dlq_clear()">Clear</button>
+<button class="btn" onclick="window.dlq_copy('dlq_out')">Copy Comment</button>
+<button class="btn" onclick="window.dlq_clear()">Clear</button>
 </div>
 
 <div class="field">
@@ -1339,9 +1339,9 @@ Complete the checklist to enable Generate.
     try{ var b=event&&event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
   };
 
-  // Generate formatted comment (gated by checklist)
+ 
   window.dlq_generate = function(){
-    if(!allChecked()){ alert('Please complete the checklist before generating.'); return; }
+    
 
     var lines=[];
     lines.push('Delinquency Report — ' + (g('dlq_tenant')||'[Tenant]'));
@@ -1521,11 +1521,12 @@ PropertyWize Leasing Team`;
 
   // ---- resilient wiring (buttons work even if inline onclicks are missing) ----
   function on(id, fn){ var el=$(id); if(el && typeof fn==='function') el.addEventListener('click', fn); }
-  on('sl_btnGen',  window.sl_generate);
-  on('sl_btnCopy', function(){ window.sl_copy('sl_out'); });
-  on('sl_btnTxt',  window.sl_downloadTXT);
-  on('sl_btnCsv',  window.sl_downloadCSV);
-  on('sl_btnEml',  window.sl_downloadEML);
+<button id="sl_btnGen"  class="btn primary" onclick="sl_generate()">Generate</button>
+<button id="sl_btnCopy" class="btn"          onclick="sl_copy('sl_out')">Copy</button>
+<button id="sl_btnTxt"  class="btn">Download .txt</button>
+<button id="sl_btnCsv"  class="btn">Download .csv</button>
+<button id="sl_btnEml"  class="btn">Download .eml</button>
+
 })();
 </script>
 <script>
@@ -1610,7 +1611,27 @@ PropertyWize Leasing Team`;
   window.sl_copy = function(id){
     const el = $(id); if(!el) return;
     const txt = (el.value !== undefined) ? el.value : (el.innerText || el.textContent || '');
-    if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(txt); }
+   <script>
+function safeCopyText(text) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text || '');
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text || '';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return Promise.resolve();
+    }
+  } catch (e) {
+    console.error('Copy failed:', e);
+    return Promise.resolve();
+  }
+}
+</script>
+
     else { try{ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); }catch(_){ } }
   };
 
@@ -1654,15 +1675,32 @@ PropertyWize Leasing Team`;
 
 <script>
 (function () {
-  function bind() {
-    const map = [
-      ['sl_btnGen', () => window.dlq_generate && window.dlq_generate()],
-      ['sl_btnCopy', () => window.sl_copy && window.sl_copy('sl_out')],
-      ['sl_btnTxt',  () => window.sl_downloadTXT && window.sl_downloadTXT()],
-      ['sl_btnCsv',  () => window.sl_downloadCSV && window.sl_downloadCSV()],
-      ['sl_btnEml',  () => window.sl_downloadEML && window.sl_downloadEML()],
-    ];
+  function on(id, fn) {
+    var el = document.getElementById(id);
+    if (el && typeof fn === 'function') el.addEventListener('click', fn);
+  }
 
+  // wait until the DOM exists
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind, { once: true });
+  } else {
+    bind();
+  }
+
+  function bind() {
+    // Stale Listing
+    on('sl_btnGen',  function(){ if (window.sl_generate)     window.sl_generate(); });
+    on('sl_btnCopy', function(){ if (window.sl_copy)          window.sl_copy('sl_out'); });
+    on('sl_btnTxt',  function(){ if (window.sl_downloadTXT)   window.sl_downloadTXT(); });
+    on('sl_btnCsv',  function(){ if (window.sl_downloadCSV)   window.sl_downloadCSV(); });
+    on('sl_btnEml',  function(){ if (window.sl_downloadEML)   window.sl_downloadEML(); });
+
+    // Delinquency (only if you added IDs above)
+    on('dlq_btnGen',  function(){ if (window.dlq_generate) window.dlq_generate(); });
+    on('dlq_btnCopy', function(){ if (window.dlq_copy)     window.dlq_copy('dlq_out'); });
+  }
+})();
+</script>
     map.forEach(([id, fn]) => {
       const el = document.getElementById(id);          // <— real element
       if (!el) { console.warn('Missing element:', id); return; }
