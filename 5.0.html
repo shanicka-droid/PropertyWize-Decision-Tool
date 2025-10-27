@@ -1695,15 +1695,8 @@ function safeCopyText(text) {
     on('dlq_btnGen',  function(){ if (window.dlq_generate) window.dlq_generate(); });
     on('dlq_btnCopy', function(){ if (window.dlq_copy)     window.dlq_copy('dlq_out'); });
   }
-    bind();
-})();
-</script>
-    map.forEach(([id, fn]) => {
-      const el = document.getElementById(id);          // <— real element
-      if (!el) { console.warn('Missing element:', id); return; }
-      if (!el._pwBound) { el.addEventListener('click', fn); el._pwBound = true; }
-    });
-  }
+
+ }
 
 })();
 </script>
