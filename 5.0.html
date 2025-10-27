@@ -920,7 +920,7 @@ Complete the checklist to enable Generate.
 </div>
 
 <div class="soft">
-<div class="field"><label>FTP date</label><input id="dlq_ftp" type="date"></div>
+<div class="field"><label>FTP date</label><input id="dlq_ftp" type="text" placeholder="e.g., 10/26/2025 or Not Scheduled"></div>
 <div class="field"><label>Court outcome</label><input id="dlq_court" type="text"></div>
 <div class="field"><label>Judgment ordered</label><input id="dlq_judgment" type="text"></div>
 <div class="field"><label>Eviction date</label><input id="dlq_eviction" type="text"></div>
@@ -1046,7 +1046,7 @@ Complete the checklist to enable Generate.
     var misc   = g('dlq_misc') || '$0';
     var last   = g('dlq_lastpay') || '—';
     var comm   = g('dlq_lastcomm') || '—';
-    var ftp    = g('dlq_ftp') || '—'; // 
+    var ftp    = g('dlq_ftp') || '—'; 
     var court  = g('dlq_court') || '—';
     var judg   = g('dlq_judgment') || '—';
     var ev     = g('dlq_eviction') || '—';
