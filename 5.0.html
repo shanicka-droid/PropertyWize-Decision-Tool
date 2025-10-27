@@ -1682,9 +1682,7 @@ function safeCopyText(text) {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bind, { once: true });
   } else {
-    bind();
-  }
-
+  
   function bind() {
     // Stale Listing
     on('sl_btnGen',  function(){ if (window.sl_generate)     window.sl_generate(); });
@@ -1697,6 +1695,7 @@ function safeCopyText(text) {
     on('dlq_btnGen',  function(){ if (window.dlq_generate) window.dlq_generate(); });
     on('dlq_btnCopy', function(){ if (window.dlq_copy)     window.dlq_copy('dlq_out'); });
   }
+    bind();
 })();
 </script>
     map.forEach(([id, fn]) => {
