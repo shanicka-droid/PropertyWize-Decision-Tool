@@ -1422,15 +1422,14 @@ function copyMaintNote(){
     if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt); }
     else { try{ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); }catch(_){} }
   };
+  
+  window.sl_calcDOM = function () {
+    var listedEl = document.getElementById('sl_listed');
+    var domEl    = document.getElementById('sl_dom');
+    if (!listedEl || !domEl) return;
 
-<script>
-window.sl_calcDOM = function () {
-  var listedEl = document.getElementById('sl_listed');
-  var domEl    = document.getElementById('sl_dom');
-  if (!listedEl || !domEl) return;
-
-  var raw = (listedEl.value || '').trim();
-  if (!raw) { domEl.value = ''; return; }
+    var raw = (listedEl.value || '').trim();
+    if (!raw) { domEl.value = ''; return; }
 
   // Accept YYYY-MM-DD or MM/DD/YYYY
   var dt;
