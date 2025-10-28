@@ -111,14 +111,14 @@
 
   <!-- RIGHT COLUMN -->
   <section class="card">
-    <div id="viewWelcome">
+     <div id="viewWelcome" class="view-pane"> 
       <h2>Welcome</h2>
       <p><strong>PropertyWize Operations Team:</strong> The PropertyWize Decision Tool centralizes our most critical workflows into one smart system that empowers every department — Maintenance, Finance, Leasing, and Delinquency — to work faster and more accurately. It provides step-by-step guidance for complex tasks, ensures approvals and communications are handled consistently, and automatically generates formatted notes, owner updates, and internal handoffs. This tool was built to simplify decisions, reduce errors, and keep the entire PropertyWize team aligned, informed, and accountable from start to finish.</p>
       <p class="note">Tip: Add to Home Screen in Safari/Chrome to use like an app.</p>
     </div>
 
     <!-- Maintenance VIEW -->
-    <div id="viewMaintenance" class="hidden">
+    <div id="viewMaintenance" class="view-pane hidden">
       <div class="badge">Owner FYI for emergencies is sent by <b>Maintenance</b></div>
       <div class="badge">Handoff status: <span class="kbd">READY FOR FINANCE</span></div>
       <div class="hr"></div>
@@ -1860,30 +1860,49 @@ function safeCopyText(text) {
   };
 })();
 </script>
-<!-- Show/hide view panes -->
 <script>
+(function () {
+  // Hide everything, then show the one we want
   function showPane(id) {
-    // Hide all view panes first
     document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-
-    // Then show only the one requested
     const el = document.getElementById(id);
     if (el) el.classList.remove('hidden');
   }
 
-  // Listen for role selection
-  document.querySelectorAll('input[name="role"]').forEach(r => {
-    r.addEventListener('change', e => {
-      const target = e.target.getAttribute('data-target');
-      if (target) showPane(target);
+  // Wire the role buttons
+  document.querySelectorAll('#rolePicker [data-target]').forEach(input => {
+    ['change','click'].forEach(evt => {
+      input.addEventListener(evt, () => {
+        const id = input.getAttribute('data-target');
+        if (id && document.getElementById(id)) {
+          localStorage.setItem('pw_role', id);
+          showPane(id);
+        } else {
+          alert('Missing panel with id="' + id + '"');
+        }
+      });
     });
   });
 
-  // Show the welcome page (or first view) by default when loading
-  document.addEventListener('DOMContentLoaded', () => {
-    showPane('viewWelcome'); // change 'viewWelcome' to your default view if needed
-  });
-</script>
+  // Pick a safe default even if there is NO Welcome pane
+  function firstExistingTarget() {
+    // 1) try saved choice
+    const saved = localStorage.getItem('pw_role');
+    if (saved && document.getElementById(saved)) return saved;
 
+    // 2) try the first radio’s data-target that actually exists
+    const radios = Array.from(document.querySelectorAll('#rolePicker [data-target]'));
+    const hit = radios.find(r => document.getElementById(r.getAttribute('data-target')));
+    if (hit) return hit.getAttribute('data-target');
+
+    // 3) finally, try the first .view-pane in the DOM
+    const pane = document.querySelector('.view-pane');
+    return pane ? pane.id : null;
+  }
+
+  const initial = firstExistingTarget();
+  if (initial) showPane(initial);
+})();
+</script>
 </body>
 </html>
