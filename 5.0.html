@@ -1098,6 +1098,7 @@ Complete the checklist to enable Generate.
 <footer class="wrap" style="text-align:center;font-size:12px;color:var(--muted);padding-bottom:28px">
   © 2025 PropertyWize • This single file runs entirely on your device. Add to Home Screen for faster access.
 </footer>
+    <script>
   // ====== State & helpers ======
   const $ = (q,ctx=document)=>ctx.querySelector(q);
   const $$ = (q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
@@ -1128,11 +1129,15 @@ Complete the checklist to enable Generate.
     return plans;
   }
   function openPlans() {
+    window.openPlans = openPlans;
     $("#plansText").value = loadPlans().join("\n");
     $("#plansModal").classList.remove("hidden");
   }
   function closePlans() { $("#plansModal").classList.add("hidden"); }
+      window.closePlans = closePlans;
+
   function savePlans() {
+    window.savePlans = savePlans;
     const lines = $("#plansText").value.split(/\n+/).map(s=>s.trim()).filter(Boolean);
     localStorage.setItem("pw_plans", JSON.stringify(lines));
     loadPlans();
@@ -1250,6 +1255,7 @@ Complete the checklist to enable Generate.
     $("#handoff").focus(); $("#handoff").select();
   }
   function genFinance(){
+      window.genFinance = genFinance;
     const dt = new Date().toLocaleDateString();
     const txt = `FINANCE INTAKE — WO # ${$("#fin_wo").value||$("#wo").value||"[####]"} — ${$("#fin_addr").value||$("#addr").value||"<Address>"}\n`
       + `Vendor: ${$("#fin_vendor").value||$("#vendor").value||"<Vendor>"} — Amount: $${$("#fin_amount").value||$("#amount").value||"0.00"}\n`
@@ -1283,6 +1289,7 @@ function s(id,txt){ /* ... */ }
 
   // Copy with fallback
   window.dlq_copy = function(id){
+    window.dlq_copy = dlq_copy;
     var el=document.getElementById(id); if(!el) return;
     var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
     if(navigator.clipboard && navigator.clipboard.writeText){
@@ -1294,7 +1301,7 @@ function s(id,txt){ /* ... */ }
 
  
   window.dlq_generate = function(){
-    
+    window.dlq_generate = dlq_generate;
 
     var lines=[];
     lines.push('Delinquency Report — ' + (g('dlq_tenant')||'[Tenant]'));
@@ -1317,6 +1324,7 @@ function s(id,txt){ /* ... */ }
 
   // Clear all inputs/outputs
   window.dlq_clear = function(){
+    window.dlq_clear = dlq_clear;
     ['dlq_tenant','dlq_address','dlq_rent','dlq_util','dlq_misc','dlq_lastpay','dlq_lastcomm','dlq_ftp','dlq_court','dlq_judgment','dlq_eviction','dlq_noevict_reason','dlq_leaseend','dlq_lastaction'].forEach(function(id){
       var el=document.getElementById(id); if(!el) return; el.value='';
     });
@@ -1331,6 +1339,7 @@ function s(id,txt){ /* ... */ }
 })();
 // === Maintenance Note generator ===
 function genMaintNote(){
+  window.genMaintNote = genMaintNote;
   const issue = document.getElementById("issue")?.value || "";
   const tenantResp = document.getElementById("mt_tenant_resp")?.checked ? "Tenant responsibility confirmed." : "";
   const followup = document.getElementById("mt_followup_suggested")?.checked ? "Vendor suggested follow-up." : "";
@@ -1378,6 +1387,7 @@ function copyMaintNote(){
   
   // Calculate Days on Market (sl_calcDOM)
   window.sl_calcDOM = function () {
+    window.sl_calcDOM = sl_calcDOM;
     const d = gv('sl_listed'); if(!d){ const o=$('sl_dom'); if(o) o.value=''; return; }
     
     // Logic to handle YYYY-MM-DD or MM/DD/YYYY input
@@ -1417,6 +1427,7 @@ function copyMaintNote(){
   
   // Generate Report (sl_generate)
   window.sl_generate = function(){
+    window.sl_generate = sl_generate;
     window.sl_calcDOM();
 
     const addr=gv('sl_address')||'[Address]';
@@ -1577,6 +1588,8 @@ function todayISO(){ return new Date().toISOString().slice(0,10); }
 
 // Copy (used by Stale Listing, Appliance, and others)
 window.sl_copy = window.appl_copy = function(id){
+    window.appl_copy = appl_copy;
+    window.sl_copy = sl_copy;
   var el=$(id); if(!el) return;
   var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
 
@@ -1609,12 +1622,14 @@ function download(name, mime, text){
 // --- Stale Listing Tool Functions (sl_download*) ---
 
 window.sl_downloadTXT = function(){
+    window.sl_downloadTXT = sl_downloadTXT;
   const out = $('sl_out'); if(out && !out.value) window.sl_generate();
   const addr = (gv('sl_address') || 'Unit').replace(/[^A-Za-z0-9]+/g,'_');
   download(`OwnerReport_${addr}_${todayISO()}.txt`, 'text/plain', $('sl_out')?.value || '');
 };
 
 window.sl_downloadCSV = function(){
+    window.sl_downloadCSV = sl_downloadCSV;
   const csv = [
     ['Date','Address','ListRent','DOM','New','Pending','Approved','Declined','Showings7d','Median','Low','High','Recommendation'].join(','),
     [
@@ -1628,6 +1643,7 @@ window.sl_downloadCSV = function(){
 };
 
 window.sl_downloadEML = function(){
+    window.sl_downloadEML = sl_downloadEML;
   const addr = gv('sl_address') || 'Unit';
   const dom  = gv('sl_dom') || '0';
   const to   = 'operationsmgr@propertywize.com';
@@ -1659,7 +1675,10 @@ window.sl_downloadEML = function(){
   window.appl_insertTroubleshooting = function(){ /* ... */ };
   // Note: appl_copy is now aliased to sl_copy above
   window.appl_clear = function(){ /* ... */ };
+    window.appl_clear = appl_clear;
   window.appl_generate = function(){ /* ... */ };
+    window.appl_generate = appl_generate;
+
   
   // Paste the full contents of appl_insertTroubleshooting, appl_clear, and appl_generate here.
   // I cannot do it fully in this block as you did not provide the full function bodies.
@@ -1668,6 +1687,8 @@ window.sl_downloadEML = function(){
 
   // Example:
   window.appl_insertTroubleshooting = function(){
+    window.appl_insertTroubleshooting = appl_insertTroubleshooting;
+
      if (g('appl_troubleshoot')) return; 
      var t = [ '1) Power/Breaker checked and ON', /* ... */ ].join('\n');
      s('appl_troubleshoot', t);
@@ -1809,7 +1830,5 @@ window.sl_downloadEML = function(){
   }
 })();
 </script>
-
 </body>
-
 </html>
