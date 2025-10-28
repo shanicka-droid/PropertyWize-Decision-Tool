@@ -1399,75 +1399,89 @@ function copyMaintNote(){
 }
 </script>
 <script>
-(function(){
+(function() {
+  // Prevent script from running twice
   if (window._staleWire) return; window._staleWire = true;
 
-  // helpers
+  // --- Helper Functions ---
+  
+  // Find element by ID ($)
   function $(id){ return document.getElementById(id); }
-  function v(id){
-  <script>
-(function(){
-  // ---- helper shims ----
-  function $(id){ return document.getElementById(id); }
-  function v(id){ var el=$(id); return el ? (el.value||'').trim() : ''; }
-  function n(x){ return (x===''||x==null)?0:parseInt(x,10)||0; }
-  function fmtMoney(x){ return x&&x[0]==='$' ? x : (x?('$'+x):''); }
+  // Get element value (gv or v)
+  function gv(id){ var el=$(id); return el ? (el.value||'').trim() : ''; }
+  // Get element value as integer (gi)
+  function gi(id){ const el=$(id); return el ? (parseInt(el.value,10)||0) : 0; }
+  // Format as money (m$)
+  function m$(x){ return x&&x[0]==='$' ? x : (x?('$'+x):''); }
+  // Get today's date in YYYY-MM-DD format
   function todayISO(){ return new Date().toISOString().slice(0,10); }
-  function fmtDate(d){ try{ var t=new Date(d); return (t.getMonth()+1).toString().padStart(2,'0')+'/'+t.getDate().toString().padStart(2,'0')+'/'+t.getFullYear(); }catch(_){ return d||'—'; } }
+  // Format date from ISO to MM/DD/YYYY
+  function fmtDate(d){ 
+    if(!d) return '—'; 
+    const t=new Date(d); 
+    return isNaN(t) ? d : `${String(t.getMonth()+1).padStart(2,'0')}/${String(t.getDate()).padStart(2,'0')}/${t.getFullYear()}`; 
+  }
 
-  // ---- core actions (expose on window) ----
-  window.sl_copy = function(id){
-    var el=$(id); if(!el) return;
-    var txt=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
-    if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt); }
-    else { try{ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); }catch(_){} }
+  // --- Core Action Functions ---
+  
+  // Calculate Days on Market (sl_calcDOM)
+  window.sl_calcDOM = function () {
+    const d = gv('sl_listed'); if(!d){ const o=$('sl_dom'); if(o) o.value=''; return; }
+    
+    // Logic to handle YYYY-MM-DD or MM/DD/YYYY input
+    let dt;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      const p = d.split('-').map(Number);
+      dt = new Date(p[0], p[1]-1, p[2], 0, 0, 0, 0);
+    } else {
+      const m = d.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      dt = m ? new Date(+m[3], +m[1]-1, +m[2], 0, 0, 0, 0) : new Date(d);
+    }
+    if (isNaN(+dt)) { 
+      const o=$('sl_dom'); if(o) o.value=''; return; 
+    }
+
+    const today = new Date();
+    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const days = Math.max(0, Math.floor((todayMid - dt) / 86400000)); // ms→days
+
+    const o = $('sl_dom'); if(o) o.value = String(days);
   };
   
-  window.sl_calcDOM = function () {
-    var listedEl = document.getElementById('sl_listed');
-    var domEl    = document.getElementById('sl_dom');
-    if (!listedEl || !domEl) return;
-
-    var raw = (listedEl.value || '').trim();
-    if (!raw) { domEl.value = ''; return; }
-
-  // Accept YYYY-MM-DD or MM/DD/YYYY
-  var dt;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-    var p = raw.split('-').map(Number);
-    dt = new Date(p[0], p[1]-1, p[2], 0, 0, 0, 0);
-  } else {
-    var m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-    dt = m ? new Date(+m[3], +m[1]-1, +m[2], 0, 0, 0, 0) : new Date(raw);
-  }
-  if (isNaN(+dt)) { domEl.value = ''; return; }
-
-  var today = new Date();
-  var todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  var days = Math.max(0, Math.floor((todayMid - dt) / 86400000)); // ms→days
-  domEl.value = String(days);
-};
-</script>
-
-
+  // Copy to Clipboard (sl_copy) - Uses the most robust version you provided
+  window.sl_copy = function(id){
+    const el = $(id); if(!el) return;
+    const txt = (el.value !== undefined) ? el.value : (el.innerText || el.textContent || '');
+    
+    if (navigator.clipboard && navigator.clipboard.writeText){ 
+      navigator.clipboard.writeText(txt); 
+    } else { 
+      try{ 
+        // Legacy clipboard access
+        el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); 
+      }catch(_){} 
+    }
+  };
+  
+  // Generate Report (sl_generate)
   window.sl_generate = function(){
-    sl_calcDOM();
+    window.sl_calcDOM();
 
-    var addr=v('sl_address')||'[Address]';
-    var owner=v('sl_owner')||'Owner';
-    var listed=v('sl_listed')?fmtDate(v('sl_listed')):'—';
-    var rent=fmtMoney(v('sl_rent')), dom=v('sl_dom')||'0';
+    const addr=gv('sl_address')||'[Address]';
+    const owner=gv('sl_owner')||'Owner';
+    const listed=gv('sl_listed')?fmtDate(gv('sl_listed')):'—';
+    const rent=m$(gv('sl_rent')), dom=gv('sl_dom')||'0';
 
-    var aNew=n(v('sl_apps_new')), aPen=n(v('sl_apps_pending')), aApp=n(v('sl_apps_approved')), aDec=n(v('sl_apps_declined'));
-    var show=n(v('sl_showings')), feed=v('sl_feedback')||'—';
+    const aNew=gi('sl_apps_new'), aPen=gi('sl_apps_pending'), aApp=gi('sl_apps_approved'), aDec=gi('sl_apps_declined');
+    const show=gi('sl_showings'), feed=gv('sl_feedback')||'—';
 
-    var med=v('sl_med')||'—', low=v('sl_low')||'—', high=v('sl_high')||'—', reco=v('sl_reco')||'—';
+    const med=gv('sl_med')||'—', low=gv('sl_low')||'—', high=gv('sl_high')||'—', reco=gv('sl_reco')||'—';
 
-    var subject = `[PropertyWize] Unit Status — ${addr} — ${dom} days on market`;
+    const subject = `[PropertyWize] Unit Status — ${addr} — ${dom} days on market`;
 
-    var body = `Hi ${owner},
+    const body = `Hi ${owner},
 
-Here’s the status update for ${addr}:
+We're reaching out to provide you with this week's update on the applications received for your property at ${addr}. Below is a summary of the activities from the past 7 days:
 
 Listing Summary
 • Date Listed: ${listed}
@@ -1493,128 +1507,9 @@ Attached: Buildium Listing + Rentometer Report
 Thanks,
 PropertyWize Leasing Team`;
 
-    $('sl_out').value = `Subject: ${subject}\n\n${body}`;
-
-    var staleFlag = ( (aApp===0 && (parseInt(dom,10)>=14)) || (parseInt(dom,10)>=30) ) ? 'STALE' : 'MONITOR';
-    $('sl_handoff').value =
-      `Stale Listing Review — ${addr}\n`+
-      `DOM: ${dom} | List: ${rent}\n`+
-      `Apps N/P/A/D: ${aNew}/${aPen}/${aApp}/${aDec} | Showings(7d): ${show}\n`+
-      `Rentometer: med ${med}, range ${low}-${high}\n`+
-      `Reco: ${reco}\n`+
-      `Status: ${staleFlag}\n`+
-      `EPM approval required before owner send.`;
-  };
-
-  function dl(name, mime, text){
-    var blob=new Blob([text], {type: mime+';charset=utf-8'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a'); a.href=url; a.download=name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
-  }
-
-  window.sl_downloadTXT = function(){
-    var content=$('sl_out').value || ''; if(!content){ sl_generate(); content=$('sl_out').value; }
-    var addr=(v('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
-    dl(`OwnerReport_${addr}_${todayISO()}.txt`, 'text/plain', content);
-  };
-
-  window.sl_downloadCSV = function(){
-    var csv=[
-      ['Date','Address','ListRent','DOM','New','Pending','Approved','Declined','Showings7d','Median','Low','High','Recommendation'].join(','),
-      [ todayISO(), `"${v('sl_address')}"`, `"${v('sl_rent')}"`, v('sl_dom')||'',
-        v('sl_apps_new')||'0', v('sl_apps_pending')||'0', v('sl_apps_approved')||'0', v('sl_apps_declined')||'0',
-        v('sl_showings')||'0', `"${v('sl_med')}"`, `"${v('sl_low')}"`, `"${v('sl_high')}"`, `"${v('sl_reco')}"` ].join(',')
-    ].join('\n');
-    var addr=(v('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
-    dl(`StaleListing_${addr}_${todayISO()}.csv`, 'text/csv', csv);
-  };
-
-  window.sl_downloadEML = function(){
-    var addr=v('sl_address')||'Unit', dom=v('sl_dom')||'0';
-    var to='operationsmgr@propertywize.com';
-    var subject=`EPM Review – ${addr} – ${dom} DOM`;
-    var body=$('sl_out').value || ''; if(!body){ sl_generate(); body=$('sl_out').value; }
-    var eml=['From: ','To: '+to,'Subject: '+subject,'Content-Type: text/plain; charset=UTF-8','',body].join('\r\n');
-    var name=(addr.replace(/[^A-Za-z0-9]+/g,'_'));
-    dl(`EPM_Review_${name}_${todayISO()}.eml`, 'message/rfc822', eml);
-  };
-
-  // ---- resilient wiring (buttons work even if inline onclicks are missing) ----
-  function on(id, fn){ var el=$(id); if(el && typeof fn==='function') el.addEventListener('click', fn); }
-<button id="sl_btnGen"  class="btn primary" onclick="sl_generate()">Generate</button>
-<button id="sl_btnCopy" class="btn"          onclick="sl_copy('sl_out')">Copy</button>
-<button id="sl_btnTxt"  class="btn">Download .txt</button>
-<button id="sl_btnCsv"  class="btn">Download .csv</button>
-<button id="sl_btnEml"  class="btn">Download .eml</button>
-
-
-(function(){
-  // --- helpers ---
-  const $ = i => document.getElementById(i);
-  const gv = i => { const el = $(i); return el ? (el.value || '').trim() : ''; };
-  const gi = i => { const el = $(i); return el ? (parseInt(el.value,10) || 0) : 0; };
-  const m$ = x => x && x[0] === '$' ? x : (x ? ('$' + x) : '');
-  const todayISO = () => new Date().toISOString().slice(0,10);
-  const fmtDate = d => { if(!d) return '—'; const t = new Date(d); return isNaN(t) ? d : `${String(t.getMonth()+1).padStart(2,'0')}/${String(t.getDate()).padStart(2,'0')}/${t.getFullYear()}`; };
-
-  // --- core actions (overwrite if defined) ---
-  window.sl_calcDOM = function(){
-    const d = gv('sl_listed'); if(!d){ const o=$('sl_dom'); if(o) o.value=''; return; }
-    const start = new Date(d), now = new Date();
-    const dom = Math.max(0, Math.round((now - start)/86400000));
-    const o = $('sl_dom'); if(o) o.value = dom;
-  };
-
-  window.sl_generate = function(){
-    window.sl_calcDOM();
-
-    const addr = gv('sl_address') || '[Address]';
-    const owner= gv('sl_owner') || 'Owner';
-    const listed= gv('sl_listed') ? fmtDate(gv('sl_listed')) : '—';
-    const rent = m$(gv('sl_rent'));
-    const dom  = gv('sl_dom') || '0';
-
-    const aNew = gi('sl_apps_new'), aPen = gi('sl_apps_pending'), aApp = gi('sl_apps_approved'), aDec = gi('sl_apps_declined');
-    const show = gi('sl_showings'), feed = gv('sl_feedback') || '—';
-
-    const med  = gv('sl_med') || '—', low = gv('sl_low') || '—', high = gv('sl_high') || '—';
-    const reco = gv('sl_reco') || '—';
-
-    const subject = `[PropertyWize] Unit Status — ${addr} — ${dom} days on market`;
-const body = `Hi ${owner},
-
-We're reaching out to provide you with this week's update on the applications received for your property at ${addr}. Below is a summary of the activities from the past 7 days:
-
-Listing Summary
-• Date Listed: ${listed}
-• List Rent: ${rent}
-• DOM: ${dom}
-
-Applications
-• New: ${aNew} | Pending: ${aPen} | Approved: ${aApp} | Declined: ${aDec}
-
-Showings/Feedback
-• Showings in last 7 days: ${show}
-• Feedback: "${feed}"
-
-Market Check (Rentometer)
-• Median: ${med} | Range: ${low}–${high}
-• Current List: ${rent}
-
-Recommendation
-${reco}
-
-Attached: Buildium Listing + Rentometer Report
-
-Thanks,  
-PropertyWize Leasing Team`;
-    
-
     const out = $('sl_out'); if(out) out.value = `Subject: ${subject}\n\n${body}`;
 
-    const staleFlag = ((aApp===0 && (parseInt(dom,10) >= 14)) || (parseInt(dom,10) >= 30)) ? 'STALE' : 'MONITOR';
+    const staleFlag = ((aApp===0 && (parseInt(dom,10)>=14)) || (parseInt(dom,10)>=30)) ? 'STALE' : 'MONITOR';
     const ho = $('sl_handoff');
     if (ho){
       ho.value =
@@ -1627,29 +1522,56 @@ PropertyWize Leasing Team`;
         `EPM approval required before owner send.`;
     }
   };
-
-  window.sl_copy = function(id){
-    const el = $(id); if(!el) return;
-    const txt = (el.value !== undefined) ? el.value : (el.innerText || el.textContent || '');
-   <script>
-function safeCopyText(text) {
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(text || '');
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text || '';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      return Promise.resolve();
-    }
-  } catch (e) {
-    console.error('Copy failed:', e);
-    return Promise.resolve();
+  
+  // Download utility function (dl)
+  function dl(name, mime, text){
+    var blob=new Blob([text], {type: mime+';charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download=name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
   }
-<script>
+
+  // Download TXT (sl_downloadTXT)
+  window.sl_downloadTXT = function(){
+    var content=$('sl_out').value || ''; if(!content){ window.sl_generate(); content=$('sl_out').value; }
+    var addr=(gv('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
+    dl(`OwnerReport_${addr}_${todayISO()}.txt`, 'text/plain', content);
+  };
+  
+  // Download CSV (sl_downloadCSV)
+  window.sl_downloadCSV = function(){
+    var csv=[
+      ['Date','Address','ListRent','DOM','New','Pending','Approved','Declined','Showings7d','Median','Low','High','Recommendation'].join(','),
+      [ todayISO(), `"${gv('sl_address')}"`, `"${gv('sl_rent')}"`, gv('sl_dom')||'',
+        gv('sl_apps_new')||'0', gv('sl_apps_pending')||'0', gv('sl_apps_approved')||'0', gv('sl_apps_declined')||'0',
+        gv('sl_showings')||'0', `"${gv('sl_med')}"`, `"${gv('sl_low')}"`, `"${gv('sl_high')}"`, `"${gv('sl_reco')}"` ].join(',')
+    ].join('\n');
+    var addr=(gv('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
+    dl(`StaleListing_${addr}_${todayISO()}.csv`, 'text/csv', csv);
+  };
+
+  // Download EML (sl_downloadEML)
+  window.sl_downloadEML = function(){
+    var addr=gv('sl_address')||'Unit', dom=gv('sl_dom')||'0';
+    var to='operationsmgr@propertywize.com';
+    var subject=`EPM Review – ${addr} – ${dom} DOM`;
+    var body=$('sl_out').value || ''; if(!body){ window.sl_generate(); body=$('sl_out').value; }
+    var eml=['From: ','To: '+to,'Subject: '+subject,'Content-Type: text/plain; charset=UTF-8','',body].join('\r\n');
+    var name=(addr.replace(/[^A-Za-z0-9]+/g,'_'));
+    dl(`EPM_Review_${name}_${todayISO()}.eml`, 'message/rfc822', eml);
+  };
+
+  // ---- Button Wiring (If you are using this section, it should be in the DOM binding part) ----
+  /*
+  function on(id, fn){ var el=$(id); if(el && typeof fn==='function') el.addEventListener('click', fn); }
+  on('sl_btnGen', window.sl_generate);
+  // ... and so on for all your buttons
+  */
+
+})();
+</script>
+    </script>
 
 // --- Helper Shims (from Stale Listing, etc.) ---
 function $(id){ return document.getElementById(id); }
