@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,8 +13,7 @@
   .sl-only { display: none; }
   #viewListings .sl-only { display: block; }
 
-  :root{ --brand:#1b8e5a; --brand2:#1b6f
-    b8; --ink:#18202a; --muted:#6b7785; --border:#e3e8ef; --bg:#f6f8fb; --ok:#1b8e5a; --warn:#b86f1b; --danger:#b81b3b; --card:#ffffff; }
+  :root{ --brand:#1b8e5a; --brand2:#1b6fb8; --ink:#18202a; --muted:#6b7785; --border:#e3e8ef; --bg:#f6f8fb; --ok:#1b8e5a; --warn:#b86f1b; --danger:#b81b3b; --card:#ffffff; }
   *{box-sizing:border-box}
   body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f7fafc,#eef3f9 40%,#e9f3ef)}
   header{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.85);backdrop-filter:saturate(120%) blur(6px);border-bottom:1px solid var(--border)}
@@ -1230,297 +1230,208 @@ Complete the checklist to enable Generate.
     });
     calcRules(); updateProgress();
   }
-    function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
-function s(id,txt){ var el=document.getElementById(id); if(el) el.value=txt; }
-function allChecked(){
-  var ids=['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'];
-  for(var i=0;i<ids.length;i++){ var cb=document.getElementById(ids[i]); if(cb && !cb.checked) return false; }
-  return true;
-}
 
-// --- DELINQUENCY CORE FUNCTIONS ---
-// dlq_copy relies on the same logic as the working sl_copy. We define it here:
-window.dlq_copy = function(id){
-  var el=document.getElementById(id); if(!el) return;
-  var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).catch(function(){ legacy(); });
-  } else { legacy(); }
-  function legacy(){ try{ if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } }catch(_){ } }
-  try{ var b=event&&event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
-};
+  // Note generators
+  function genHandoff(){
+    const req = ["chkAllDocs","chkReady"];
+    for(const id of req){ if(!$("#"+id).checked) return alert("Complete all handoff checks first."); }
+    const dt = new Date().toLocaleString();
+    const txt = `WO # ${$("#wo").value||"[####]"} READY FOR FINANCE — ${$("#addr").value||"<Address>"} — ${$("#vendor").value||"<Vendor>"}\n`
+      + `Plan: ${$("#plan").value||"<Plan>"} — Issue: ${$("#issue").value||"<Type>"} — Amount: $${$("#amount").value||"0.00"}\n`
+      + `Date/Time: ${dt}\n\n`
+      + `Attached in WO:\n`
+      + `• Invoice WITH WO#\n`
+      + `• Owner decision: (Non‑emergency > $300 = APPROVAL) OR (Emergency > $300 = FYI by Maintenance)\n`
+      + `• Before/After photos (timestamp + watermark)\n`
+      + `• Tenant completion confirmation\n\n`
+      + `Status: READY FOR FINANCE — Assigned to: FINANCE\n`
+      + `Notes: `;
+    $("#handoff").value = txt;
+    $("#handoff").focus(); $("#handoff").select();
+  }
+  function genFinance(){
+    const dt = new Date().toLocaleDateString();
+    const txt = `FINANCE INTAKE — WO # ${$("#fin_wo").value||$("#wo").value||"[####]"} — ${$("#fin_addr").value||$("#addr").value||"<Address>"}\n`
+      + `Vendor: ${$("#fin_vendor").value||$("#vendor").value||"<Vendor>"} — Amount: $${$("#fin_amount").value||$("#amount").value||"0.00"}\n`
+      + `Approval/FYI date: ${$("#fin_date").value||dt}\n\n`
+      + `Verification:\n`
+      + `[${ $("#fin_invwo").checked ? "✔" : "✖" }] Invoice WITH WO#\n`
+      + `[${ $("#fin_approve").checked ? "✔" : "✖" }] Owner Approval (> $300 non‑emergency) or FYI (> $300 emergency)\n`
+      + `[${ $("#fin_photos").checked ? "✔" : "✖" }] Before/After photos (timestamp + watermark)\n`
+      + `[${ $("#fin_tenant").checked ? "✔" : "✖" }] Tenant completion confirmation\n`
+      + `[${ $("#fin_temp").checked ? "✔" : "✖" }] Temp Check present if > $300\n\n`
+      + `Buildium/Spreadsheet:\n`
+      + `[${ $("#fin_enter").checked ? "✔" : "✖" }] Entered via WO → Enter Bill\n`
+      + `[${ $("#fin_link").checked ? "✔" : "✖" }] Bill linked to WO; vendor/property/expense OK\n`
+      + `[${ $("#fin_sheet").checked ? "✔" : "✖" }] Added to Finance spreadsheet\n`
+      + `[${ $("#fin_epm").checked ? "✔" : "✖" }] EPM Approval received\n`
+      + `[${ $("#fin_pay").checked ? "✔" : "✖" }] Payment issued\n`
+      + `[${ $("#fin_upload").checked ? "✔" : "✖" }] Paid invoice uploaded & shared with Owner\n`
+      + `[${ $("#fin_done").checked ? "✔" : "✖" }] Spreadsheet updated; copy saved to Drive`;
+    $("#fin_note").value = txt;
+    $("#fin_note").focus(); $("#fin_note").select();
+  } 
+// --- PASTE ALL CONSOLIDATED FUNCTIONS HERE ---
+function g(id){ /* ... */ } // Now on Line 1274
+function s(id,txt){ /* ... */ }
+// ... all dlq_, sl_, appl_ functions ...
+// --- END OF PASTED FUNCTIONS ---
 
-
-window.dlq_generate = function(){
-  // CRITICAL FIX: The missing variable definition
-  var ftpStatus = g('dlq_ftp') || '—'; 
-  
-  var lines=[];
-  lines.push('Delinquency Report — ' + (g('dlq_tenant')||'[Tenant]'));
-  lines.push('Address: ' + (g('dlq_address')||'[Address]'));
-  lines.push('Balances — Rent: ' + (g('dlq_rent')||'$0') + '  •  Utilities: ' + (g('dlq_util')||'$0') + '  •  Misc: ' + (g('dlq_misc')||'$0'));
-  lines.push('Last Payment: ' + (g('dlq_lastpay')||'—'));
-  lines.push('Last Communication: ' + (g('dlq_lastcomm')||'—'));
-  lines.push('FTP Date: ' + ftpStatus);
-  lines.push('Court Outcome: ' + (g('dlq_court')||'—'));
-  lines.push('Judgment Ordered: ' + (g('dlq_judgment')||'—'));
-  lines.push('Eviction Date Scheduled: ' + (g('dlq_eviction')||'—'));
-  var r=g('dlq_noevict_reason'); if(r) lines.push('Reason No Eviction Scheduled: ' + r);
-  lines.push('Lease End Date: ' + (g('dlq_leaseend')||'—'));
-  lines.push('Last PW Action: ' + (g('dlq_lastaction')||'—'));
-  lines.push('Collection Status in Buildium: ' + (g('dlq_collection')||'—'));
-  lines.push('Maintenance Auto-Dispatch Disabled (> $500): ' + (g('dlq_maint_disable')||'—'));
-
-  s('dlq_out', lines.join('\n'));
-  // Note: The email draft and handoff logic for delinquency need to be added here if they were separate.
-};
-
-window.dlq_clear = function(){
-  ['dlq_tenant','dlq_address','dlq_rent','dlq_util','dlq_misc','dlq_lastpay','dlq_lastcomm','dlq_ftp','dlq_court','dlq_judgment','dlq_eviction','dlq_noevict_reason','dlq_leaseend','dlq_lastaction'].forEach(function(id){
-    var el=document.getElementById(id); if(!el) return; el.value='';
-  });
-  ['dlq_collection','dlq_maint_disable'].forEach(function(id){
-    var el=document.getElementById(id); if(el && el.tagName==='SELECT') el.selectedIndex=0;
-  });
-  ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].forEach(function(id){
-    var cb=document.getElementById(id); if(cb) cb.checked=false;
-  });
-  s('dlq_out','');
-};
-
-// --- MAINTENANCE NOTE GENERATORS ---
-function genMaintNote(){
-  const issue = document.getElementById("issue")?.value || "";
-  const tenantResp = document.getElementById("mt_tenant_resp")?.checked ? "Tenant responsibility confirmed." : "";
-  // ... [full body of genMaintNote] ...
-}
-
-function copyMaintNote(){
-  const note = document.getElementById("mt_note").value;
-  // ... [full body of copyMaintNote] ...
-}
-
- // Note generators
-function genHandoff(){
-  const req = ["chkAllDocs","chkReady"];
-  for(const id of req){ if(!$("#"+id).checked) return alert("Complete all handoff checks first."); }
-  const dt = new Date().toLocaleString();
-  const txt = `WO # ${$("#wo").value||"[####]"} READY FOR FINANCE — ${$("#addr").value||"<Address>"} — ${$("#vendor").value||"<Vendor>"}\n`
-    + `Plan: ${$("#plan").value||"<Plan>"} — Issue: ${$("#issue").value||"<Type>"} — Amount: $${$("#amount").value||"0.00"}\n`
-    + `Date/Time: ${dt}\n\n`
-    + `Attached in WO:\n`
-    + `• Invoice WITH WO#\n`
-    + `• Owner decision: (Non‑emergency > $300 = APPROVAL) OR (Emergency > $300 = FYI by Maintenance)\n`
-    + `• Before/After photos (timestamp + watermark)\n`
-    + `• Tenant completion confirmation\n\n`
-    + `Status: READY FOR FINANCE — Assigned to: FINANCE\n`
-    + `Notes: `;
-  $("#handoff").value = txt;
-  $("#handoff").focus(); $("#handoff").select();
-}
-
-function genFinance(){
-  const dt = new Date().toLocaleDateString();
-  const txt = `FINANCE INTAKE — WO # ${$("#fin_wo").value||$("#wo").value||"[####]"} — ${$("#fin_addr").value||$("#addr").value||"<Address>"}\n`
-    + `Vendor: ${$("#fin_vendor").value||$("#vendor").value||"<Vendor>"} — Amount: $${$("#fin_amount").value||$("#amount").value||"0.00"}\n`
-    + `Approval/FYI date: ${$("#fin_date").value||dt}\n\n`
-    + `Verification:\n`
-    + `[${ $("#fin_invwo").checked ? "✔" : "✖" }] Invoice WITH WO#\n`
-    + `[${ $("#fin_approve").checked ? "✔" : "✖" }] Owner Approval (> $300 non‑emergency) or FYI (> $300 emergency)\n`
-    + `[${ $("#fin_photos").checked ? "✔" : "✖" }] Before/After photos (timestamp + watermark)\n`
-    + `[${ $("#fin_tenant").checked ? "✔" : "✖" }] Tenant completion confirmation\n`
-    + `[${ $("#fin_temp").checked ? "✔" : "✖" }] Temp Check present if > $300\n\n`
-    + `Buildium/Spreadsheet:\n`
-    + `[${ $("#fin_enter").checked ? "✔" : "✖" }] Entered via WO → Enter Bill\n`
-    + `[${ $("#fin_link").checked ? "✔" : "✖" }] Bill linked to WO; vendor/property/expense OK\n`
-    + `[${ $("#fin_sheet").checked ? "✔" : "✖" }] Added to Finance spreadsheet\n`
-    + `[${ $("#fin_epm").checked ? "✔" : "✖" }] EPM Approval received\n`
-    + `[${ $("#fin_pay").checked ? "✔" : "✖" }] Payment issued\n`
-    + `[${ $("#fin_upload").checked ? "✔" : "✖" }] Paid invoice uploaded & shared with Owner\n`
-    + `[${ $("#fin_done").checked ? "✔" : "✖" }] Spreadsheet updated; copy saved to Drive`;
-  $("#fin_note").value = txt;
-  $("#fin_note").focus(); $("#fin_note").select();
-}
-
-// --- ALL CONSOLIDATED FUNCTIONS GO HERE ---
-
-// --- DELINQUENCY HELPERS ---
-// The master definition of g/s needed for dlq_generate
-function g(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
-function s(id,txt){ var el=document.getElementById(id); if(el) el.value=txt; }
-function allChecked(){
-  var ids=['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'];
-  for(var i=0;i<ids.length;i++){ var cb=document.getElementById(ids[i]); if(cb && !cb.checked) return false; }
-  return true;
-}
-
-// --- DELINQUENCY CORE FUNCTIONS ---
-// dlq_copy relies on the same logic as the working sl_copy. We define it here:
-window.dlq_copy = function(id){
-  var el=document.getElementById(id); if(!el) return;
-  var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).catch(function(){ legacy(); });
-  } else { legacy(); }
-  function legacy(){ try{ if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } }catch(_){ } }
-  try{ var b=event&&event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
-};
+  // Init
+  restore(); setRole(null);
 
 
-window.dlq_generate = function(){
-  // CRITICAL FIX: The missing variable definition
-  var ftpStatus = g('dlq_ftp') || '—'; 
-  
-  var lines=[];
-  lines.push('Delinquency Report — ' + (g('dlq_tenant')||'[Tenant]'));
-  lines.push('Address: ' + (g('dlq_address')||'[Address]'));
-  lines.push('Balances — Rent: ' + (g('dlq_rent')||'$0') + '  •  Utilities: ' + (g('dlq_util')||'$0') + '  •  Misc: ' + (g('dlq_misc')||'$0'));
-  lines.push('Last Payment: ' + (g('dlq_lastpay')||'—'));
-  lines.push('Last Communication: ' + (g('dlq_lastcomm')||'—'));
-  lines.push('FTP Date: ' + ftpStatus);
-  lines.push('Court Outcome: ' + (g('dlq_court')||'—'));
-  lines.push('Judgment Ordered: ' + (g('dlq_judgment')||'—'));
-  lines.push('Eviction Date Scheduled: ' + (g('dlq_eviction')||'—'));
-  var r=g('dlq_noevict_reason'); if(r) lines.push('Reason No Eviction Scheduled: ' + r);
-  lines.push('Lease End Date: ' + (g('dlq_leaseend')||'—'));
-  lines.push('Last PW Action: ' + (g('dlq_lastaction')||'—'));
-  lines.push('Collection Status in Buildium: ' + (g('dlq_collection')||'—'));
-  lines.push('Maintenance Auto-Dispatch Disabled (> $500): ' + (g('dlq_maint_disable')||'—'));
+  // Copy with fallback
+  window.dlq_copy = function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var text=(el.value!==undefined)?el.value:(el.innerText||el.textContent||'');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).catch(function(){ legacy(); });
+    } else { legacy(); }
+    function legacy(){ try{ if(el.select){ el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); } }catch(_){ } }
+    try{ var b=event&&event.target; if(b){ var t=b.textContent; b.textContent='Copied!'; setTimeout(function(){ b.textContent=t; },900);} }catch(_){}
+  };
 
-  s('dlq_out', lines.join('\n'));
-  // Note: The email draft and handoff logic for delinquency need to be added here if they were separate.
-};
+ 
+  window.dlq_generate = function(){
+    
 
-window.dlq_clear = function(){
-  ['dlq_tenant','dlq_address','dlq_rent','dlq_util','dlq_misc','dlq_lastpay','dlq_lastcomm','dlq_ftp','dlq_court','dlq_judgment','dlq_eviction','dlq_noevict_reason','dlq_leaseend','dlq_lastaction'].forEach(function(id){
-    var el=document.getElementById(id); if(!el) return; el.value='';
-  });
-  ['dlq_collection','dlq_maint_disable'].forEach(function(id){
-    var el=document.getElementById(id); if(el && el.tagName==='SELECT') el.selectedIndex=0;
-  });
-  ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].forEach(function(id){
-    var cb=document.getElementById(id); if(cb) cb.checked=false;
-  });
-  s('dlq_out','');
-};
+    var lines=[];
+    lines.push('Delinquency Report — ' + (g('dlq_tenant')||'[Tenant]'));
+    lines.push('Address: ' + (g('dlq_address')||'[Address]'));
+    lines.push('Balances — Rent: ' + (g('dlq_rent')||'$0') + '  •  Utilities: ' + (g('dlq_util')||'$0') + '  •  Misc: ' + (g('dlq_misc')||'$0'));
+    lines.push('Last Payment: ' + (g('dlq_lastpay')||'—'));
+    lines.push('Last Communication: ' + (g('dlq_lastcomm')||'—'));
+    lines.push('FTP Date: ' + ftpStatus);
+    lines.push('Court Outcome: ' + (g('dlq_court')||'—'));
+    lines.push('Judgment Ordered: ' + (g('dlq_judgment')||'—'));
+    lines.push('Eviction Date Scheduled: ' + (g('dlq_eviction')||'—'));
+    var r=g('dlq_noevict_reason'); if(r) lines.push('Reason No Eviction Scheduled: ' + r);
+    lines.push('Lease End Date: ' + (g('dlq_leaseend')||'—'));
+    lines.push('Last PW Action: ' + (g('dlq_lastaction')||'—'));
+    lines.push('Collection Status in Buildium: ' + (g('dlq_collection')||'—'));
+    lines.push('Maintenance Auto-Dispatch Disabled (> $500): ' + (g('dlq_maint_disable')||'—'));
 
-// --- MAINTENANCE NOTE GENERATORS ---
-function genMaintNote(){
-  const issue = document.getElementById("issue")?.value || "";
-  const tenantResp = document.getElementById("mt_tenant_resp")?.checked ? "Tenant responsibility confirmed." : "";
-  // ... [full body of genMaintNote] ...
-}
+    s('dlq_out', lines.join('\n'));
+  };
 
-function copyMaintNote(){
-  const note = document.getElementById("mt_note").value;
-  // ... [full body of copyMaintNote] ...
-}
-
-// --- APPLIANCE FUNCTIONS ---
-// You must ensure appl_generate, appl_clear, and appl_insertTroubleshooting are here. 
-
-// --- STALE LISTING FUNCTIONS ---
-// Ensure sl_calcDOM, sl_generate, and all sl_download* functions are here.
-
-// ----------------- END OF CONSOLIDATED FUNCTIONS -----------------
+  // Clear all inputs/outputs
+  window.dlq_clear = function(){
+    ['dlq_tenant','dlq_address','dlq_rent','dlq_util','dlq_misc','dlq_lastpay','dlq_lastcomm','dlq_ftp','dlq_court','dlq_judgment','dlq_eviction','dlq_noevict_reason','dlq_leaseend','dlq_lastaction'].forEach(function(id){
+      var el=document.getElementById(id); if(!el) return; el.value='';
+    });
+    ['dlq_collection','dlq_maint_disable'].forEach(function(id){
+      var el=document.getElementById(id); if(el && el.tagName==='SELECT') el.selectedIndex=0;
+    });
+    ['dlq_c1','dlq_c2','dlq_c3','dlq_c4','dlq_c5','dlq_c6'].forEach(function(id){
+      var cb=document.getElementById(id); if(cb) cb.checked=false;
+    });
+    s('dlq_out','');
+  };
+})();
 // === Maintenance Note generator ===
 function genMaintNote(){
-  const issue = document.getElementById("issue")?.value || "";
-  const tenantResp = document.getElementById("mt_tenant_resp")?.checked ? "Tenant responsibility confirmed." : "";
-  const followup = document.getElementById("mt_followup_suggested")?.checked ? "Vendor suggested follow-up." : "";
-  const temp = document.getElementById("mt_tempcheck")?.checked ? "Temp check / 2nd opinion required." : "";
-  const lease = document.getElementById("mt_lease_violation")?.checked ? "Lease violation triggered." : "";
-  const charge = document.getElementById("mt_tenant_chargeback")?.checked ? 
-      `Tenant chargeback required (${document.getElementById("mt_chargeback_amt").value}).` : "";
-  const forward = document.getElementById("mt_forward_fin")?.checked ? "Forwarded to Finance." : "";
-    
-  const note = `MAINTENANCE UPDATE\nIssue Type: ${issue}\n${tenantResp}\n${followup}\n${temp}\n${lease}\n${charge}\n${forward}`;
-  document.getElementById("mt_note").value = note.trim();
-} // <--- This closes the copyMaintNote function
+  const issue = document.getElementById("issue")?.value || "";
+  const tenantResp = document.getElementById("mt_tenant_resp")?.checked ? "Tenant responsibility confirmed." : "";
+  const followup = document.getElementById("mt_followup_suggested")?.checked ? "Vendor suggested follow-up." : "";
+  const temp = document.getElementById("mt_tempcheck")?.checked ? "Temp check / 2nd opinion required." : "";
+  const lease = document.getElementById("mt_lease_violation")?.checked ? "Lease violation triggered." : "";
+  const charge = document.getElementById("mt_tenant_chargeback")?.checked ? 
+      `Tenant chargeback required (${document.getElementById("mt_chargeback_amt").value}).` : "";
+  const forward = document.getElementById("mt_forward_fin")?.checked ? "Forwarded to Finance." : "";
 
-// --- CONSOLIDATED HELPER FUNCTIONS ---
-// NOTE: These must be defined before restore() is called.
-// This is the correct placement for all your shared helper functions.
-
-function $(id){ return document.getElementById(id); }
-function gv(id){ var el=$(id); return el ? (el.value||'').trim() : ''; } 
-function gi(id){ const el=$(id); return el ? (parseInt(el.value,10)||0) : 0; }
-function m$(x){ return x&&x[0]==='$' ? x : (x?('$'+x):''); }
-function todayISO(){ return new Date().toISOString().slice(0,10); }
-function fmtDate(d){ 
-  if(!d) return '—'; 
-  const t=new Date(d); 
-  return isNaN(t) ? d : `${String(t.getMonth()+1).padStart(2,'0')}/${String(t.getDate()).padStart(2,'0')}/${t.getFullYear()}`; 
+  const note = `MAINTENANCE UPDATE\nIssue Type: ${issue}\n${tenantResp}\n${followup}\n${temp}\n${lease}\n${charge}\n${forward}`;
+  document.getElementById("mt_note").value = note.trim();
 }
 
-// --- INSERT ALL OTHER DLQ/SL/APPL FUNCTIONS HERE ---
-// You would paste the bodies of all your other essential functions (dlq_generate, sl_generate, etc.)
-// right here, following the helper functions above.
+function copyMaintNote(){
+  const note = document.getElementById("mt_note").value;
+  if (!note) return alert("Generate note first!");
+  navigator.clipboard.writeText(note).then(() => alert("Copied to clipboard ✅"));
+}
+</script>
+<script>
+(function() {
+  // Prevent script from running twice
+  if (window._staleWire) return; window._staleWire = true;
 
-// --- END OF ALL FUNCTION DEFINITIONS ---
+  // --- Helper Functions ---
+  
+  // Find element by ID ($)
+  function $(id){ return document.getElementById(id); }
+  // Get element value (gv or v)
+  function gv(id){ var el=$(id); return el ? (el.value||'').trim() : ''; }
+  // Get element value as integer (gi)
+  function gi(id){ const el=$(id); return el ? (parseInt(el.value,10)||0) : 0; }
+  // Format as money (m$)
+  function m$(x){ return x&&x[0]==='$' ? x : (x?('$'+x):''); }
+  // Get today's date in YYYY-MM-DD format
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  // Format date from ISO to MM/DD/YYYY
+  function fmtDate(d){ 
+    if(!d) return '—'; 
+    const t=new Date(d); 
+    return isNaN(t) ? d : `${String(t.getMonth()+1).padStart(2,'0')}/${String(t.getDate()).padStart(2,'0')}/${t.getFullYear()}`; 
+  }
 
-// --- APPLICATION INITIALIZATION ---
-// This line MUST be the last command in your function block.
-restore(); setRole(null);
+  // --- Core Action Functions ---
+  
+  // Calculate Days on Market (sl_calcDOM)
+  window.sl_calcDOM = function () {
+    const d = gv('sl_listed'); if(!d){ const o=$('sl_dom'); if(o) o.value=''; return; }
+    
+    // Logic to handle YYYY-MM-DD or MM/DD/YYYY input
+    let dt;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      const p = d.split('-').map(Number);
+      dt = new Date(p[0], p[1]-1, p[2], 0, 0, 0, 0);
+    } else {
+      const m = d.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      dt = m ? new Date(+m[3], +m[1]-1, +m[2], 0, 0, 0, 0) : new Date(d);
+    }
+    if (isNaN(+dt)) { 
+      const o=$('sl_dom'); if(o) o.value=''; return; 
+    }
 
-  // --- Core Action Functions ---
-  
-  // Calculate Days on Market (sl_calcDOM)
-  window.sl_calcDOM = function () {
-    const d = gv('sl_listed'); if(!d){ const o=$('sl_dom'); if(o) o.value=''; return; }
-    
-    // Logic to handle YYYY-MM-DD or MM/DD/YYYY input
-    let dt;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
-      const p = d.split('-').map(Number);
-      dt = new Date(p[0], p[1]-1, p[2], 0, 0, 0, 0);
-    } else {
-      const m = d.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-      dt = m ? new Date(+m[3], +m[1]-1, +m[2], 0, 0, 0, 0) : new Date(d);
-    }
-    if (isNaN(+dt)) { 
-      const o=$('sl_dom'); if(o) o.value=''; return; 
-    }
+    const today = new Date();
+    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const days = Math.max(0, Math.floor((todayMid - dt) / 86400000)); // ms→days
 
-    const today = new Date();
-    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const days = Math.max(0, Math.floor((todayMid - dt) / 86400000)); // ms→days
+    const o = $('sl_dom'); if(o) o.value = String(days);
+  };
+  
+  // Copy to Clipboard (sl_copy) - Uses the most robust version you provided
+  window.sl_copy = function(id){
+    const el = $(id); if(!el) return;
+    const txt = (el.value !== undefined) ? el.value : (el.innerText || el.textContent || '');
+    
+    if (navigator.clipboard && navigator.clipboard.writeText){ 
+      navigator.clipboard.writeText(txt); 
+    } else { 
+      try{ 
+        // Legacy clipboard access
+        el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); 
+      }catch(_){} 
+    }
+  };
+  
+  // Generate Report (sl_generate)
+  window.sl_generate = function(){
+    window.sl_calcDOM();
 
-    const o = $('sl_dom'); if(o) o.value = String(days);
-  };
-  
-  // Copy to Clipboard (sl_copy) - Uses the most robust version you provided
-  window.sl_copy = function(id){
-    const el = $(id); if(!el) return;
-    const txt = (el.value !== undefined) ? el.value : (el.innerText || el.textContent || '');
-    
-    if (navigator.clipboard && navigator.clipboard.writeText){ 
-      navigator.clipboard.writeText(txt); 
-    } else { 
-      try{ 
-        // Legacy clipboard access
-        el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); 
-      }catch(_){} 
-    }
-  };
-  
-  // Generate Report (sl_generate)
-  window.sl_generate = function(){
-    window.sl_calcDOM();
+    const addr=gv('sl_address')||'[Address]';
+    const owner=gv('sl_owner')||'Owner';
+    const listed=gv('sl_listed')?fmtDate(gv('sl_listed')):'—';
+    const rent=m$(gv('sl_rent')), dom=gv('sl_dom')||'0';
 
-    const addr=gv('sl_address')||'[Address]';
-    const owner=gv('sl_owner')||'Owner';
-    const listed=gv('sl_listed')?fmtDate(gv('sl_listed')):'—';
-    const rent=m$(gv('sl_rent')), dom=gv('sl_dom')||'0';
+    const aNew=gi('sl_apps_new'), aPen=gi('sl_apps_pending'), aApp=gi('sl_apps_approved'), aDec=gi('sl_apps_declined');
+    const show=gi('sl_showings'), feed=gv('sl_feedback')||'—';
 
-    const aNew=gi('sl_apps_new'), aPen=gi('sl_apps_pending'), aApp=gi('sl_apps_approved'), aDec=gi('sl_apps_declined');
-    const show=gi('sl_showings'), feed=gv('sl_feedback')||'—';
+    const med=gv('sl_med')||'—', low=gv('sl_low')||'—', high=gv('sl_high')||'—', reco=gv('sl_reco')||'—';
 
-    const med=gv('sl_med')||'—', low=gv('sl_low')||'—', high=gv('sl_high')||'—', reco=gv('sl_reco')||'—';
+    const subject = `[PropertyWize] Unit Status — ${addr} — ${dom} days on market`;
 
-    const subject = `[PropertyWize] Unit Status — ${addr} — ${dom} days on market`;
-
-    const body = `Hi ${owner},
+    const body = `Hi ${owner},
 
 We're reaching out to provide you with this week's update on the applications received for your property at ${addr}. Below is a summary of the activities from the past 7 days:
 
@@ -1548,67 +1459,67 @@ Attached: Buildium Listing + Rentometer Report
 Thanks,
 PropertyWize Leasing Team`;
 
-    const out = $('sl_out'); if(out) out.value = `Subject: ${subject}\n\n${body}`;
+    const out = $('sl_out'); if(out) out.value = `Subject: ${subject}\n\n${body}`;
 
-    const staleFlag = ((aApp===0 && (parseInt(dom,10)>=14)) || (parseInt(dom,10)>=30)) ? 'STALE' : 'MONITOR';
-    const ho = $('sl_handoff');
-    if (ho){
-      ho.value =
-        `Stale Listing Review — ${addr}\n`+
-        `DOM: ${dom} | List: ${rent}\n`+
-        `Apps N/P/A/D: ${aNew}/${aPen}/${aApp}/${aDec} | Showings(7d): ${show}\n`+
-        `Rentometer: med ${med}, range ${low}-${high}\n`+
-        `Reco: ${reco}\n`+
-        `Status: ${staleFlag}\n`+
-        `EPM approval required before owner send.`;
-    }
-  };
-  
-  // Download utility function (dl)
-  function dl(name, mime, text){
-    var blob=new Blob([text], {type: mime+';charset=utf-8'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a'); a.href=url; a.download=name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
-  }
+    const staleFlag = ((aApp===0 && (parseInt(dom,10)>=14)) || (parseInt(dom,10)>=30)) ? 'STALE' : 'MONITOR';
+    const ho = $('sl_handoff');
+    if (ho){
+      ho.value =
+        `Stale Listing Review — ${addr}\n`+
+        `DOM: ${dom} | List: ${rent}\n`+
+        `Apps N/P/A/D: ${aNew}/${aPen}/${aApp}/${aDec} | Showings(7d): ${show}\n`+
+        `Rentometer: med ${med}, range ${low}-${high}\n`+
+        `Reco: ${reco}\n`+
+        `Status: ${staleFlag}\n`+
+        `EPM approval required before owner send.`;
+    }
+  };
+  
+  // Download utility function (dl)
+  function dl(name, mime, text){
+    var blob=new Blob([text], {type: mime+';charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download=name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+  }
 
-  // Download TXT (sl_downloadTXT)
-  window.sl_downloadTXT = function(){
-    var content=$('sl_out').value || ''; if(!content){ window.sl_generate(); content=$('sl_out').value; }
-    var addr=(gv('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
-    dl(`OwnerReport_${addr}_${todayISO()}.txt`, 'text/plain', content);
-  };
-  
-  // Download CSV (sl_downloadCSV)
-  window.sl_downloadCSV = function(){
-    var csv=[
-      ['Date','Address','ListRent','DOM','New','Pending','Approved','Declined','Showings7d','Median','Low','High','Recommendation'].join(','),
-      [ todayISO(), `"${gv('sl_address')}"`, `"${gv('sl_rent')}"`, gv('sl_dom')||'',
-        gv('sl_apps_new')||'0', gv('sl_apps_pending')||'0', gv('sl_apps_approved')||'0', gv('sl_apps_declined')||'0',
-        gv('sl_showings')||'0', `"${gv('sl_med')}"`, `"${gv('sl_low')}"`, `"${gv('sl_high')}"`, `"${gv('sl_reco')}"` ].join(',')
-    ].join('\n');
-    var addr=(gv('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
-    dl(`StaleListing_${addr}_${todayISO()}.csv`, 'text/csv', csv);
-  };
+  // Download TXT (sl_downloadTXT)
+  window.sl_downloadTXT = function(){
+    var content=$('sl_out').value || ''; if(!content){ window.sl_generate(); content=$('sl_out').value; }
+    var addr=(gv('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
+    dl(`OwnerReport_${addr}_${todayISO()}.txt`, 'text/plain', content);
+  };
+  
+  // Download CSV (sl_downloadCSV)
+  window.sl_downloadCSV = function(){
+    var csv=[
+      ['Date','Address','ListRent','DOM','New','Pending','Approved','Declined','Showings7d','Median','Low','High','Recommendation'].join(','),
+      [ todayISO(), `"${gv('sl_address')}"`, `"${gv('sl_rent')}"`, gv('sl_dom')||'',
+        gv('sl_apps_new')||'0', gv('sl_apps_pending')||'0', gv('sl_apps_approved')||'0', gv('sl_apps_declined')||'0',
+        gv('sl_showings')||'0', `"${gv('sl_med')}"`, `"${gv('sl_low')}"`, `"${gv('sl_high')}"`, `"${gv('sl_reco')}"` ].join(',')
+    ].join('\n');
+    var addr=(gv('sl_address')||'Unit').replace(/[^A-Za-z0-9]+/g,'_');
+    dl(`StaleListing_${addr}_${todayISO()}.csv`, 'text/csv', csv);
+  };
 
-  // Download EML (sl_downloadEML)
-  window.sl_downloadEML = function(){
-    var addr=gv('sl_address')||'Unit', dom=gv('sl_dom')||'0';
-    var to='operationsmgr@propertywize.com';
-    var subject=`EPM Review – ${addr} – ${dom} DOM`;
-    var body=$('sl_out').value || ''; if(!body){ window.sl_generate(); body=$('sl_out').value; }
-    var eml=['From: ','To: '+to,'Subject: '+subject,'Content-Type: text/plain; charset=UTF-8','',body].join('\r\n');
-    var name=(addr.replace(/[^A-Za-z0-9]+/g,'_'));
-    dl(`EPM_Review_${name}_${todayISO()}.eml`, 'message/rfc822', eml);
-  };
+  // Download EML (sl_downloadEML)
+  window.sl_downloadEML = function(){
+    var addr=gv('sl_address')||'Unit', dom=gv('sl_dom')||'0';
+    var to='operationsmgr@propertywize.com';
+    var subject=`EPM Review – ${addr} – ${dom} DOM`;
+    var body=$('sl_out').value || ''; if(!body){ window.sl_generate(); body=$('sl_out').value; }
+    var eml=['From: ','To: '+to,'Subject: '+subject,'Content-Type: text/plain; charset=UTF-8','',body].join('\r\n');
+    var name=(addr.replace(/[^A-Za-z0-9]+/g,'_'));
+    dl(`EPM_Review_${name}_${todayISO()}.eml`, 'message/rfc822', eml);
+  };
 
-  // ---- Button Wiring (If you are using this section, it should be in the DOM binding part) ----
-  /*
-  function on(id, fn){ var el=$(id); if(el && typeof fn==='function') el.addEventListener('click', fn); }
-  on('sl_btnGen', window.sl_generate);
-  // ... and so on for all your buttons
-  */
+  // ---- Button Wiring (If you are using this section, it should be in the DOM binding part) ----
+  /*
+  function on(id, fn){ var el=$(id); if(el && typeof fn==='function') el.addEventListener('click', fn); }
+  on('sl_btnGen', window.sl_generate);
+  // ... and so on for all your buttons
+  */
 
 })();
 </script>
@@ -1688,7 +1599,7 @@ window.sl_copy = window.appl_copy = function(id){
 // Download File (used by sl_download*)
 function download(name, mime, text){
   const blob = new Blob([text], {type: mime + ';charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
+  const url  = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = name;
   document.body.appendChild(a); a.click();
   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
@@ -1718,11 +1629,11 @@ window.sl_downloadCSV = function(){
 
 window.sl_downloadEML = function(){
   const addr = gv('sl_address') || 'Unit';
-  const dom  = gv('sl_dom') || '0';
-  const to   = 'operationsmgr@propertywize.com';
+  const dom  = gv('sl_dom') || '0';
+  const to   = 'operationsmgr@propertywize.com';
   if ($('sl_out') && !$('sl_out').value) window.sl_generate();
   const body = $('sl_out')?.value || '';
-  const eml  = ['From: ','To: '+to,'Subject: ' + `EPM Review – ${addr} – ${dom} DOM`,'Content-Type: text/plain; charset=UTF-8','', body].join('\r\n');
+  const eml  = ['From: ','To: '+to,'Subject: ' + `EPM Review – ${addr} – ${dom} DOM`,'Content-Type: text/plain; charset=UTF-8','', body].join('\r\n');
   const name = addr.replace(/[^A-Za-z0-9]+/g,'_');
   download(`EPM_Review_${name}_${todayISO()}.eml`, 'message/rfc822', eml);
 };
@@ -1779,16 +1690,16 @@ window.sl_downloadEML = function(){
 
   function bind(){
     // --- Stale Listing buttons ---
-    on('sl_btnGen',  function(){ window.sl_generate   && window.sl_generate();   });
-    on('sl_btnCopy', function(){ window.sl_copy       && window.sl_copy('sl_out');});
-    on('sl_btnTxt',  function(){ window.sl_downloadTXT&& window.sl_downloadTXT();});
-    on('sl_btnCsv',  function(){ window.sl_downloadCSV&& window.sl_downloadCSV();});
-    on('sl_btnEml',  function(){ window.sl_downloadEML&& window.sl_downloadEML();});
-    on('sl_btnDom',  function(){ window.sl_calcDOM    && window.sl_calcDOM();    }); // New/Fixed DOM button
+    on('sl_btnGen',  function(){ window.sl_generate   && window.sl_generate();   });
+    on('sl_btnCopy', function(){ window.sl_copy       && window.sl_copy('sl_out');});
+    on('sl_btnTxt',  function(){ window.sl_downloadTXT&& window.sl_downloadTXT();});
+    on('sl_btnCsv',  function(){ window.sl_downloadCSV&& window.sl_downloadCSV();});
+    on('sl_btnEml',  function(){ window.sl_downloadEML&& window.sl_downloadEML();});
+    on('sl_btnDom',  function(){ window.sl_calcDOM    && window.sl_calcDOM();    }); // New/Fixed DOM button
 
     // --- Delinquency buttons (must have a dlq_generate/dlq_copy defined elsewhere) ---
-    on('dlq_btnGen',  function(){ window.dlq_generate && window.dlq_generate();  });
-    on('dlq_btnCopy', function(){ window.dlq_copy     && window.dlq_copy('dlq_out'); });
+    on('dlq_btnGen',  function(){ window.dlq_generate && window.dlq_generate();  });
+    on('dlq_btnCopy', function(){ window.dlq_copy     && window.dlq_copy('dlq_out'); });
   }
   
   // Wait for the page to load before binding buttons
@@ -1813,6 +1724,92 @@ window.sl_downloadEML = function(){
 })();
 
 </script>
+    <script>
+/* ===== PropertyWize Button Fix Patch (non-visual) ===== */
+(function () {
+  // 0) Tiny helpers
+  function exp(name) {
+    try {
+      if (typeof window[name] !== 'function' && typeof self[name] === 'function') {
+        window[name] = self[name];
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  // 1) Export the functions your buttons are calling (from your console errors)
+  // Maintenance
+  exp('genMaintNote');
+
+  // Finance
+  exp('genFinance');
+
+  // Delinquency
+  exp('dlq_generate');
+  exp('dlq_copy');
+  exp('dlq_clear');
+
+  // Stale Listing
+  exp('sl_generate');
+  exp('sl_copy');
+  exp('sl_downloadTXT');
+  exp('sl_downloadCSV');
+  exp('sl_downloadEML');
+  exp('sl_calcDOM');
+
+  // Appliance
+  exp('appl_generate');
+  exp('appl_insertTroubleshooting');
+  exp('appl_copy');
+  exp('appl_clear');
+
+  // Plans modal (if your code already defines these, export them)
+  exp('openPlans');
+  exp('savePlans');
+  exp('closePlans');
+
+  // 2) Provide a minimal persist() so onchange="persist(...)" no longer throws
+  if (typeof window.persist !== 'function') {
+    window.persist = function () {
+      // No-op persistence that won’t crash your flow; your real code can overwrite this.
+      try { localStorage.setItem('pw_state_last', Date.now().toString()); } catch (e) {}
+    };
+  }
+
+  // 3) Fallback executor: if the browser skipped original binding, run onclick anyway
+  if (!window.__pw_click_bind__) {
+    window.__pw_click_bind__ = true;
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('button[onclick]');
+      if (!btn) return;
+      const call = btn.getAttribute('onclick');
+      if (!call) return;
+      try { new Function(call).call(window); } catch (err) { console.error('onclick fallback error:', call, err); }
+    }, true);
+  }
+
+  // 4) Hide any stray code that rendered as text (caused by a mismatched </script>)
+  const suspicious = /======\s*State\s*&\s*helpers|DEFAULT_PLANS\s*=\s*\[|function\s+\w+\s*\(/i;
+  document.querySelectorAll('footer, body').forEach(root => {
+    Array.from(root.childNodes).forEach(n => {
+      if (n.nodeType === 3 && suspicious.test(n.textContent || '')) {
+        const span = document.createElement('span');
+        span.style.display = 'none';
+        span.textContent = n.textContent;
+        n.parentNode.replaceChild(span, n);
+      }
+    });
+  });
+
+  // 5) Ensure hidden class actually hides modals even if inline styles conflict
+  if (!document.getElementById('pwHiddenStyle')) {
+    const style = document.createElement('style');
+    style.id = 'pwHiddenStyle';
+    style.textContent = '.hidden{display:none!important;}';
+    document.head.appendChild(style);
+  }
+})();
+</script>
+
 </body>
 
 </html>
