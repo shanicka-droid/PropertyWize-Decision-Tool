@@ -2214,41 +2214,6 @@ window.sl_downloadEML = function(){
 </script>
 
 
-
-  // Helper: find the next .flowQ after the current node
-  function nextFlowQ(from){
-    var el = from;
-    while (el && (el = el.nextElementSibling)){
-      if (el.matches && (el.matches('[data-flow-step]') || el.matches('.flowQ'))) return el;
-    }
-    // fallback: first step
-    return steps[0];
-  }
-
-  // If buttons lack data-next, give them a safe default to the next step
-  Array.from(hw.querySelectorAll('button, .btn')).forEach(function(btn){
-    if (!btn.getAttribute('data-next')) {
-      var nx = nextFlowQ(hw);
-      if (nx && nx.id) btn.setAttribute('data-next', nx.id);
-    }
-  });
-
-  // Generic click handler (does not modify UI styles)
-  if (!flow._pw_hw){
-    flow._pw_hw = true;
-    flow.addEventListener('click', function(e){
-      var t = e.target.closest('[data-next]');
-      if (!t) return;
-      var nx = t.getAttribute('data-next'); if (!nx) return;
-      var id = nx.charAt(0)==='#' ? nx.slice(1) : nx;
-      var target = document.getElementById(id);
-      var all = Array.from(flow.querySelectorAll('[data-flow-step], .flowQ'));
-      all.forEach(function(s){ s.classList.add('hidden'); });
-      if (target) target.classList.remove('hidden');
-    }, {passive:true});
-  }
-})();
-</script>
 <script>
 /* ===== Targeted Fix v3: Plans modal show/hide, Plan dropdown, Maint start at HW, Progress ===== */
 (function(){
@@ -2405,6 +2370,41 @@ window.sl_downloadEML = function(){
   // 4) safe persist() (if not already present)
   if (typeof window.persist !== 'function') window.persist = function(){};
 
+})();
+</script>
+
+  // Helper: find the next .flowQ after the current node
+  function nextFlowQ(from){
+    var el = from;
+    while (el && (el = el.nextElementSibling)){
+      if (el.matches && (el.matches('[data-flow-step]') || el.matches('.flowQ'))) return el;
+    }
+    // fallback: first step
+    return steps[0];
+  }
+
+  // If buttons lack data-next, give them a safe default to the next step
+  Array.from(hw.querySelectorAll('button, .btn')).forEach(function(btn){
+    if (!btn.getAttribute('data-next')) {
+      var nx = nextFlowQ(hw);
+      if (nx && nx.id) btn.setAttribute('data-next', nx.id);
+    }
+  });
+
+  // Generic click handler (does not modify UI styles)
+  if (!flow._pw_hw){
+    flow._pw_hw = true;
+    flow.addEventListener('click', function(e){
+      var t = e.target.closest('[data-next]');
+      if (!t) return;
+      var nx = t.getAttribute('data-next'); if (!nx) return;
+      var id = nx.charAt(0)==='#' ? nx.slice(1) : nx;
+      var target = document.getElementById(id);
+      var all = Array.from(flow.querySelectorAll('[data-flow-step], .flowQ'));
+      all.forEach(function(s){ s.classList.add('hidden'); });
+      if (target) target.classList.remove('hidden');
+    }, {passive:true});
+  }
 })();
 </script>
 
