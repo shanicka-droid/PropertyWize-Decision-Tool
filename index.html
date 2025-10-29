@@ -147,7 +147,6 @@
 </div>
 </div>
 
-<!-- 
 <!-- Q3 -->
 <div class="flowQ hidden" id="q3">
 <label><strong>Is the Property enrolled in a Home Warranty program?</strong></label>
@@ -191,7 +190,9 @@
 
 <script>
 (function(){
-if (window._mdf_wired) return; window._mdf_wired = true;
+if (window._mdf_wired) return; 
+// Use a robust check to ensure this runs only once and overrides previous bad logic
+window._mdf_wired = true; 
 
 // tiny helpers
 const $ = (q,ctx=document) => ctx.querySelector(q);
@@ -222,56 +223,66 @@ const outBox = $('#mdf_out', flow);
 const resetBtn = $('#mdf_reset', flow);
 const copyBtn = $('#mdf_copy', flow);
 
-// reset to first question
+// reset to first question (ensures Q1 is shown, all others hidden)
 function resetFlow(){
-qs.forEach(q => hide(q));
-show($('#q1', flow));
-hide(outWrap);
-if(outBox) outBox.value = '';
+    qs.forEach(q => hide(q));
+    show($('#q1', flow));
+    hide(outWrap);
+    if(outBox) outBox.value = '';
 }
 
 // render outcome
 function setOutcome(key){
-if(!OUT[key]) return;
-outBox.value = OUT[key];
-show(outWrap);
-// hide remaining questions
-qs.forEach(q => hide(q));
+    if(!OUT[key]) return;
+    outBox.value = OUT[key];
+    show(outWrap);
+    // hide remaining questions
+    qs.forEach(q => hide(q));
 }
 
 // wire buttons
 flow.addEventListener('click', (e)=>{
-const b = e.target.closest('button[data-next]');
-if(!b) return;
-const next = b.getAttribute('data-next');
+    const b = e.target.closest('button[data-next]');
+    if(!b) return;
+    const next = b.getAttribute('data-next');
 
-if(next.startsWith('OUT_')){
-setOutcome(next);
-return;
-}
-// show next question
-qs.forEach(q => hide(q));
-show($('#'+next, flow));
+    if(next.startsWith('OUT_')){
+        setOutcome(next);
+        return;
+    }
+    // show next question
+    qs.forEach(q => hide(q));
+    show($('#'+next, flow));
 });
 
 // copy/reset
 copyBtn && copyBtn.addEventListener('click', ()=>{
-const t = outBox.value || '';
-if(navigator.clipboard && navigator.clipboard.writeText){
-navigator.clipboard.writeText(t);
-} else {
-outBox.select && outBox.select();
-document.execCommand && document.execCommand('copy');
-}
-// tiny visual feedback
-const prev = copyBtn.textContent;
-copyBtn.textContent = 'Copied!';
-setTimeout(()=> copyBtn.textContent = prev, 900);
+    const t = outBox.value || '';
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(t);
+    } else {
+        outBox.select && outBox.select();
+        document.execCommand && document.execCommand('copy');
+    }
+    // tiny visual feedback
+    const prev = copyBtn.textContent;
+    copyBtn.textContent = 'Copied!';
+    setTimeout(()=> copyBtn.textContent = prev, 900);
 });
 resetBtn && resetBtn.addEventListener('click', resetFlow);
 
 // init
-resetFlow();
+// Always run a final reset to guarantee Q1 is visible after any role switch/load
+resetFlow(); 
+
+// *** CRITICAL STEP: Disable the faulty final patch script ***
+// This targets the problematic script at the very end of your file (near line 1368) 
+// that frequently causes this exact failure by re-hiding flow questions.
+const finalPatchScript = $('script:last-of-type');
+if (finalPatchScript && finalPatchScript.textContent.includes('FINAL PW TOOL – FIXED FUNCTIONALITY')) {
+    finalPatchScript.remove();
+}
+
 })();
 </script>
 
@@ -2201,22 +2212,166 @@ window.sl_downloadEML = function(){
 
 })();
 </script>
-    
-<!-- FINAL PW TOOL – FIXED FUNCTIONALITY, SAME UI -->
+
+
 <script>
+/* ===== Targeted Fix v3: Plans modal show/hide, Plan dropdown, Maint start at HW, Progress ===== */
 (function(){
   'use strict';
-  // Minimal, UI-safe fix: ensure Home Warranty Yes/No advance the flow
-  var flow = document.getElementById('maintDispatchFlow');
-  if (!flow) return;
-  // Find the step that contains "Home Warranty"
-  var steps = Array.from(flow.querySelectorAll('[data-flow-step], .flowQ'));
-  if (!steps.length) return;
-  var hw = steps.find(function(s){
-    var t = (s.textContent||'') + ' ' + (s.innerText||'');
-    return /home\s*warranty/i.test(t);
-  });
-  if (!hw) return;
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  // --- Manage Owner Plans modal uses .hidden toggle (not .open)
+  (function(){
+    const btn = $('#btnPlans'), modal = $('#plansModal'), ta = $('#plansText'), sel = $('#plan');
+    if (!btn || !modal || !ta) return;
+    const KEY='pw_owner_plans';
+    const DEFAULT=[
+      "Standard- (Owner Approval >300+)",
+      "Home Warranty (Owner Has An Active HW Plan with PW Auth)",
+      "Basic- (Owner Approval >150+)",
+      "Opt-Out (Owner Managed)",
+      "Emergency-Only (Auto Approved, EPM Approved, FYI to Owner)"
+    ].join('\\n');
+
+    function getText(){ return (ta.value && ta.value.trim()) || localStorage.getItem(KEY) || DEFAULT; }
+    function populateSelect(){
+      if (!sel) return;
+      const list = getText().split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean);
+      while (sel.firstChild) sel.removeChild(sel.firstChild);
+      const ph = document.createElement('option'); ph.value=''; ph.textContent=''; sel.appendChild(ph);
+      list.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+    }
+    function open(){ modal.classList.remove('hidden'); if (!ta.value.trim()) ta.value = localStorage.getItem(KEY) || DEFAULT; }
+    function close(){ modal.classList.add('hidden'); }
+    function save(){ try{ localStorage.setItem(KEY, (ta.value||'').trim()); alert('Plans saved ✅'); }catch(e){} populateSelect(); close(); }
+
+    if (!btn._pw){ btn._pw=true; btn.addEventListener('click', open); }
+    if (!window.savePlans) window.savePlans = save;
+    if (!window.closePlans) window.closePlans = close;
+
+    // initial
+    if (!ta.value.trim()) { const s = localStorage.getItem(KEY); if (s) ta.value = s; }
+    populateSelect();
+  })();
+
+  // --- Progress: watch all checkbox changes (capture any dynamically shown areas too)
+  function updateProgress(){
+    const bar = $('#progressBar'), note = $('#progressNote'); if (!bar || !note) return;
+    let checks = $$('input[type="checkbox"][data-progress="1"]');
+    if (checks.length === 0) {
+      const pane = $$('.view-pane').find(p => !p.classList.contains('hidden')) || document;
+      checks = $$('input[type="checkbox"]', pane);
+    }
+    const total = checks.length || 1;
+    const done  = checks.filter(c => c.checked).length;
+    const pct   = Math.round((done/total)*100);
+    bar.style.width = pct + '%'; note.textContent = pct + '% complete';
+  }
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.matches('input[type="checkbox"]')) updateProgress();
+  }, true);
+  updateProgress();
+
+  // --- Safe persist() (some inline onchange="persist()" refs exist)
+  if (typeof window.persist !== 'function') window.persist = function(){};
+
+})();
+</script>
+
+
+<script>
+/* ===== Targeted Fix v4: Plans modal robust; Maintenance HW step; Progress tracker super-robust ===== */
+(function(){
+  'use strict';
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  /* 1) Manage Owner Plans orange button: ensure open/close always work */
+  (function(){
+    const btn = $('#btnPlans'), modal = $('#plansModal'), ta = $('#plansText'), sel = $('#plan');
+    if (!btn || !modal) return;
+    const KEY='pw_owner_plans';
+    const DEFAULT=[
+      "Standard- (Owner Approval >300+)",
+      "Home Warranty (Owner Has An Active HW Plan with PW Auth)",
+      "Basic- (Owner Approval >150+)",
+      "Opt-Out (Owner Managed)",
+      "Emergency-Only (Auto Approved, EPM Approved, FYI to Owner)"
+    ].join('\\n');
+
+    function ensureShown(m){
+      m.classList.remove('hidden');
+      // if CSS relies on inline display, set fallback
+      if (getComputedStyle(m).display === 'none') m.style.display = 'block';
+    }
+    function ensureHidden(m){
+      m.classList.add('hidden');
+      // only clear our inline style if we set it
+      if (m.style.display === 'block') m.style.display = '';
+    }
+    function populateSelect(){
+      const list = ((ta && ta.value.trim()) || localStorage.getItem(KEY) || DEFAULT).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+      if (!sel) return;
+      while (sel.firstChild) sel.removeChild(sel.firstChild);
+      const ph=document.createElement('option'); ph.value=''; ph.textContent=''; sel.appendChild(ph);
+      list.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+    }
+    function open(){
+      try{ if (ta && !ta.value.trim()) ta.value = localStorage.getItem(KEY) || DEFAULT; }catch(e){}
+      populateSelect();
+      ensureShown(modal);
+    }
+    function close(){ ensureHidden(modal); }
+    function save(){
+      try{ localStorage.setItem(KEY, (ta && ta.value ? ta.value.trim() : '')); alert('Plans saved ✅'); }catch(e){}
+      populateSelect(); close();
+    }
+    if (!btn._pw){ btn._pw=true; btn.addEventListener('click', open); }
+    if (!window.savePlans) window.savePlans = save;
+    if (!window.closePlans) window.closePlans = close;
+  })();
+
+  /* 3) Progress tracker: listen to clicks, changes, and DOM mutations */
+  (function(){
+    const bar = document.getElementById('progressBar');
+    const note = document.getElementById('progressNote');
+    if (!bar || !note) return;
+    function checksInScope(){
+      let nodes = $$('input[type="checkbox"][data-progress="1"]');
+      if (nodes.length === 0) {
+        const pane = $$('.view-pane').find(p => !p.classList.contains('hidden')) || document;
+        nodes = $$('input[type="checkbox"]', pane);
+      }
+      return nodes;
+    }
+    function update(){
+      const nodes = checksInScope();
+      const total = nodes.length || 1;
+      const done = nodes.filter(n => n.checked).length;
+      const pct = Math.round((done/total)*100);
+      bar.style.width = pct + '%';
+      note.textContent = pct + '% complete';
+    }
+    document.addEventListener('change', function(e){
+      if (e.target && e.target.matches('input[type="checkbox"], input[type="radio"], select')) update();
+    }, true);
+    document.addEventListener('click', function(e){
+      if (e.target && (e.target.matches('button, .btn, label') || e.target.closest('label'))) {
+        // slight delay in case input is toggled by label
+        setTimeout(update, 0);
+      }
+    }, true);
+    const mo = new MutationObserver(function(){ setTimeout(update, 0); });
+    mo.observe(document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['class']});
+    update();
+  })();
+
+  // 4) safe persist() (if not already present)
+  if (typeof window.persist !== 'function') window.persist = function(){};
+
+})();
+</script>
 
   // Helper: find the next .flowQ after the current node
   function nextFlowQ(from){
