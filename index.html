@@ -2243,26 +2243,6 @@ window.sl_downloadEML = function(){
     populateSelect();
   })();
 
-  // --- Maintenance Dispatch: start at Home Warranty question (q3)
-  (function(){
-    const flow = document.getElementById('maintDispatchFlow'); if (!flow) return;
-    const q1 = document.getElementById('q1');
-    const q3 = document.getElementById('q3');
-    if (q1 && q3) { q1.classList.add('hidden'); q3.classList.remove('hidden'); }
-    // generic navigation using data-next
-    flow.addEventListener('click', function(e){
-      const el = e.target.closest('[data-next]'); if (!el) return;
-      const next = el.getAttribute('data-next');
-      const steps = $$('.flowQ', flow);
-      steps.forEach(s=>s.classList.add('hidden'));
-      if (next) {
-        // outcomes start with OUT_; show any wrapper already in DOM
-        const target = document.getElementById(next);
-        if (target) target.classList.remove('hidden');
-      }
-    }, {passive:true});
-  })();
-
   // --- Progress: watch all checkbox changes (capture any dynamically shown areas too)
   function updateProgress(){
     const bar = $('#progressBar'), note = $('#progressNote'); if (!bar || !note) return;
@@ -2340,38 +2320,6 @@ window.sl_downloadEML = function(){
     if (!window.closePlans) window.closePlans = close;
   })();
 
-  /* 2) Maintenance Dispatch: start at step that contains "Home Warranty" */
-  (function(){
-    const flow = document.getElementById('maintDispatchFlow'); if (!flow) return;
-    const steps = $$('[class*="flowQ"]', flow);
-    if (steps.length === 0) return;
-    // pick step that contains "Home Warranty"
-    let hw = steps.find(s => /home\s*warranty/i.test(s.textContent||''));
-    if (!hw) {
-      // fallback: show the second step if it exists (to avoid blank intro)
-      hw = steps[1] || steps[0];
-    }
-    steps.forEach(s => s.classList.add('hidden'));
-    hw.classList.remove('hidden');
-
-    // generic next navigation
-    flow.addEventListener('click', function(e){
-      const el = e.target.closest('[data-next]'); if (!el) return;
-      const nx = el.getAttribute('data-next');
-      // hide all steps
-      steps.forEach(s => s.classList.add('hidden'));
-      if (nx) {
-        const tgt = document.getElementById(nx);
-        if (tgt) tgt.classList.remove('hidden');
-        // if it points to an OUT_ wrapper, just unhide what exists
-        if (!tgt && /^OUT_/i.test(nx)) {
-          const wrap = flow.querySelector('[id*="OUT_"]');
-          if (wrap) wrap.classList.remove('hidden');
-        }
-      }
-    }, {passive:true});
-  })();
-
   /* 3) Progress tracker: listen to clicks, changes, and DOM mutations */
   (function(){
     const bar = document.getElementById('progressBar');
@@ -2412,23 +2360,6 @@ window.sl_downloadEML = function(){
 
 })();
 </script>
-
-
-<!-- FINAL PW TOOL – FIXED FUNCTIONALITY, SAME UI -->
-<script>
-(function(){
-  'use strict';
-  // Minimal, UI-safe fix: ensure Home Warranty Yes/No advance the flow
-  var flow = document.getElementById('maintDispatchFlow');
-  if (!flow) return;
-  // Find the step that contains "Home Warranty"
-  var steps = Array.from(flow.querySelectorAll('[data-flow-step], .flowQ'));
-  if (!steps.length) return;
-  var hw = steps.find(function(s){
-    var t = (s.textContent||'') + ' ' + (s.innerText||'');
-    return /home\s*warranty/i.test(t);
-  });
-  if (!hw) return;
 
   // Helper: find the next .flowQ after the current node
   function nextFlowQ(from){
