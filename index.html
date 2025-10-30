@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3929,5 +3930,115 @@ Note: Account delinquent — group non-urgent calls and seek owner direction for
   window._pwQ3Fix = true;
 })();
 </script>
+<script>
+// === PropertyWize • Maintenance Dispatch Flow (single-step + correct decisions) ===
+(function(){
+  const flow = document.getElementById('maintDispatchFlow');
+  if (!flow || flow._pwBound) return;
+
+  const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
+  const byId = id => document.getElementById(id);
+
+  // ---- Visibility helpers (one question at a time)
+  function hideAllSteps(){
+    $$('.flowQ', flow).forEach(el => {
+      el.classList.add('hidden');
+      el.style.display = 'none';
+      el.removeAttribute('data-active');
+    });
+  }
+  function showStep(id){
+    const el = byId(id);
+    if (!el) return;
+    el.classList.remove('hidden');
+    el.style.display = '';
+    el.setAttribute('data-active','1');
+  }
+
+  // ---- Decision output wiring
+  const outWrap = byId('mdf_out_wrap');
+  const outBox  = byId('mdf_out');
+  const copyBtn = byId('mdf_copy');
+  const resetBtn= byId('mdf_reset');
+
+  const DECISIONS = {
+    OUT_STANDARD:
+      "Proceed with Standard Dispatch (send owner FYI; auto approval by EPM for emergencies).",
+    OUT_DELINQ:
+      "Complete Delinquency SOP.",
+    OUT_HW:
+      "Proceed with Scheduling with Home Warranty.",
+    OUT_NOTIFY_OWNER:
+      "Notify the rental owner of the request (owner completes maintenance tickets).",
+    OUT_RECALL:
+      "Check the history and begin the Recall SOP."
+  };
+
+  function showDecision(code){
+    if (!outBox || !outWrap) return;
+    outBox.value = DECISIONS[code] || ("Decision: " + code.replace(/^OUT_/, ''));
+    outWrap.classList.remove('hidden');
+    outWrap.style.display = '';
+  }
+
+  // ---- Initialize: start at Q1 only
+  hideAllSteps();
+  showStep('q1');           // only Q1 visible; others hidden
+  if (outWrap){ outWrap.classList.add('hidden'); outWrap.style.display = 'none'; }
+
+  // ---- Advance on clicks
+  flow.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-next]');
+    if (!btn || !flow.contains(btn)) return;
+
+    const next = btn.getAttribute('data-next') || '';
+    // Always collapse to a single visible step
+    hideAllSteps();
+
+    if (next.startsWith('OUT_')) {
+      showDecision(next);
+    } else {
+      // Next is a step id: q2, q3, q4, q5
+      showStep(next);
+    }
+  }, {passive:true});
+
+  // ---- Copy/Reset
+  if (copyBtn && outBox){
+    copyBtn.addEventListener('click', () => { outBox.select(); document.execCommand('copy'); });
+  }
+  if (resetBtn){
+    resetBtn.addEventListener('click', () => {
+      if (outWrap){ outWrap.classList.add('hidden'); outWrap.style.display = 'none'; }
+      hideAllSteps();
+      showStep('q1');
+    });
+  }
+
+  // ---- Safety: ensure each step has a label (especially Q3)
+  const ensureLabel = (id, text) => {
+    const el = byId(id); if (!el) return;
+    let lab = el.querySelector('label');
+    if (!lab) { lab = document.createElement('label'); el.insertBefore(lab, el.firstChild); }
+    lab.innerHTML = `<strong>${text}</strong>`;
+  };
+  ensureLabel('q1', 'Is it an Emergency?');
+  ensureLabel('q2', 'Is the Property in Delinquent Status?');
+  ensureLabel('q3', 'Is the Property enrolled in a Home Warranty program?');
+  ensureLabel('q4', 'Will the Owner complete their own maintenance tickets?');
+  ensureLabel('q5', 'Was the same issue reported within the last 12 months?');
+
+  // ---- Make sure hidden class doesn't fight us
+  const style = document.createElement('style');
+  style.textContent = `
+    #maintDispatchFlow .flowQ.hidden { display: none !important; }
+    #maintDispatchFlow .flowQ[data-active="1"] { display: block !important; }
+  `;
+  document.head.appendChild(style);
+
+  flow._pwBound = true;
+})();
+</script>
+
 </body>
 </html>
