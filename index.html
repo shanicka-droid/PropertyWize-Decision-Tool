@@ -1109,65 +1109,63 @@ Tenant's vs HAP Rent Portion: ${data.rentPortion}
 })();
 
 
-</script>
-// ===== PropertyWize Dynamic Delinquency Email Generator =====
+<!-- PATCH: Delinquency email builder (stacked format, CRLF-safe) -->
+<script id="dlq-email-patch">
 (function(){
-  const btn = document.getElementById('dlq_send_email');
-  if (!btn || btn._pwBound) return;
+  if (window._pwDlqEmailBound) return; window._pwDlqEmailBound = true;
 
-  btn.addEventListener('click', () => {
-    // Pull values live from form fields or textareas
-    const get = id => (document.getElementById(id)?.value || '').trim();
+  const $ = id => document.getElementById(id);
+  const v = id => ( $(id)?.value || '' ).trim();
+  const na = x => x ? x : 'N/A';
 
-    const data = {
-      manager: get('dlq_manager') || 'SYS',
-      voucher: get('dlq_voucher') || 'No',
-      rentPortion: get('dlq_rentportion') || 'N/A - Rent is $1,674 + $25 RBP',
-      tenant: get('dlq_tenant') || 'Catherine Berry, Ronald Hope',
-      address: get('dlq_address') || '1814 E 30th Street',
-      balance: get('dlq_balance') || '$1,058.30',
-      lastPayment: get('dlq_lastpayment') || '10/17 for $1,000',
-      lastComm: get('dlq_lastcomm') || 'Tenants said they will be paying off the entire balance by 10/31, Fri.',
-      ftpDate: get('dlq_ftpdate') || 'None Filed',
-      courtOutcome: get('dlq_courtoutcome') || 'N/A',
-      judgment: get('dlq_judgment') || 'N/A',
-      evictionDate: get('dlq_eviction') || 'None filed yet',
-      lastAction: get('dlq_lastaction') || "Final notice today that if full balance is not paid by 11/02/2025, we'll have no choice but to file for FTP in court.",
-      reasonNoEviction: get('dlq_noevictionreason') || 'None filed yet',
-      leaseEnd: get('dlq_leaseend') || '01/31/2026',
-      buildiumBlock: get('dlq_buildiumblock') || 'No',
-      eligibleROR: get('dlq_ror') || 'No'
-    };
+  function defaultSubject(){
+    const t = v('dlq_tenant')  || 'Tenant';
+    const a = v('dlq_address') || 'Property';
+    return `Delinquency Update \u2013 ${t} (${a})`;
+  }
 
-    const body =
-`Manager Assigned: ${data.manager}
-Voucher Tenant: ${data.voucher}
-Tenant's vs HAP Rent Portion: ${data.rentPortion}
-1. Tenant's Name: ${data.tenant}
-2. Address: ${data.address}
-3. Balance: ${data.balance}
-4. Last Payment Received: ${data.lastPayment}
-5. Last Communication from Tenant: ${data.lastComm}
-6. FTP Date: ${data.ftpDate}
-7. Court Outcome: ${data.courtOutcome}
-8. Judgment Ordered: ${data.judgment}
-9. Eviction Date Scheduled: ${data.evictionDate}
-10. Last Action Completed: ${data.lastAction}
-11. If no eviction schedule was completed, please state the reason: ${data.reasonNoEviction}
-12. Lease End Date: ${data.leaseEnd}
-13. Tenant status in Buildium reflects collection status, meaning they are blocked from making partial payments online: ${data.buildiumBlock}
-14. Eligible for ROR? ${data.eligibleROR}`;
+  function buildBody(){
+    return `Manager Assigned: ${na(v('dlq_manager'))}
+Voucher Tenant: ${na(v('dlq_voucher'))}
+Tenant's vs HAP Rent Portion: ${na(v('dlq_rentportion'))}
+1. Tenant's Name: ${na(v('dlq_tenant'))}
+2. Address: ${na(v('dlq_address'))}
+3. Balance: ${na(v('dlq_total'))}
+4. Last Payment Received: ${na(v('dlq_lastpay'))}
+5. Last Communication from Tenant: ${na(v('dlq_lastcomm'))}
+6. FTP Date: ${na(v('dlq_ftp'))}
+7. Court Outcome: ${na(v('dlq_court'))}
+8. Judgment Ordered: ${na(v('dlq_judgment'))}
+9. Eviction Date Scheduled: ${na(v('dlq_eviction'))}
+10. Last Action Completed: ${na(v('dlq_lastaction'))}
+11. If no eviction schedule was completed, please state the reason: ${na(v('dlq_noevict_reason'))}
+12. Lease End Date: ${na(v('dlq_leaseend'))}
+13. Tenant status in Buildium reflects collection status, meaning they are blocked from making partial payments online: ${na(v('dlq_blocked'))}
+14. Eligible for ROR? ${na(v('dlq_ror'))}`;
+  }
 
-    const subject = `Delinquency Update – ${data.tenant} (${data.address})`;
-    const recipients = encodeURIComponent('owner@propertywize.com; epm@propertywize.com');
-    const mailto = `mailto:${recipients}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
-  });
+  function preview(){
+    const subj = v('dlq_email_subj') || defaultSubject();
+    $('dlq_email_subj').value = subj;
+    $('dlq_email_body').value = buildBody();
+  }
 
-  btn._pwBound = true;
+  function send(){
+    const to = v('dlq_email_to');
+    if (!to){ alert('Please add a recipient (To).'); return; }
+    const cc   = v('dlq_email_cc');
+    const subj = v('dlq_email_subj') || defaultSubject();
+    let body   = $('dlq_email_body').value || buildBody();
+    body = body.replace(/\r?\n/g, '\r\n'); // CRLF-safe
+    const rcpts = [to, cc].filter(Boolean).join('; ');
+    location.href = `mailto:${encodeURIComponent(rcpts)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  }
+
+  $('dlq_email_preview')?.addEventListener('click', e => { e.preventDefault(); preview(); });
+  $('dlq_email_send')?.addEventListener('click',    e => { e.preventDefault(); preview(); send(); });
+
 })();
 </script>
-
 </div>
 
 <div class="field">
@@ -4224,6 +4222,7 @@ Note: Account delinquent — group non-urgent calls and seek owner direction for
 
   flow._pwBound = true;
 })();
+<!-- PATCH A: Delinquency email builder (stacked format, CRLF-safe)
 </script>
 
 </body>
