@@ -950,27 +950,166 @@ Complete the checklist to enable Generate.
 <button class="btn" onclick="window.dlq_copy('dlq_out')">Copy Comment</button>
 <button class="btn" onclick="window.dlq_clear()">Clear</button>
 </div>
+<!-- ===== NEW Delinquency Contact + Email (replaces old Buildium Comment + Email Draft) ===== -->
+<div class="hr"></div>
+<h3>Delinquency Contact & Email</h3>
 
-<div class="field">
-<label>Delinquency Comment (Buildium)</label>
-<textarea id="dlq_out" readonly></textarea>
+<div class="two-col">
+  <!-- NEW Fields -->
+  <div class="field">
+    <label>Manager Assigned</label>
+    <input id="dlq_manager" type="text" placeholder="e.g., SYS">
+  </div>
+  <div class="field">
+    <label>Voucher Tenant?</label>
+    <select id="dlq_voucher">
+      <option value="" selected>— Select —</option>
+      <option>Yes</option>
+      <option>No</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Tenant vs HAP Rent Portion</label>
+    <input id="dlq_rentportion" type="text" placeholder="e.g., N/A - Rent is $1,674 + $25 RBP">
+  </div>
+  <div class="field">
+    <label>Buildium Collection Block (blocked from partial payments online?)</label>
+    <select id="dlq_blocked">
+      <option value="" selected>— Select —</option>
+      <option>Yes</option>
+      <option>No</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Eligible for ROR?</label>
+    <select id="dlq_ror">
+      <option value="" selected>— Select —</option>
+      <option>Yes</option>
+      <option>No</option>
+    </select>
+  </div>
 </div>
 
 <div class="hr"></div>
-<h3>Email Draft (Owner)</h3>
+<h3>Email Draft</h3>
+
 <div class="two-col">
-<div class="soft">
-<div class="field"><label>To</label><input id="dlq_email_to" type="text" placeholder="owner@example.com"></div>
-<div class="field"><label>CC</label><input id="dlq_email_cc" type="text" placeholder="team@propertywize.com"></div>
+  <div class="field">
+    <label>To</label>
+    <input id="dlq_email_to" type="text" placeholder="owner@example.com">
+  </div>
+  <div class="field">
+    <label>CC</label>
+    <input id="dlq_email_cc" type="text" placeholder="epm@example.com">
+  </div>
 </div>
+
 <div class="soft">
-<div class="field"><label>Subject</label><input id="dlq_email_subj" type="text" placeholder="Delinquency Update – [Tenant]"></div>
-</div>
-<div id="dlq-email-section" style="margin-top:12px;">
-  <button id="dlq_send_email" class="btn primary">Email Update to Owner & EPM</button>
+  <div class="field">
+    <label>Subject</label>
+    <input id="dlq_email_subj" type="text" placeholder="Delinquency Update – [Tenant]">
+  </div>
+  <div class="field">
+    <label>Preview</label>
+    <textarea id="dlq_email_body" readonly style="min-height:220px"></textarea>
+  </div>
+  <div class="row" style="gap:8px;">
+    <button class="btn" id="dlq_email_preview">Preview</button>
+    <button class="btn primary" id="dlq_email_send">Send Email</button>
+  </div>
 </div>
 
 <script>
+// ===== PropertyWize: Delinquency Email (no Buildium comment; uses live fields) =====
+(function(){
+  const $ = id => document.getElementById(id);
+  const v = id => ( $(id)?.value || '' ).trim();
+  const na = x => x ? x : 'N/A';
+
+  function buildBody(){
+    const data = {
+      manager:          na(v('dlq_manager')),
+      voucher:          na(v('dlq_voucher')),
+      rentPortion:      na(v('dlq_rentportion')),
+      tenant:           na(v('dlq_tenant')),
+      address:          na(v('dlq_address')),
+      balance:          na(v('dlq_total')),
+      lastPayment:      na(v('dlq_lastpay')),
+      lastComm:         na(v('dlq_lastcomm')),
+      ftpDate:          na(v('dlq_ftp')),
+      courtOutcome:     na(v('dlq_court')),
+      judgment:         na(v('dlq_judgment')),
+      evictionDate:     na(v('dlq_eviction')),
+      lastAction:       na(v('dlq_lastaction')),
+      reasonNoEviction: na(v('dlq_noevict_reason')),
+      leaseEnd:         na(v('dlq_leaseend')),
+      blocked:          na(v('dlq_blocked')),
+      ror:              na(v('dlq_ror'))
+    };
+
+    return (
+`Manager Assigned: ${data.manager}
+Voucher Tenant: ${data.voucher}
+Tenant's vs HAP Rent Portion: ${data.rentPortion}
+1. Tenant's Name: ${data.tenant}
+2. Address: ${data.address}
+3. Balance: ${data.balance}
+4. Last Payment Received: ${data.lastPayment}
+5. Last Communication from Tenant: ${data.lastComm}
+6. FTP Date: ${data.ftpDate}
+7. Court Outcome: ${data.courtOutcome}
+8. Judgment Ordered: ${data.judgment}
+9. Eviction Date Scheduled: ${data.evictionDate}
+10. Last Action Completed: ${data.lastAction}
+11. If no eviction schedule was completed, please state the reason: ${data.reasonNoEviction}
+12. Lease End Date: ${data.leaseEnd}
+13. Tenant status in Buildium reflects collection status, meaning they are blocked from making partial payments online: ${data.blocked}
+14. Eligible for ROR? ${data.ror}`
+    );
+  }
+
+  function defaultSubject(){
+    const t = v('dlq_tenant') || 'Tenant';
+    const a = v('dlq_address') || 'Property';
+    return `Delinquency Update – ${t} (${a})`;
+  }
+
+  function preview(){
+    const subj = v('dlq_email_subj') || defaultSubject();
+    $('dlq_email_subj').value = subj;
+    $('dlq_email_body').value = buildBody();
+  }
+
+  function send(){
+    const to = v('dlq_email_to');
+    const cc = v('dlq_email_cc');
+    const subj = v('dlq_email_subj') || defaultSubject();
+    const body = $('dlq_email_body').value || buildBody();
+
+    if (!to){
+      alert('Please add a recipient (To).');
+      return;
+    }
+
+    const rcpts = encodeURIComponent([to, cc].filter(Boolean).join('; '));
+    const url = `mailto:${rcpts}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+    window.location.href = url;
+  }
+
+  $('dlq_email_preview')?.addEventListener('click', (e)=>{ e.preventDefault(); preview(); });
+  $('dlq_email_send')?.addEventListener('click', (e)=>{ e.preventDefault(); preview(); send(); });
+
+  ['dlq_tenant','dlq_address'].forEach(id=>{
+    $(id)?.addEventListener('input', ()=> {
+      if (!v('dlq_email_subj')) $('dlq_email_subj').placeholder = defaultSubject();
+    });
+  });
+})();
+
+
+</script>
 // ===== PropertyWize Dynamic Delinquency Email Generator =====
 (function(){
   const btn = document.getElementById('dlq_send_email');
