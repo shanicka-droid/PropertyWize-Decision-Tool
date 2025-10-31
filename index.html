@@ -4294,5 +4294,81 @@ Tenant's vs HAP Rent Portion: ${na(v('dlq_rentportion'))}
   else document.addEventListener('DOMContentLoaded', bindAll);
 })();
 </script>
+<script>
+(function(){
+  // Scope: Delinquency section root
+  const root = document.querySelector('#view-delinquency') || document;
+  if (!root || root._dlqBound) return; root._dlqBound = true;
+
+  // Helpers
+  const $  = id => document.getElementById(id);
+  const v  = id => ( $(id)?.value || '' ).trim();
+  const na = x  => x ? x : 'N/A';
+
+  // Subject + body builders (your exact stacked format)
+  function subjectDefault(){
+    const t = v('dlq_tenant')  || 'Tenant';
+    const a = v('dlq_address') || 'Property';
+    return `Delinquency Update – ${t} (${a})`;
+  }
+  function buildBody(){
+    return `Manager Assigned: ${na(v('dlq_manager'))}
+Voucher Tenant: ${na(v('dlq_voucher'))}
+Tenant's vs HAP Rent Portion: ${na(v('dlq_rentportion'))}
+1. Tenant's Name: ${na(v('dlq_tenant'))}
+2. Address: ${na(v('dlq_address'))}
+3. Balance: ${na(v('dlq_total'))}
+4. Last Payment Received: ${na(v('dlq_lastpay'))}
+5. Last Communication from Tenant: ${na(v('dlq_lastcomm'))}
+6. FTP Date: ${na(v('dlq_ftp'))}
+7. Court Outcome: ${na(v('dlq_court'))}
+8. Judgment Ordered: ${na(v('dlq_judgment'))}
+9. Eviction Date Scheduled: ${na(v('dlq_eviction'))}
+10. Last Action Completed: ${na(v('dlq_lastaction'))}
+11. If no eviction schedule was completed, please state the reason: ${na(v('dlq_noevict_reason'))}
+12. Lease End Date: ${na(v('dlq_leaseend'))}
+13. Tenant status in Buildium reflects collection status, meaning they are blocked from making partial payments online: ${na(v('dlq_blocked'))}
+14. Eligible for ROR? ${na(v('dlq_ror'))}`;
+  }
+
+  function doPreview(){
+    const subj = v('dlq_email_subj') || subjectDefault();
+    $('dlq_email_subj') && ($('dlq_email_subj').value = subj);
+    $('dlq_email_body') && ($('dlq_email_body').value = buildBody());
+  }
+  function doSend(){
+    const to = v('dlq_email_to');
+    if (!to){ alert('Please add a recipient (To).'); return; }
+    const cc   = v('dlq_email_cc');
+    const subj = v('dlq_email_subj') || subjectDefault();
+    let body   = ($('dlq_email_body')?.value || buildBody()).replace(/\r?\n/g, '\r\n');
+    const rcpts = [to, cc].filter(Boolean).join('; ');
+    location.href = `mailto:${encodeURIComponent(rcpts)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  }
+
+  // Normalize button text for matching if no data-action is present
+  function actionFromButton(btn){
+    const act = (btn.dataset && btn.dataset.action) ? btn.dataset.action.toLowerCase() : '';
+    if (act) return act;
+    const t = (btn.innerText || btn.textContent || '').trim().toLowerCase();
+    if (t === 'preview') return 'dlq-preview';
+    if (t === 'send email' || t === 'send') return 'dlq-send';
+    return '';
+  }
+
+  // Single delegated listener
+  root.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button, .btn');
+    if (!btn || !root.contains(btn)) return;
+    const act = actionFromButton(btn);
+    if (!act) return;
+
+    e.preventDefault();
+
+    if (act === 'dlq-preview')  { doPreview(); }
+    if (act === 'dlq-send')     { doPreview(); doSend(); }
+  });
+})();
+</script>
 </body>
 </html>
