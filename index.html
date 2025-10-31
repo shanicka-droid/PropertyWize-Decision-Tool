@@ -2219,6 +2219,37 @@ window.sl_downloadEML = function(){
       const type=gv('appl_type'), brand=gv('appl_brand'), color=gv('appl_color'), sn=gv('appl_serial'), age=gv('appl_age'), pr=gv('appl_priority');
       const issue=gv('appl_complaint'), vendor=gv('appl_vendor'), reco=gv('appl_vendor_reco'), reviewed=cb('appl_vendor_reviewed'), sent=cb('appl_sent_vendor');
       const opt1=gv('appl_opt1'), opt2=gv('appl_opt2'), opt3=gv('appl_opt3'), album=gv('appl_album');
+      // --- PropertyWize: Delinquent + Non-Essential appliance email gate ---
+const balance = parseFloat(gv('dlq_total') || '0');       // pulled from Delinquency
+const tenant  = gv('dlq_tenant') || 'Tenant';
+const aType   = (type || '').toLowerCase();
+
+// Treat these as ESSENTIAL (everything else = non-essential)
+const essentials = ['refrigerator','fridge','stove','range','oven','washer','dryer'];
+
+// Helper: is this a non-essential appliance?
+const isNonEssential = !essentials.some(e => aType.includes(e));
+
+// If tenant owes > $500 AND appliance is non-essential → generate denial email and stop.
+if (balance > 500 && isNonEssential) {
+  const emailBox = document.getElementById('appl_email_out') || document.querySelector('#appl_email_out');
+  if (emailBox) {
+    emailBox.value =
+`Dear ${tenant},
+
+Thank you for submitting your request.
+
+Unfortunately, we are unable to process your request at this time as your account is not in good standing. Please get in touch with our Collections Account Manager to discuss payment arrangements if necessary.
+
+You can conveniently submit a request through your online portal at https://propertywize.managebuilding.com/Resident/public/home.
+
+Once your account is back in good standing, please contact us to complete your request.
+
+Regards,
+PropertyWize Management Team`;
+  }
+  return; // stop normal ticket generation
+}
       const epm=[
         `EPM – Appliance Ticket ${wo||'[WO]'}`,
         addr||unit?`Address: ${[addr,unit].filter(Boolean).join(', ')}`:'',
