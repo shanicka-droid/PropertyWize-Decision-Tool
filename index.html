@@ -2219,31 +2219,24 @@ window.sl_downloadEML = function(){
       const type=gv('appl_type'), brand=gv('appl_brand'), color=gv('appl_color'), sn=gv('appl_serial'), age=gv('appl_age'), pr=gv('appl_priority');
       const issue=gv('appl_complaint'), vendor=gv('appl_vendor'), reco=gv('appl_vendor_reco'), reviewed=cb('appl_vendor_reviewed'), sent=cb('appl_sent_vendor');
       const opt1=gv('appl_opt1'), opt2=gv('appl_opt2'), opt3=gv('appl_opt3'), album=gv('appl_album');
-     /* ---- PW Appliance: Delinquent + Non-Essential Gate (v2, hardened) ---- */
-const getNum = (s) => {
-  const n = (s ?? '').toString().replace(/[^0-9.]/g, '');   // strip $, commas, spaces
-  return parseFloat(n) || 0;
-};
+  /* ---- PW Appliance: Delinquent + Non-Essential Gate (v3, robust + debug) ---- */
+const $id = (i)=>document.getElementById(i);
+const num = (s)=>{ const n=(s??'').toString().replace(/[^0-9.]/g,''); return parseFloat(n)||0; };
 
-// pull from Delinquency (or an optional local field if you added one)
-const balance = getNum(gv('dlq_total') || gv('appl_balance') || '0');
-const tenant  = gv('dlq_tenant') || gv('appl_tenant') || 'Tenant';
-const aType   = (type || '').toLowerCase().trim();
+// Pull values (from Delinquency first, then Appliance fallback)
+const balance = num(gv('dlq_total') || gv('appl_balance') || '0');
+const tenant  = (gv('dlq_tenant') || gv('appl_tenant') || 'Tenant').trim();
+const aType   = ((typeof type!=='undefined'?type:gv('appl_type')) || '').toLowerCase().trim();
 
-// essential list (everything else is non-essential)
+// Essentials list (everything else = non-essential)
 const essentials = ['refrigerator','fridge','stove','range','oven','washer','dryer'];
+const isNonEssential = aType.length>0 && !essentials.some(e=>aType.includes(e));
 
-// detect non-essential
-const isNonEssential = aType.length > 0 && !essentials.some(e => aType.includes(e));
-
-// pick the output box robustly (works with either id)
-let emailBox = document.getElementById('appl_email_out')
-            || document.getElementById('appl_out')
-            || document.querySelector('#appl_email_out, #appl_out');
-
-// if no output exists, create one so you can see the result
+// Find output box (try several ids), create one if missing
+let emailBox = $id('appl_email_out') || $id('appl_out') || $id('appl_email') 
+            || document.querySelector('#appl_email_out, #appl_out, textarea[id*="appl"]');
 if (!emailBox) {
-  const holder = document.querySelector('#appliance, #applianceTab, [data-view="appliance"]') || document.body;
+  const holder = document.querySelector('[data-view="appliance"], #appliance, #applianceTab') || document.body;
   emailBox = document.createElement('textarea');
   emailBox.id = 'appl_email_out';
   emailBox.readOnly = true;
@@ -2253,10 +2246,10 @@ if (!emailBox) {
   holder.appendChild(emailBox);
 }
 
-// DEBUG breadcrumb (open DevTools console to see)
-try { console.log('[PW] appl gate → balance:', balance, 'type:', aType, 'isNonEssential:', isNonEssential); } catch(e){}
+// DEBUG (open DevTools console)
+try{ console.log('[PW][appl_gate] balance=',balance,'type=',aType,'nonEssential=',isNonEssential,'box=',!!emailBox);}catch(e){}
 
-// Gate: balance > 500 & non-essential → set denial email and STOP normal flow
+// Gate: Balance > 500 AND Non-essential → set deferral email and STOP normal flow
 if (balance > 500 && isNonEssential) {
   emailBox.value =
 `Dear ${tenant},
@@ -2271,7 +2264,7 @@ Once your account is back in good standing, please contact us to complete your r
 
 Regards,
 PropertyWize Management Team`;
-  return; // IMPORTANT: prevents later code from overwriting the email
+  return; // IMPORTANT: prevents later code from overwriting this email
 }
       const epm=[
         `EPM – Appliance Ticket ${wo||'[WO]'}`,
