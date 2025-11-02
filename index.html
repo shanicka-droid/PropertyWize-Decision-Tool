@@ -293,6 +293,110 @@ OUT_EMER:
 "Step 1: Send an FYI to the EPM for approval.\n" +
 "Step 2: Once the EPM approves, send an FYI to the property owner.",
 };
+<script>
+// ---------- emergency helpers (paste after OUT) ----------
+const emergWrap = document.querySelector('#emerg_email_wrap');
+const planSel   = document.querySelector('#plan');
+
+const $id = (id) => document.getElementById(id);
+const txt = (id) => ($id(id)?.value || '').trim();
+
+function showEmerg(on) { if (emergWrap) emergWrap.classList.toggle('hidden', !on); }
+
+function buildEmergencyEmails() {
+  const t      = txt('med_tenant')          || '[Tenant Name]';
+  const addr   = txt('med_address')         || '[Property Address]';
+  const visit  = txt('med_visit')           || 'TBD';
+  const estRaw = txt('med_estimate');
+  const est    = estRaw ? Number(estRaw) : null;
+  const ten    = txt('med_tenant_stmt')     || '[Tenant statement]';
+  const find   = txt('med_findings')        || '[Vendor findings]';
+  const reco   = txt('med_reco')            || '[Vendor recommendation]';
+  const owner  = txt('maint_owner_name')    || '[Owner Name]';
+
+  const epmSubj = `🔔 EPM Approval Needed – Emergency Maintenance Ticket [${t} / ${addr}]`;
+  const epmBody =
+`Dear EPM Team,
+
+Please review the emergency maintenance request below and provide your approval before we notify the property owner.
+
+Tenant Name: ${t}
+Unit Address: ${addr}
+
+Reported Issue (Tenant Complaint):
+"${ten}"
+
+Vendor’s Diagnosis:
+"${find}"
+
+Proposed Work:
+"${reco}"
+
+Estimated Cost:
+${est !== null ? `$${est.toFixed(2)}` : 'TBD'} (Vendor Estimate) + 10% Surcharge
+Total: ${est !== null ? `$${(est*1.10).toFixed(2)}` : 'TBD'}
+
+Visit Date: ${visit}
+`;
+
+  const ownSubj = `🚨 Emergency Dispatch FYI – ${t} / ${addr}`;
+  const ownBody =
+`Dear ${owner},
+
+In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.
+
+You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:
+
+Tenant Name: ${t}
+Unit Address: ${addr}
+
+Brief Description of Work Requested:
+The tenant reported:
+“${ten}”
+
+Vendor’s Diagnosis:
+Our service provider visited the property on ${visit} and found/reported:
+“${find}”
+
+Proposed Work:
+“${reco}”
+
+Quoted Cost:
+${est !== null ? `$${est.toFixed(2)}` : 'TBD'} (Vendor Estimate) + 10% Surcharge
+Total: ${est !== null ? `$${(est*1.10).toFixed(2)}` : 'TBD'}
+
+This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.
+You will receive updates once the work is completed and the invoice has been processed.`;
+
+  $id('epm_subj')?.value = epmSubj;
+  $id('epm_body')?.value = epmBody;
+  $id('own_subj')?.value = ownSubj;
+  $id('own_body')?.value = ownBody;
+}
+
+// button to generate
+document.getElementById('med_generate')?.addEventListener('click', buildEmergencyEmails);
+
+// live update while typing (optional)
+[
+  'med_tenant','med_address','med_visit','med_estimate',
+  'med_tenant_stmt','med_findings','med_reco','maint_owner_name'
+].forEach(id => $id(id)?.addEventListener('input', buildEmergencyEmails));
+
+// Copy buttons that use data-copy
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-copy]');
+  if (!b) return;
+  const sel = b.getAttribute('data-copy');
+  const el  = sel ? document.querySelector(sel) : null;
+  if (!el) return;
+  el.select?.();
+  document.execCommand?.('copy');
+  const prev = b.textContent;
+  b.textContent = 'Copied!';
+  setTimeout(() => b.textContent = prev, 900);
+});
+</script>
 
 const flow = $('#maintDispatchFlow');
 if(!flow) return;
@@ -313,12 +417,18 @@ function resetFlow(){
 
 // render outcome
 function setOutcome(key){
-    if(!OUT[key]) return;
-    outBox.value = OUT[key];
-    show(outWrap);
-    // hide remaining questions
-    qs.forEach(q => hide(q));
+  if (key === 'OUT_EMER') {
+    showEmerg(true);
+    buildEmergencyEmails();      // prefill using the fields
+  } else {
+    showEmerg(false);
+  }
+  if(!OUT[key]) return;
+  outBox.value = OUT[key];
+  show(outWrap);
+  qs.forEach(q => hide(q));
 }
+
 
 // wire buttons
 flow.addEventListener('click', (e)=>{
@@ -348,13 +458,32 @@ copyBtn && copyBtn.addEventListener('click', ()=>{
     const prev = copyBtn.textContent;
     copyBtn.textContent = 'Copied!';
     setTimeout(()=> copyBtn.textContent = prev, 900);
+      
+
 });
 resetBtn && resetBtn.addEventListener('click', resetFlow);
 
 // init
 // Always run a final reset to guarantee Q1 is visible after any role switch/load
-resetFlow(); 
+      // If Owner Plan select contains the word "Emergency", behave like OUT_EMER
+planSel?.addEventListener('change', (e) => {
+  const isEmer = /emergency/i.test(e.target.value || '');
+  if (isEmer) {
+    setOutcome('OUT_EMER');
+    show(outWrap);
+    outBox.value = OUT.OUT_EMER;
+  } else {
+    // don’t wipe user’s existing flow; just hide emergency UI
+    showEmerg(false);
+  }
+});
 
+resetFlow(); 
+const emergWrap = document.querySelector('#emerg_email_wrap');
+function showEmerg(showIt) {
+  if (showIt) emergWrap?.classList.remove('hidden');
+  else emergWrap?.classList.add('hidden');
+}
 // *** CRITICAL STEP: Disable the faulty final patch script ***
 // This targets the problematic script at the very end of your file (near line 1368) 
 // that frequently causes this exact failure by re-hiding flow questions.
