@@ -309,6 +309,59 @@ if (finalPatchScript && finalPatchScript.textContent.includes('FINAL PW TOOL –
   <option>Opt-Out Maintenance</option> <!-- NEW -->
 </select>
           </div>
+          <!-- ===== Emergency Details (lightweight add-only) ===== -->
+<div class="card" id="pw_emergency_details" style="margin-top:12px;">
+  <h3>Emergency Details</h3>
+  <div class="two-col">
+    <div class="field">
+      <label>Tenant Name</label>
+      <input id="maint_tenant" type="text" placeholder="e.g., Anna Banana">
+    </div>
+    <div class="field">
+      <label>Unit Address</label>
+      <input id="maint_address" type="text" placeholder="e.g., 123 Maple St, City ST">
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="field">
+      <label>Owner Name (for greeting)</label>
+      <input id="maint_owner_name" type="text" placeholder="e.g., John Doe (optional)">
+    </div>
+    <div class="field">
+      <label>Vendor Visit Date</label>
+      <input id="maint_vendor_visitdate" type="date" placeholder="">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Tenant Complaint (quote exact)</label>
+    <textarea id="maint_tenant_complaint" rows="3" placeholder="Quote tenant’s original statement…"></textarea>
+  </div>
+
+  <div class="two-col">
+    <div class="field">
+      <label>Vendor Findings (diagnosis)</label>
+      <textarea id="maint_vendor_findings" rows="3" placeholder="What the vendor found…"></textarea>
+    </div>
+    <div class="field">
+      <label>Vendor Recommendation (proposed work)</label>
+      <textarea id="maint_vendor_reco" rows="3" placeholder="What the vendor recommends…"></textarea>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="field">
+      <label>Vendor Estimate (numbers only)</label>
+      <input id="maint_vendor_estimate" type="number" step="0.01" min="0" placeholder="e.g., 325.00">
+    </div>
+    <div class="field">
+      <label>Portal Link (optional)</label>
+      <input id="maint_portal_link" type="url" placeholder="e.g., https://…">
+    </div>
+  </div>
+</div>
+
         </div>
         <!-- Vendor Findings & Compliance -->
 <div class="hr"></div>
