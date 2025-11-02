@@ -5367,6 +5367,123 @@ You will receive updates once the work is completed and the invoice has been pro
 
 })();
 </script>
+<script>
+(function(){
+  // --- Early exit if we've already wired ---
+  if (window._pw_emerg_wired) return; 
+  window._pw_emerg_wired = true;
+
+  // Shorthands
+  const $ = (s,ctx=document)=>ctx.querySelector(s);
+  const $$ = (s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+
+  const emergWrap = $('#emerg_email_wrap');
+  const decision  = $('#mdf_out');
+
+  // If the block isn't in the DOM, stop.
+  if (!emergWrap || !decision) return;
+
+  // Some themes don't define .hidden; provide a safe fallback
+  function hide(el){ if(!el) return; el.classList.add('hidden'); el.style.display = 'none'; }
+  function show(el){ if(!el) return; el.classList.remove('hidden'); el.style.display = ''; }
+
+  // Reveal emergency block if the decision contains your policy text
+  const EMER_SIG = 'emergency dispatch policy';
+
+  function toggleEmergencyBlock(){
+    const v = (decision.value || '').toLowerCase();
+    if (v.includes(EMER_SIG)) show(emergWrap); else hide(emergWrap);
+  }
+
+  // Run once on load
+  toggleEmergencyBlock();
+
+  // Re-check after any click inside the Maintenance card (covers next/yes/no buttons)
+  const maintCard = document.getElementById('maintDispatchFlow') || document;
+  if (!maintCard._pw_emerg_bound){
+    maintCard._pw_emerg_bound = true;
+    maintCard.addEventListener('click', ()=>setTimeout(toggleEmergencyBlock, 0), {passive:true});
+  }
+
+  // Also re-check after Copy/Reset (if those redraw decision text)
+  ['mdf_copy','mdf_reset'].forEach(id=>{
+    const b = document.getElementById(id);
+    if (b && !b._pw_emerg_bound){
+      b._pw_emerg_bound = true;
+      b.addEventListener('click', ()=>setTimeout(toggleEmergencyBlock,0), {passive:true});
+    }
+  });
+
+  // -------- Email generator wiring (uses fields from Block A) --------
+  function dollars(n){
+    const num = Number(n);
+    return Number.isFinite(num) ? num.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}) : ('$'+(n||''));
+  }
+  const q = s => s ? `“${s}”` : '—';
+
+  function buildEmergencyEmails(){
+    const tn  = $('#med_tenant')?.value?.trim() || '';
+    const ad  = $('#med_address')?.value?.trim() || '';
+    const dt  = $('#med_visit')?.value?.trim() || '';
+    const est = $('#med_estimate')?.value?.trim() || '';
+    const cmp = $('#med_tenant_stmt')?.value?.trim() || '';
+    const fd  = $('#med_findings')?.value?.trim() || '';
+    const rc  = $('#med_reco')?.value?.trim() || '';
+
+    const epmSubj = `🔔 EPM Approval Needed – Emergency Maintenance Ticket ${tn ? `[${tn}]` : ''}${ad ? ` (${ad})` : ''}`;
+    const ownSubj = `🚨 Emergency Dispatch FYI – ${tn ? `[${tn}]` : ''}${ad ? ` (${ad})` : ''}`;
+
+    const epmBody = [
+      'Dear EPM Team,','',
+      'Please review the emergency maintenance request below and provide your approval before we notify the property owner.','',
+      `Tenant Name: ${tn}`,
+      `Unit Address: ${ad}`,'',
+      'Reported Issue (Tenant Complaint):', q(cmp),'',
+      'Vendor’s Diagnosis:', q(fd),'',
+      'Proposed Work:', q(rc),'',
+      `Quoted Cost: ${dollars(est)} + 10% surcharge`,'',
+      'Please reply “Approved” or “Denied” and include any special instructions, if applicable.'
+    ].join('\n');
+
+    const ownBody = [
+      'Dear [Owner Name],','',
+      'In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.','',
+      'You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:','',
+      `Tenant Name: ${tn}`,
+      `Unit Address: ${ad}`,'',
+      'Brief Description of Work Requested:',
+      'The tenant reported:', q(cmp),'',
+      'Vendor’s Diagnosis:',
+      `Our service provider visited the property on ${dt || '[Insert Date]'} and found/reported:`, q(fd),'',
+      'Proposed Work:', q(rc),'',
+      `Quoted Cost:\n${dollars(est)} (Vendor Estimate) + 10% Surcharge\nTotal: [Auto from Finance after invoice]`,'',
+      'This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.',
+      'You will receive updates once the work is completed and the invoice has been processed.'
+    ].join('\n');
+
+    const epmSub = $('#epm_subj'); if (epmSub) epmSub.value = epmSubj;
+    const epmB   = $('#epm_body'); if (epmB)   epmB.value   = epmBody;
+    const ownSub = $('#own_subj'); if (ownSub) ownSub.value = ownSubj;
+    const ownB   = $('#own_body'); if (ownB)   ownB.value   = ownBody;
+  }
+
+  $('#med_generate')?.addEventListener('click', buildEmergencyEmails, {passive:true});
+
+  // Copy helpers (data-copy="#textareaId")
+  $$('[data-copy]').forEach(btn=>{
+    if (btn._pw_copy) return;
+    btn._pw_copy = true;
+    btn.addEventListener('click', ()=>{
+      const sel = btn.getAttribute('data-copy');
+      const el  = sel ? $(sel) : null;
+      if (!el) return;
+      el.select && el.select();
+      document.execCommand('copy');
+    }, {passive:true});
+  });
+
+})();
+</script>
 
 </body>
 </html>
