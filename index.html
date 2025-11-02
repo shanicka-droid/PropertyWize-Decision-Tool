@@ -188,6 +188,78 @@
 <button type="button" class="btn" id="mdf_reset">Reset</button>
 </div>
 </div>
+  <!-- ===== Emergency Email (only shows when Emergency is chosen) ===== -->
+<div id="emerg_email_wrap" class="hidden" style="margin-top:12px;">
+  <div class="hr"></div>
+  <h3>Emergency Email Data</h3>
+  <div class="row" style="gap:12px; flex-wrap:wrap;">
+    <div class="field" style="flex:1 1 260px">
+      <label>Tenant Name</label>
+      <input id="med_tenant" type="text" placeholder="e.g., Jane Smith">
+    </div>
+    <div class="field" style="flex:1 1 320px">
+      <label>Unit Address</label>
+      <input id="med_address" type="text" placeholder="e.g., 123 Main St, Baltimore MD">
+    </div>
+    <div class="field" style="flex:1 1 220px">
+      <label>Vendor Visit Date</label>
+      <input id="med_visit" type="date">
+    </div>
+    <div class="field" style="flex:1 1 180px">
+      <label>Vendor Estimate ($)</label>
+      <input id="med_estimate" type="number" min="0" step="1" placeholder="e.g., 425">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Tenant Complaint (quote exact)</label>
+    <textarea id="med_tenant_stmt" rows="3" placeholder="Paste what tenant wrote…"></textarea>
+  </div>
+  <div class="row" style="gap:12px; flex-wrap:wrap;">
+    <div class="field" style="flex:1 1 320px">
+      <label>Vendor Findings</label>
+      <textarea id="med_findings" rows="3" placeholder="Diagnosis…"></textarea>
+    </div>
+    <div class="field" style="flex:1 1 320px">
+      <label>Vendor Recommendation</label>
+      <textarea id="med_reco" rows="3" placeholder="Proposed work…"></textarea>
+    </div>
+  </div>
+
+  <div class="row" style="gap:8px; margin-top:6px;">
+    <button type="button" class="btn primary" id="med_generate">Generate Emergency Emails</button>
+  </div>
+
+  <div class="hr"></div>
+  <h3>Emergency Emails (auto-filled)</h3>
+  <p class="note"><strong>Policy:</strong> Step 1: FYI to <em>EPM</em> for approval. Step 2: After EPM approves, FYI to <em>Owner</em>.</p>
+
+  <div class="field">
+    <label>EPM Subject</label>
+    <input id="epm_subj" type="text" readonly>
+  </div>
+  <div class="field">
+    <label>EPM Body</label>
+    <textarea id="epm_body" rows="9" readonly></textarea>
+    <div class="row" style="justify-content:flex-end; gap:8px;">
+      <button type="button" class="btn" data-copy="#epm_body">Copy EPM Email</button>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+  <div class="field">
+    <label>Owner Subject</label>
+    <input id="own_subj" type="text" readonly>
+  </div>
+  <div class="field">
+    <label>Owner FYI Body</label>
+    <textarea id="own_body" rows="11" readonly></textarea>
+    <div class="row" style="justify-content:flex-end; gap:8px;">
+      <button type="button" class="btn" data-copy="#own_body">Copy Owner Email</button>
+    </div>
+  </div>
+</div>
+
 </div>
 <!-- ===== /Maintenance Dispatch Flow ===== -->
 
@@ -5132,6 +5204,167 @@ You will receive updates once the work is completed and the invoice has been pro
 
   // Initial pass
   update();
+})();
+</script>
+<script>
+(function(){
+  if (window._pwMDFPatch) return; window._pwMDFPatch = true;
+
+  const $  = (s,ctx=document)=>ctx.querySelector(s);
+  const $$ = (s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+  const gv = id => { const n=document.getElementById(id); return n?(n.value||'').trim():''; };
+
+  const flowRoot   = document.getElementById('maintDispatchFlow'); // your existing card id
+  const outWrap    = document.getElementById('mdf_out_wrap');
+  const outBox     = document.getElementById('mdf_out');
+  const emergWrap  = document.getElementById('emerg_email_wrap');
+
+  function show(el){ if(el) el.classList.remove('hidden'); }
+  function hide(el){ if(el) el.classList.add('hidden'); }
+
+  // 1) Map outcome messages (no UI style changes)
+  const MDF_OUT = {
+    OUT_STANDARD: 'Standard dispatch per policy.',
+    OUT_DELINQ:   'Ticket blocked due to delinquency. Follow the Delinquency flow for next steps.',
+    OUT_HW:       'Route through the Home Warranty provider per policy.',
+    OUT_NOTIFY_OWNER: 'Owner elected to complete maintenance. Send FYI and close PW ticket.',
+    OUT_RECALL:   'Recall within 12 months. Route to prior vendor for warranty/service check.',
+    OUT_EMERGENCY:'Please follow the Emergency Dispatch Policy: Step 1: Send an FYI to the EPM for approval. Step 2: Once the EPM approves, send an FYI to the property owner.'
+  };
+
+  function setDecision(keyOrText){
+    const txt = MDF_OUT[keyOrText] || keyOrText || '';
+    if (outBox) outBox.value = txt;
+    if (outWrap) show(outWrap);
+  }
+
+  // 2) Ensure sequential reveal: only one question at a time
+  const steps = ['q1','q2','q3','q4','q5'].map(id=>document.getElementById(id)).filter(Boolean);
+  function hideAllQs(){ steps.forEach(s=>hide(s)); }
+  function reveal(id){ hideAllQs(); const el=document.getElementById(id); if(el) show(el); }
+
+  // Initial state: show q1 only
+  reveal('q1'); if (emergWrap) hide(emergWrap);
+
+  // 3) Click router for your existing buttons (data-next or data-q/data-val)
+  if (flowRoot && !flowRoot._pwBound){
+    flowRoot._pwBound = true;
+    flowRoot.addEventListener('click', function(e){
+      const btn = e.target.closest('button');
+      if (!btn) return;
+
+      // A) Support your existing HTML: data-next="OUT_*" or "q*"
+      let nx = btn.getAttribute('data-next');
+
+      // B) Also support the q* schema you showed (data-q + data-val):
+      const q = btn.getAttribute('data-q');
+      const val = btn.getAttribute('data-val');
+      if (!nx && q){
+        if (q === 'q1') nx = (val === 'yes') ? 'OUT_EMERGENCY' : 'q2';
+        else if (q === 'q2') nx = (val === 'yes') ? 'OUT_DELINQ' : 'q3';
+        else if (q === 'q3') nx = (val === 'yes') ? 'OUT_HW' : 'q4';
+        else if (q === 'q4') nx = (val === 'yes') ? 'OUT_NOTIFY_OWNER' : 'q5';
+        else if (q === 'q5') nx = (val === 'yes') ? 'OUT_RECALL' : 'OUT_STANDARD';
+      }
+
+      if (!nx) return;
+
+      // Outcome?
+      if (/^OUT_/.test(nx)){
+        setDecision(nx);
+        // Emergency outcome toggles email block visibility
+        if (nx === 'OUT_EMERGENCY') {
+          if (emergWrap) show(emergWrap);
+        } else {
+          if (emergWrap) hide(emergWrap);
+        }
+        // When outcome is final, hide follow-up questions
+        hideAllQs();
+        reveal('q1'); // keep q1 visible for context
+        return;
+      }
+
+      // Otherwise it's the id of the next question
+      reveal(nx);
+      // Special case: ensure Q3 text is visible like Q1/Q2
+      if (nx === 'q3') {
+        // nothing to style: just ensure it is un-hidden (handled by reveal)
+      }
+    }, {passive:true});
+  }
+
+  // 4) Copy helpers for email textareas
+  $$('[data-copy]').forEach(function(b){
+    if (b._pwCopy) return; b._pwCopy = true;
+    b.addEventListener('click', function(){
+      const sel = b.getAttribute('data-copy');
+      const el = $(sel);
+      if (!el) return;
+      el.select && el.select();
+      document.execCommand('copy');
+    }, {passive:true});
+  });
+
+  // 5) Generate emails from the small data entry area
+  function dollars(n){
+    const num = Number(n); return isFinite(num) ? num.toLocaleString(undefined, {style:'currency', currency:'USD',maximumFractionDigits:0}) : ('$'+(n||''));
+  }
+  function q(s){ return s ? `“${s}”` : '—'; }
+
+  function buildEmergencyEmails(){
+    const tn = gv('med_tenant');
+    const ad = gv('med_address');
+    const dt = gv('med_visit');
+    const est= gv('med_estimate');
+    const cmp= gv('med_tenant_stmt');
+    const fd = gv('med_findings');
+    const rc = gv('med_reco');
+
+    const epmSubj = `🔔 EPM Approval Needed – Emergency Maintenance Ticket ${tn ? `[${tn}]` : ''}${ad ? ` (${ad})` : ''}`;
+    const ownSubj = `🚨 Emergency Dispatch FYI – ${tn ? `[${tn}]` : ''}${ad ? ` (${ad})` : ''}`;
+
+    const epmBody = [
+      'Dear EPM Team,','',
+      'Please review the emergency maintenance request below and provide your approval before we notify the property owner.','',
+      `Tenant Name: ${tn || ''}`,
+      `Unit Address: ${ad || ''}`,'',
+      'Reported Issue (Tenant Complaint):', q(cmp),'',
+      'Vendor’s Diagnosis:', q(fd),'',
+      'Proposed Work:', q(rc),'',
+      `Quoted Cost: ${dollars(est)} + 10% surcharge`,'',
+      'Please reply “Approved” or “Denied” and include any special instructions, if applicable.'
+    ].join('\n');
+
+    const ownBody = [
+      'Dear [Owner Name],','',
+      'In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.','',
+      'You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:','',
+      `Tenant Name: ${tn || ''}`,
+      `Unit Address: ${ad || ''}`,'',
+      'Brief Description of Work Requested:','The tenant reported:', q(cmp),'',
+      'Vendor’s Diagnosis:', `Our service provider visited the property on ${dt || '[Insert Date]'} and found/reported:`, q(fd),'',
+      'Proposed Work:', q(rc),'',
+      `Quoted Cost:\n${dollars(est)} (Vendor Estimate) + 10% Surcharge\nTotal: [Auto from Finance after invoice]`,'',
+      'This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.',
+      'You will receive updates once the work is completed and the invoice has been processed.'
+    ].join('\n');
+
+    const epmSub = document.getElementById('epm_subj');
+    const epmB   = document.getElementById('epm_body');
+    const ownSub = document.getElementById('own_subj');
+    const ownB   = document.getElementById('own_body');
+    if (epmSub) epmSub.value = epmSubj;
+    if (epmB)   epmB.value   = epmBody;
+    if (ownSub) ownSub.value = ownSubj;
+    if (ownB)   ownB.value   = ownBody;
+  }
+
+  const genBtn = document.getElementById('med_generate');
+  if (genBtn && !genBtn._pwBound){
+    genBtn._pwBound = true;
+    genBtn.addEventListener('click', buildEmergencyEmails, {passive:true});
+  }
+
 })();
 </script>
 
