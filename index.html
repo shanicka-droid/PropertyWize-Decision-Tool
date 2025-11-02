@@ -2,6 +2,8 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -636,6 +638,7 @@ After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
 
 <details>
 <summary><strong>Step 3 • Pay the Bill</strong></summary>
+<p><em>Reminder:</em> Before paying, check the Water Bill SOP doc: <a href="https://drive.google.com/file/d/1_1oeQsj_TOc89CARn5rtYtNgN5lsqjIS/view?ts=69076e10" target="_blank" rel="noopener">Open reference</a>.</p>
 <p><strong>Rule Summary:</strong> Pay ≤ $200 directly. Over $200: confirm no unpaid balances &amp; compare to 6-mo avg. Escalate if &gt;$300 (SFD) or &gt;$350 (MFD).</p>
 
 <div class="two-col">
@@ -1168,16 +1171,6 @@ Tenant's vs HAP Rent Portion: ${na(v('dlq_rentportion'))}
 </script>
 </div>
 
-<div class="field">
-<label>Email Body</label>
-<textarea id="dlq_email_body" readonly style="min-height:160px"></textarea>
-</div>
-<button class="btn" onclick="dlq_copy('dlq_email_body')">Copy Email</button>
-<div class="hr"></div>
-<h3>Handoff</h3>
-<div class="field"><textarea id="dlq_handoff" readonly></textarea></div>
-<div class="row"><button class="btn" onclick="dlq_copy('dlq_handoff')">Copy Handoff</button></div>
-</div>
 <!-- ==== /Delinquency Handoff ==== -->
   <!-- ==== Stale Listing VIEW (Owner Report) ==== -->
 <div id="viewListings" class="view-pane hidden">
@@ -4370,5 +4363,510 @@ Tenant's vs HAP Rent Portion: ${na(v('dlq_rentportion'))}
   });
 })();
 </script>
+
+<script>
+(function(){
+  const TRACKER_URL = window.PW_APPLIANCE_TRACKER_URL || 'https://docs.google.com/spreadsheets/d/APPLIANCE_TRACKER_URL_HERE';
+  const btn = document.getElementById('appl_tracker_btn');
+  if (btn && !btn._pw){
+    btn._pw = true;
+    btn.addEventListener('click', ()=> window.open(TRACKER_URL, '_blank'));
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function appl_buildEpmTemplate() {
+    const gv = id => (document.getElementById(id)?.value||'').trim();
+    const quote = s => s?('"'+s+'"'):'';
+    const lines = [
+      "Dear Shanicka/Michelle,",
+      "",
+      "We have received an appliance ticket for the " + (gv('appl_type')||'[Appliance]') + ".",
+      "",
+      "Tenant Reported:",
+      quote(gv('appl_complaint')) || "[Insert tenant’s direct complaint from work order]",
+      "",
+      "Appliance Information:",
+      "Brand: " + (gv('appl_brand')||'[Brand]'),
+      "Model#: " + (gv('appl_model')||'[Model]'),
+      "Serial#: " + (gv('appl_serial')||'[Serial]'),
+      "Color: " + (gv('appl_color')||'[Color]'),
+      "Age of Appliance: " + (gv('appl_age')||'[Age]'),
+      "Photo Album Link: " + (gv('appl_album')||'[Link]'),
+      "",
+      "Result of troubleshooting: " + (gv('appl_troubleshoot')||'{Was troubleshooting done by the tenant:}'),
+      "",
+      "History of Appliance Repairs:",
+      (gv('appl_hist')||"List each old ticket related to this appliance with\n   = Date:\n   = WO# ,\n   = What was repaired or replaced?\n   = How much the cost"),
+      "",
+      "Appliance Vendor (" + (gv('appl_vendor')||'NT Appliance - Ahmed') + ") has reviewed the ticket and advised " + (gv('appl_vendor_reco')||'[repair/replacement]') + " (if applicable).",
+      "",
+      "Based on our review, we are looking into either the same model or closest match available.",
+      "",
+      "If replacement is needed, we will ensure the unit has 4.0+/5.0 rating with 500+ user reviews.",
+      "",
+      "Please advise on how to proceed.",
+      "",
+      "Thank you,",
+      (gv('appl_epm_name')||'[Your Name]')
+    ].join('\n');
+    const out = document.getElementById('appl_email_out');
+    if (out) out.value = lines;
+  }
+  // Hook into existing generate button if present
+  try{
+    const btns = Array.from(document.querySelectorAll('button')).filter(b => /generate/i.test(b.textContent));
+    btns.forEach(b=>{ if(!b._applTpl){ b.addEventListener('click', ()=>{ if(document.getElementById('viewAppliance') && !document.getElementById('viewAppliance').classList.contains('hidden')) { appl_buildEpmTemplate(); } }); b._applTpl=true; }});
+  }catch(e){}
+  // Expose for manual call from console if needed
+  window.appl_buildEpmTemplate = appl_buildEpmTemplate;
+})();
+</script>
+
+
+<script>
+(function(){
+  const flow = document.getElementById('maintDispatchFlow');
+  if (!flow) return;
+  if (flow._hardOverride) return;
+  flow._hardOverride = true;
+  const steps = Array.from(flow.querySelectorAll('.flowQ'));
+  function showOnly(id){
+    steps.forEach(s=>s.classList.add('hidden'));
+    const el = document.getElementById(id);
+    if (el){ el.classList.remove('hidden'); }
+  }
+  // init: show first visible or q1
+  if (!steps.some(s=>!s.classList.contains('hidden'))) showOnly('q1');
+  flow.addEventListener('click', function(e){
+    const t = e.target.closest('[data-next]');
+    if (!t) return;
+    const nx = t.getAttribute('data-next');
+    if (!nx) return;
+    if (/^OUT_/.test(nx)){
+      const out = document.getElementById('mdf_out');
+      const wrap= document.getElementById('mdf_out_wrap');
+      if (wrap) wrap.classList.remove('hidden');
+      if (out) out.value = (nx==='OUT_HW'?'Proceed with scheduling via Home Warranty.':
+                            nx==='OUT_DELINQ'?'Complete Delinquency SOP before dispatching.':
+                            nx==='OUT_NOTIFY_OWNER'?'Notify the rental owner of the request.':
+                            nx==='OUT_RECALL'?'Check for recall/warranty within 12 months.':
+                            'Standard dispatch per policy.');
+      return;
+    }
+    showOnly(nx);
+  }, {passive:true});
+})();
+</script>
+<script>
+/* =======================
+   PW — 11/02/2025 Hotfix
+   ======================= */
+
+/* 1) WATER BILL NOTE: replace with your exact wording + link */
+(function fixWaterBillNote(){
+  var root = document.querySelector('#view-nonmaint');
+  if (!root || root._wbFixed) return; root._wbFixed = true;
+
+  var anchor = root.querySelector('h4, h3'); // close to the pay section header
+  if (!anchor) return;
+
+  // Preferred link (as requested)
+  var url = 'https://docs.google.com/spreadsheets/d/1_1oeQsj_TOc89CARn5rtYtNgN5lsqjIS/edit?gid=1576758348#gid=1576758348';
+
+  // Remove any old note we inserted previously
+  var old = root.querySelector('.pw-waterbill-note');
+  if (old) old.remove();
+
+  var note = document.createElement('div');
+  note.className = 'pw-waterbill-note note';
+  note.style.marginTop = '8px';
+  note.innerHTML =
+    'Refer 6 month average bill by <a href="'+url+'" target="_blank" rel="noopener noreferrer">Open reference</a> — ' +
+    'Reminder: Before paying, check the Water Bill Average doc: ' +
+    '<a href="'+url+'" target="_blank" rel="noopener noreferrer">Open reference</a>';
+  anchor.insertAdjacentElement('afterend', note);
+})();
+
+/* 2) STALE LISTING: remove the four stray controls only */
+(function cleanStaleListingHeader(){
+  var view = document.querySelector('#view-stale');
+  if (!view || view._staleCleaned) return; view._staleCleaned = true;
+
+  // Find the first card/section at the top of the Stale view
+  var card = view.querySelector('.card, section, .pane, .box, .container');
+  if (!card) return;
+
+  // Any textarea labels that equal these should be removed with their copy buttons
+  var killLabels = ['Email Body','Handoff'];
+  killLabels.forEach(function(lbl){
+    // grab label nodes
+    Array.from(card.querySelectorAll('label')).forEach(function(l){
+      if ((l.textContent||'').trim() === lbl){
+        // Remove label + its nearest textarea + any sibling button row
+        var field = l.closest('.field') || l.parentElement;
+        if (field) field.remove();
+      }
+    });
+  });
+
+  // Remove "Copy Email" / "Copy Handoff" buttons if any remain
+  Array.from(card.querySelectorAll('button,.btn')).forEach(function(b){
+    var t = (b.innerText||b.textContent||'').trim().toLowerCase();
+    if (t === 'copy email' || t === 'copy handoff') b.remove();
+  });
+})();
+
+/* 3) MAINTENANCE: Emergency-Only templates (auto-populate when Owner Plan = Emergency-Only)
+      - Does NOT alter existing flow or visuals.
+      - If your maintenance section already has email subject/body fields, we’ll fill those.
+      - If not, we add a small, matching card *below* your existing decision box with two textareas + copy buttons.
+*/
+(function emergencyEmailsWhenOwnerPlanIsEmergency(){
+  var maint = document.querySelector('#view-maintenance,#maintDispatchFlow') || document;
+  if (!maint || maint._emergencyBind) return; maint._emergencyBind = true;
+
+  // Try to locate the Owner Plan <select> by id or by options text
+  function findOwnerPlanSelect(){
+    var s = document.getElementById('owner_plan') ||
+            document.getElementById('maint_owner_plan') ||
+            maint.querySelector('select[name*="owner"][name*="plan"]') ||
+            Array.from(maint.querySelectorAll('select')).find(function(sel){
+              var opts = Array.from(sel.options).map(o => (o.text||'').toLowerCase());
+              return opts.some(t => t.indexOf('emergency-only') > -1);
+            });
+    return s || null;
+  }
+
+  // Try to reuse existing email fields if they exist
+  var epmSubj = document.getElementById('maint_epm_subj'),
+      epmBody = document.getElementById('maint_epm_body'),
+      ownSubj = document.getElementById('maint_owner_subj'),
+      ownBody = document.getElementById('maint_owner_body');
+
+  // If missing, add a minimal card below the decision output
+  function ensureEmergencyCard(){
+    if (epmSubj && epmBody && ownSubj && ownBody) return;
+
+    var anchor = document.getElementById('mdf_out_wrap') || maint.querySelector('#maintDispatchFlow') || maint;
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.style.marginTop = '12px';
+    wrap.id = 'pw_emergency_emails';
+
+    wrap.innerHTML = `
+      <h3>Emergency Emails (auto-filled)</h3>
+      <div class="two-col">
+        <div class="field">
+          <label>EPM Subject</label>
+          <input id="maint_epm_subj" type="text" />
+        </div>
+        <div class="field">
+          <label>Owner Subject</label>
+          <input id="maint_owner_subj" type="text" />
+        </div>
+      </div>
+      <div class="field">
+        <label>EPM Body</label>
+        <textarea id="maint_epm_body" rows="8"></textarea>
+      </div>
+      <div class="row" style="gap:8px;margin-top:4px;">
+        <button type="button" class="btn" id="pw_copy_epm">Copy EPM Email</button>
+      </div>
+      <div class="hr"></div>
+      <div class="field">
+        <label>Owner FYI Body</label>
+        <textarea id="maint_owner_body" rows="10"></textarea>
+      </div>
+      <div class="row" style="gap:8px;margin-top:4px;">
+        <button type="button" class="btn" id="pw_copy_owner">Copy Owner Email</button>
+      </div>
+    `;
+    anchor.insertAdjacentElement('afterend', wrap);
+
+    epmSubj = document.getElementById('maint_epm_subj');
+    epmBody = document.getElementById('maint_epm_body');
+    ownSubj = document.getElementById('maint_owner_subj');
+    ownBody = document.getElementById('maint_owner_body');
+
+    // Copy helpers
+    function bindCopy(id){
+      var b = document.getElementById(id);
+      if (!b || b._bound) return; b._bound = true;
+      b.addEventListener('click', function(){
+        var target = (id==='pw_copy_epm') ? epmBody : ownBody;
+        if (!target) return;
+        target.select();
+        document.execCommand('copy');
+      }, {passive:true});
+    }
+    bindCopy('pw_copy_epm');
+    bindCopy('pw_copy_owner');
+  }
+
+  function fillTemplates(){
+    // Basic safe getters (use blank if not present)
+    function v(id){ var el = document.getElementById(id); return el ? (el.value||'').trim() : ''; }
+
+    var tName   = v('dlq_tenant') || v('appl_tenant') || '[Tenant Name]';
+    var address = v('dlq_address') || v('appl_address') || '[Property Address]';
+    var tenantStatement = v('maint_tenant_complaint') || v('appl_complaint') || '[Insert the tenant’s original statement from the work order]';
+    var vendorFindings  = v('maint_vendor_findings')  || '[Insert the vendor’s findings after diagnostic testing or site visit]';
+    var vendorReco      = v('maint_vendor_reco')      || '[Insert what the vendor suggested to resolve the issue]';
+    var estimate        = v('maint_vendor_estimate')  || '________';
+
+    // Subjects
+    var sEPM   = '🔔 EPM Approval Needed – Emergency Maintenance Ticket ' + tName + ' / ' + address;
+    var sOwner = '🚨 Emergency Dispatch FYI – ' + tName + ' / ' + address;
+
+    // Bodies
+    var bEPM =
+`Dear EPM Team,
+
+Please review the emergency maintenance request below and provide your approval before we notify the property owner.
+
+Tenant Name: ${tName}
+Unit Address: ${address}
+
+Reported Issue (Tenant Complaint):
+"${tenantStatement}"
+
+Vendor’s Diagnosis:
+"${vendorFindings}"
+
+Vendor’s Recommended Work:
+"${vendorReco}"
+
+Estimated Cost:
+$${estimate} (Vendor Estimate) + 10% Surcharge
+Total: $__________
+
+Please reply “Approved” or “Denied” and include any special instructions, if applicable.
+
+Regards,
+PropertyWize Management Team`;
+
+    var bOwner =
+`Dear [Owner Name],
+
+In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.
+
+You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:
+
+Tenant Name: ${tName}
+Unit Address: ${address}
+
+Brief Description of Work Requested:
+The tenant reported:
+“${tenantStatement}”
+
+Vendor’s Diagnosis:
+Our service provider visited the property and found/reported:
+“${vendorFindings}”
+
+Proposed Work:
+“${vendorReco}”
+
+Quoted Cost:
+$${estimate} (Vendor Estimate) + 10% Surcharge
+Total: $__________
+
+This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.
+You will receive updates once the work is completed and the invoice has been processed.`;
+
+    // Ensure fields exist, then populate
+    ensureEmergencyCard();
+    if (epmSubj) epmSubj.value = sEPM;
+    if (epmBody) epmBody.value = bEPM;
+    if (ownSubj) ownSubj.value = sOwner;
+    if (ownBody) ownBody.value = bOwner;
+  }
+
+  // Owner Plan watcher
+  var sel = findOwnerPlanSelect();
+  if (!sel) return;
+
+  function onOwnerPlanChange(){
+    var txt = (sel.value || sel.options[sel.selectedIndex]?.text || '').toLowerCase();
+    if (txt.indexOf('emergency') > -1) fillTemplates();
+  }
+
+  sel.addEventListener('change', onOwnerPlanChange, {passive:true});
+  // If already selected on load, populate immediately
+  onOwnerPlanChange();
+})();
+</script>
+<script>
+/* ===== PW Emergency Email Autowire (safe, idempotent) ===== */
+(function(){
+  if (window._pwEmergPatched) return; window._pwEmergPatched = true;
+
+  // ---- helpers ----
+  const $ = (s,ctx=document)=>ctx.querySelector(s);
+  const $$ = (s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+  const val = id => { const n=document.getElementById(id); return n?(n.value||'').trim():''; };
+
+  function ensureCard(){
+    // Use existing fields if you already have them; otherwise we inject a small card.
+    let card = document.getElementById('pw_emergency_emails');
+    let epmSub = document.getElementById('maint_epm_subj');
+    let epmBody= document.getElementById('maint_epm_body');
+    let ownSub = document.getElementById('maint_owner_subj');
+    let ownBody= document.getElementById('maint_owner_body');
+
+    if (!epmSub || !epmBody || !ownSub || !ownBody){
+      // Insert after Maintenance Dispatch area if present; else at end of maintenance view.
+      const anchor = document.getElementById('mdf_out_wrap') || $('#maintDispatchFlow') || $('#view-maintenance') || document.body;
+      if (!card){
+        card = document.createElement('div');
+        card.id = 'pw_emergency_emails';
+        card.className = 'card';
+        card.style.marginTop = '12px';
+        card.innerHTML = `
+          <h3>Emergency Emails (auto-filled)</h3>
+          <div class="two-col">
+            <div class="field"><label>EPM Subject</label><input id="maint_epm_subj" type="text"></div>
+            <div class="field"><label>Owner Subject</label><input id="maint_owner_subj" type="text"></div>
+          </div>
+          <div class="field"><label>EPM Body</label><textarea id="maint_epm_body" rows="8"></textarea></div>
+          <div class="row" style="gap:8px"><button type="button" class="btn" id="pw_copy_epm">Copy EPM Email</button></div>
+          <div class="hr"></div>
+          <div class="field"><label>Owner FYI Body</label><textarea id="maint_owner_body" rows="10"></textarea></div>
+          <div class="row" style="gap:8px"><button type="button" class="btn" id="pw_copy_owner">Copy Owner Email</button></div>
+        `;
+        anchor.insertAdjacentElement('afterend', card);
+      }
+    }
+    // return live refs
+    return {
+      epmSub:  document.getElementById('maint_epm_subj'),
+      epmBody: document.getElementById('maint_epm_body'),
+      ownSub:  document.getElementById('maint_owner_subj'),
+      ownBody: document.getElementById('maint_owner_body'),
+      copyE:   document.getElementById('pw_copy_epm'),
+      copyO:   document.getElementById('pw_copy_owner'),
+      card:    document.getElementById('pw_emergency_emails')
+    };
+  }
+
+  function bindCopy(btn, ta){
+    if (!btn || !ta || btn._pw) return;
+    btn._pw = true;
+    btn.addEventListener('click', ()=>{ ta.select(); document.execCommand('copy'); }, {passive:true});
+  }
+
+  function ownerPlanSelect(){
+    // Prefer known ids, else detect by option that contains “Emergency-Only”
+    return document.getElementById('owner_plan')
+        || document.getElementById('maint_owner_plan')
+        || $$('#view-maintenance select, #maintDispatchFlow select, select')
+             .find(sel => $$( 'option', sel ).some(o => /emergency.*only/i.test((o.text||'')+(o.value||''))));
+  }
+
+  function fillIfEmergency(){
+    const sel = ownerPlanSelect();
+    if (!sel) return;
+
+    const text = ((sel.value||'') + ' ' + (sel.options[sel.selectedIndex]||{}).text).toLowerCase();
+    const isEmerg = /emergency[\s-]*only/.test(text);
+    const {epmSub, epmBody, ownSub, ownBody, copyE, copyO, card} = ensureCard();
+
+    if (!isEmerg){ if (card) card.style.display='none'; return; }
+    if (card) card.style.display='';
+
+    // pull any helpful values already on page
+    const tName   = val('dlq_tenant')     || val('appl_tenant')     || '[Tenant Name]';
+    const address = val('dlq_address')    || val('appl_address')    || '[Property Address]';
+    const tStmt   = val('maint_tenant_complaint') || val('appl_complaint') || '[Insert the tenant’s original statement from the work order]';
+    const vFind   = val('maint_vendor_findings')  || '[Insert the vendor’s findings after diagnostic testing or site visit]';
+    const vReco   = val('maint_vendor_reco')      || '[Insert what the vendor suggested to resolve the issue]';
+    const est     = val('maint_vendor_estimate')  || '________';
+
+    const subjEPM   = `🔔 EPM Approval Needed – Emergency Maintenance Ticket ${tName} / ${address}`;
+    const subjOwner = `🚨 Emergency Dispatch FYI – ${tName} / ${address}`;
+
+    const bodyEPM = [
+      'Dear EPM Team,',
+      '',
+      'Please review the emergency maintenance request below and provide your approval before we notify the property owner.',
+      '',
+      `Tenant Name: ${tName}`,
+      `Unit Address: ${address}`,
+      '',
+      'Reported Issue (Tenant Complaint):',
+      `“${tStmt}”`,
+      '',
+      'Vendor’s Diagnosis:',
+      `“${vFind}”`,
+      '',
+      'Vendor’s Recommended Work:',
+      `“${vReco}”`,
+      '',
+      'Estimated Cost:',
+      `$${est} (Vendor Estimate) + 10% Surcharge`,
+      'Total: $__________',
+      '',
+      'Please reply “Approved” or “Denied” and include any special instructions, if applicable.',
+      '',
+      'Regards,',
+      'PropertyWize Management Team'
+    ].join('\n');
+
+    const bodyOwner = [
+      'Dear [Owner Name],',
+      '',
+      'In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.',
+      '',
+      'You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:',
+      '',
+      `Tenant Name: ${tName}`,
+      `Unit Address: ${address}`,
+      '',
+      'Brief Description of Work Requested:',
+      'The tenant reported:',
+      `“${tStmt}”`,
+      '',
+      'Vendor’s Diagnosis:',
+      'Our service provider visited the property and found/reported:',
+      `“${vFind}”`,
+      '',
+      'Proposed Work:',
+      `“${vReco}”`,
+      '',
+      'Quoted Cost:',
+      `$${est} (Vendor Estimate) + 10% Surcharge`,
+      'Total: $__________',
+      '',
+      'This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.',
+      'You will receive updates once the work is completed and the invoice has been processed.'
+    ].join('\n');
+
+    if (epmSub)  epmSub.value  = subjEPM;
+    if (epmBody) epmBody.value = bodyEPM;
+    if (ownSub)  ownSub.value  = subjOwner;
+    if (ownBody) ownBody.value = bodyOwner;
+
+    bindCopy(copyE, epmBody);
+    bindCopy(copyO, ownBody);
+  }
+
+  // ---- bind ----
+  const sel = ownerPlanSelect();
+  if (!sel) return;
+
+  // re-bind on changes + on DOM mutations (in case UI re-renders)
+  sel.addEventListener('change', fillIfEmergency, {passive:true});
+  const mo = new MutationObserver(fillIfEmergency);
+  mo.observe(sel, {attributes:true, childList:true, subtree:true});
+
+  // run once now
+  fillIfEmergency();
+})();
+</script>
+
 </body>
 </html>
+
