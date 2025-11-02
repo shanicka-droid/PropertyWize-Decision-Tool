@@ -134,12 +134,13 @@
 
 <!-- Q1 -->
 <div class="flowQ" id="q1">
-<label><strong>Is it an Emergency?</strong></label>
-<div class="row" style="gap:8px;">
-<button type="button" class="btn" data-next="OUT_STANDARD">Yes</button>
-<button type="button" class="btn" data-next="q2">No</button>
+  <label><strong>Is it an Emergency?</strong></label>
+  <div class="row" style="gap:8px;">
+    <button type="button" class="btn" data-next="OUT_EMER">Yes</button>
+    <button type="button" class="btn" data-next="q2">No</button>
+  </div>
 </div>
-</div>
+  
 
 <!-- Q2 -->
 <div class="flowQ hidden" id="q2">
@@ -287,6 +288,10 @@ OUT_NOTIFY_OWNER:
 "Notify the rental owner of the request.\n• Confirm if the owner will complete the work.\n• Document plan and timeline.",
 OUT_RECALL:
 "Check for recall/warranty within 12 months.\n• Review invoice for warranty coverage (roofing, water proofing, HVAC, carpet, etc.).\n• Begin Recall SOP if applicable."
+OUT_EMER:
+"Please follow the Emergency Dispatch Policy:\n" +
+"Step 1: Send an FYI to the EPM for approval.\n" +
+"Step 2: Once the EPM approves, send an FYI to the property owner.",
 };
 
 const flow = $('#maintDispatchFlow');
@@ -358,6 +363,142 @@ if (finalPatchScript && finalPatchScript.textContent.includes('FINAL PW TOOL –
     finalPatchScript.remove();
 }
 
+})();
+</script>
+<script>
+(function(){
+  if (window._pw_em_wired) return; window._pw_em_wired = true;
+
+  const $  = (s,ctx=document)=>ctx.querySelector(s);
+  const $$ = (s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+
+  const wrap     = $('#emerg_email_wrap');   // whole emergency email section
+  const decision = $('#mdf_out');            // Decision textarea
+  const issueSel = $('#issue');              // optional Issue Type dropdown
+  const genBtn   = $('#med_generate');
+
+  const epmSub  = $('#epm_subj');
+  const epmBody = $('#epm_body');
+  const ownSub  = $('#own_subj');
+  const ownBody = $('#own_body');
+
+  // helpers
+  function gv(id){ const el=document.getElementById(id); return el && 'value' in el ? (el.value||'').trim() : ''; }
+  function first(...ids){ for(const id of ids){ const x=gv(id); if(x) return x; } return ''; }
+  function currency(n){
+    const num = Number(String(n).replace(/[^0-9.]/g,'')); 
+    return Number.isFinite(num) ? num.toLocaleString(undefined,{style:'currency',currency:'USD'}) : (n||'');
+  }
+  function quote(s){ return s ? `“${s}”` : '—'; }
+
+  function gather(){
+    const tenant   = first('maint_tenant','med_tenant','wo_tenant','dlq_tenant','tenant_name');
+    const address  = first('maint_address','med_address','addr','wo_address','appl_address');
+    const owner    = first('maint_owner_name');
+    const visit    = first('maint_vendor_visitdate','med_visit','vendor_visit_date');
+    const estimate = first('maint_vendor_estimate','med_estimate','md_estimate');
+    const complaint= first('maint_tenant_complaint','med_tenant_stmt','wo_complaint','tenant_complaint');
+    const findings = first('maint_vendor_findings','med_findings','vendor_findings');
+    const reco     = first('maint_vendor_reco','med_reco','vendor_reco');
+    return {tenant,address,owner,visit,estimate,complaint,findings,reco};
+  }
+
+  function fillEmails(){
+    if (!wrap) return;
+    const d = gather();
+
+    const subjEPM = `🔔 EPM Approval Needed – Emergency Maintenance Ticket${d.tenant?` [${d.tenant}]`:''}${d.address?` (${d.address})`:''}`;
+    const subjOWN = `🚨 Emergency Dispatch FYI –${d.tenant?` [${d.tenant}]`:''}${d.address?` (${d.address})`:''}`;
+
+    const bodyEPM = [
+      'Dear EPM Team,','',
+      'Please review the emergency maintenance request below and provide your approval before we notify the property owner.','',
+      `Tenant Name: ${d.tenant || '[Tenant Name]'}`,
+      `Unit Address: ${d.address || '[Property Address]'}`
+      ,'',
+      'Reported Issue (Tenant Complaint):',
+      quote(d.complaint),'',
+      'Vendor’s Diagnosis:',
+      quote(d.findings),'',
+      'Proposed Work:',
+      quote(d.reco),'',
+      `Quoted Cost: ${d.estimate ? currency(d.estimate) : '[Vendor Estimate]'} + 10% surcharge`,'',
+      'Please reply “Approved” or “Denied” and include any special instructions, if applicable.'
+    ].join('\n');
+
+    const bodyOWN = [
+      `Dear ${d.owner || '[Owner Name]'},`,'',
+      'In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.','',
+      'You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:','',
+      `Tenant Name: ${d.tenant || '[Tenant Name]'}\nUnit Address: ${d.address || '[Property Address]'}\n`,
+      'Brief Description of Work Requested:',
+      'The tenant reported:',
+      quote(d.complaint),'',
+      'Vendor’s Diagnosis:',
+      `Our service provider visited the property on ${d.visit || '[Insert Date]'} and found/reported:`,
+      quote(d.findings),'',
+      'Proposed Work:',
+      quote(d.reco),'',
+      `Quoted Cost:\n${d.estimate ? currency(d.estimate) : '[Vendor Estimate]'} + 10% Surcharge\nTotal: [Auto from Finance after invoice]`,'',
+      'This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.',
+      'You will receive updates once the work is completed and the invoice has been processed.'
+    ].join('\n');
+
+    if (epmSub && !epmSub.value)   epmSub.value = subjEPM;
+    if (ownSub && !ownSub.value)   ownSub.value = subjOWN;
+    if (epmBody && !epmBody.value) epmBody.value = bodyEPM;
+    if (ownBody && !ownBody.value) ownBody.value = bodyOWN;
+  }
+
+  function isEmergencySelected(){
+    const byIssue   = issueSel && /emergency/i.test(issueSel.value||'');
+    const byOutcome = decision && /emergency dispatch policy/i.test((decision.value||'').toLowerCase());
+    return !!(byIssue || byOutcome);
+  }
+
+  function show(){ if (wrap){ wrap.classList.remove('hidden'); wrap.style.display=''; } }
+  function hide(){ if (wrap){ wrap.classList.add('hidden'); wrap.style.display='none'; } }
+
+  function sync(){
+    if (isEmergencySelected()){
+      show(); fillEmails();
+    } else {
+      hide();
+    }
+  }
+
+  // events
+  if (issueSel && !issueSel._pwEv){ issueSel._pwEv = true; issueSel.addEventListener('change', sync, {passive:true}); }
+  if (decision && !decision._pwEv){
+    decision._pwEv = true;
+    decision.addEventListener('input',  sync, {passive:true});
+    decision.addEventListener('change', sync, {passive:true});
+  }
+  if (genBtn && !genBtn._pwEv){
+    genBtn._pwEv = true;
+    genBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      [epmSub,ownSub,epmBody,ownBody].forEach(el=>{ if(el) el.value=''; });
+      fillEmails();
+    });
+  }
+
+  // copy buttons (data-copy="#textareaId")
+  $$('[data-copy]').forEach(btn=>{
+    if (btn._pw_copy) return;
+    btn._pw_copy = true;
+    btn.addEventListener('click', ()=>{
+      const el = $(btn.getAttribute('data-copy'));
+      if (!el) return;
+      el.select && el.select();
+      document.execCommand && document.execCommand('copy');
+      if (navigator.clipboard && el.value) navigator.clipboard.writeText(el.value).catch(()=>{});
+      const t=btn.textContent; btn.textContent='Copied!'; setTimeout(()=>btn.textContent=t,900);
+    },{passive:true});
+  });
+
+  // first run
+  sync();
 })();
 </script>
 
