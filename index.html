@@ -4866,6 +4866,48 @@ You will receive updates once the work is completed and the invoice has been pro
   fillIfEmergency();
 })();
 </script>
+<script>
+(function(){
+  var outBox = document.getElementById('mdf_out');
+  var outWrap = document.getElementById('mdf_out_wrap');
+
+  // Centralized messages for MDF outcomes
+  var MDF_OUT = {
+    OUT_STANDARD:
+      'Standard dispatch per policy.',
+    OUT_DELINQ:
+      'Ticket blocked due to delinquency. Follow the Delinquency flow for next steps.',
+    OUT_HW:
+      'Route through the Home Warranty provider per policy.',
+    OUT_NOTIFY_OWNER:
+      'Owner elected to complete maintenance. Send FYI and close PW ticket.',
+    OUT_RECALL:
+      'Recall within 12 months. Route to the prior vendor for warranty/service check.',
+    OUT_EMERGENCY:
+      'Please follow the Emergency Dispatch Policy: Step 1: Send an FYI to the EPM for approval. Step 2: Once the EPM approves, send an FYI to the property owner.'
+  };
+
+  function showDecision(key){
+    if (!outBox) return;
+    outBox.value = MDF_OUT[key] || '';
+    if (outWrap) outWrap.classList.remove('hidden');
+  }
+
+  // Lightweight router for buttons with data-next="OUT_*"
+  var flow = document.getElementById('maintDispatchFlow');
+  if (flow && !flow._pwBind) {
+    flow._pwBind = true;
+    flow.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-next]');
+      if (!btn) return;
+      var nx = btn.getAttribute('data-next') || '';
+      if (/^OUT_/.test(nx)) {
+        showDecision(nx);
+      }
+    }, {passive:true});
+  }
+})();
+</script>
 
 </body>
 </html>
