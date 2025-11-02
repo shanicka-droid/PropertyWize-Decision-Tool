@@ -4908,6 +4908,179 @@ You will receive updates once the work is completed and the invoice has been pro
   }
 })();
 </script>
+<script>
+/* ===== PW Emergency Email: fill only after required fields are entered ===== */
+(function(){
+  if (window._pwEmergReadyPatched) return; window._pwEmergReadyPatched = true;
+
+  const $ = (s,ctx=document)=>ctx.querySelector(s);
+  const $$ = (s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+  const gv = id => { const n=document.getElementById(id); return n?(n.value||'').trim():''; };
+
+  // Try to find the Owner Plan <select>
+  function getOwnerPlan(){
+    return document.getElementById('owner_plan')
+        || document.getElementById('maint_owner_plan')
+        || $$('#view-maintenance select, #maintDispatchFlow select, select')
+             .find(sel => $$( 'option', sel ).some(o => /emergency.*only/i.test((o.text||'')+(o.value||''))));
+  }
+
+  // Emergency-Only selected?
+  function isEmergencyOnly(sel){
+    if (!sel) return false;
+    const txt = ((sel.value||'') + ' ' + (sel.options[sel.selectedIndex]||{}).text).toLowerCase();
+    return /emergency[\s-]*only/.test(txt);
+  }
+
+  // Ensure the email card exists and get live refs
+  function refs(){
+    return {
+      epmSub:  document.getElementById('maint_epm_subj'),
+      epmBody: document.getElementById('maint_epm_body'),
+      ownSub:  document.getElementById('maint_owner_subj'),
+      ownBody: document.getElementById('maint_owner_body'),
+      copyE:   document.getElementById('pw_copy_epm'),
+      copyO:   document.getElementById('pw_copy_owner'),
+      card:    document.getElementById('pw_emergency_emails')
+    };
+  }
+
+  // Fields considered "required" for generation
+  function getInputs(){
+    const tenant   = gv('dlq_tenant')        || gv('appl_tenant')       || '';
+    const address  = gv('dlq_address')       || gv('appl_address')      || '';
+    const tStmt    = gv('maint_tenant_complaint') || gv('appl_complaint') || '';
+    const vFind    = gv('maint_vendor_findings')  || '';
+    const vReco    = gv('maint_vendor_reco')      || '';
+    const estimate = gv('maint_vendor_estimate')  || '';
+    return { tenant, address, tStmt, vFind, vReco, estimate };
+  }
+
+  // Are required fields complete?
+  function ready(){
+    const {tenant,address,tStmt,vFind,vReco,estimate} = getInputs();
+    return tenant && address && tStmt && vFind && vReco && estimate;
+  }
+
+  // Fill templates (same text you approved earlier)
+  function fillTemplates(){
+    const r = refs(); if (!r.card) return;
+    const {tenant,address,tStmt,vFind,vReco,estimate} = getInputs();
+
+    const subjEPM   = `🔔 EPM Approval Needed – Emergency Maintenance Ticket ${tenant} / ${address}`;
+    const subjOwner = `🚨 Emergency Dispatch FYI – ${tenant} / ${address}`;
+
+    const bodyEPM = [
+      'Dear EPM Team,',
+      '',
+      'Please review the emergency maintenance request below and provide your approval before we notify the property owner.',
+      '',
+      `Tenant Name: ${tenant}`,
+      `Unit Address: ${address}`,
+      '',
+      'Reported Issue (Tenant Complaint):',
+      `“${tStmt}”`,
+      '',
+      'Vendor’s Diagnosis:',
+      `“${vFind}”`,
+      '',
+      'Vendor’s Recommended Work:',
+      `“${vReco}”`,
+      '',
+      'Estimated Cost:',
+      `$${estimate} (Vendor Estimate) + 10% Surcharge`,
+      'Total: $__________',
+      '',
+      'Please reply “Approved” or “Denied” and include any special instructions, if applicable.',
+      '',
+      'Regards,',
+      'PropertyWize Management Team'
+    ].join('\n');
+
+    const bodyOwner = [
+      'Dear [Owner Name],',
+      '',
+      'In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.',
+      '',
+      'You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:',
+      '',
+      `Tenant Name: ${tenant}`,
+      `Unit Address: ${address}`,
+      '',
+      'Brief Description of Work Requested:',
+      'The tenant reported:',
+      `“${tStmt}”`,
+      '',
+      'Vendor’s Diagnosis:',
+      'Our service provider visited the property and found/reported:',
+      `“${vFind}”`,
+      '',
+      'Proposed Work:',
+      `“${vReco}”`,
+      '',
+      'Quoted Cost:',
+      `$${estimate} (Vendor Estimate) + 10% Surcharge`,
+      'Total: $__________',
+      '',
+      'This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.',
+      'You will receive updates once the work is completed and the invoice has been processed.'
+    ].join('\n');
+
+    if (r.epmSub)  r.epmSub.value  = subjEPM;
+    if (r.epmBody) r.epmBody.value = bodyEPM;
+    if (r.ownSub)  r.ownSub.value  = subjOwner;
+    if (r.ownBody) r.ownBody.value = bodyOwner;
+
+    // Enable copy buttons once filled
+    if (r.copyE) r.copyE.disabled = false;
+    if (r.copyO) r.copyO.disabled = false;
+  }
+
+  // Show placeholders & keep copy buttons disabled until ready
+  function holdState(){
+    const r = refs(); if (!r.card) return;
+    if (r.epmSub)  r.epmSub.value  = '🔔 EPM Approval Needed – Emergency Maintenance Ticket [Tenant Name] / [Property Address]';
+    if (r.ownSub)  r.ownSub.value  = '🚨 Emergency Dispatch FYI – [Tenant Name] / [Property Address]';
+    if (r.epmBody) r.epmBody.value = '';
+    if (r.ownBody) r.ownBody.value = '';
+    if (r.copyE)   r.copyE.disabled = true;
+    if (r.copyO)   r.copyO.disabled = true;
+  }
+
+  // Main controller
+  function update(){
+    const sel = getOwnerPlan();
+    if (!sel || !isEmergencyOnly(sel)) { holdState(); return; }
+    if (ready()) fillTemplates(); else holdState();
+  }
+
+  // Bind listeners to all candidate inputs (runs whenever they change)
+  const watchIds = [
+    'dlq_tenant','appl_tenant','dlq_address','appl_address',
+    'maint_tenant_complaint','appl_complaint','maint_vendor_findings',
+    'maint_vendor_reco','maint_vendor_estimate'
+  ];
+  watchIds.forEach(id=>{
+    const el = document.getElementById(id);
+    if (el && !el._pwWatch){
+      el._pwWatch = true;
+      el.addEventListener('input', update, {passive:true});
+      el.addEventListener('change', update, {passive:true});
+    }
+  });
+
+  // React to Owner Plan changes and option swaps
+  const sel = getOwnerPlan();
+  if (sel && !sel._pwWatch){
+    sel._pwWatch = true;
+    sel.addEventListener('change', update, {passive:true});
+    new MutationObserver(update).observe(sel, {childList:true, subtree:true, attributes:true});
+  }
+
+  // Initial pass
+  update();
+})();
+</script>
 
 </body>
 </html>
