@@ -8,6 +8,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<style>
+/* Full-width “Water Bills” card inside Finance view */
+#viewFinance .wb-span {
+  grid-column: 1 / -1;       /* spans across all grid columns */
+  width: 100%;
+  max-width: 1200px;         /* adjust to taste */
+  margin-inline: auto;       /* centers content if container wider */
+  box-sizing: border-box;
+}
+
+/* Make all inputs, selects, and textareas expand properly */
+#viewFinance .wb-span .field input,
+#viewFinance .wb-span .field select,
+#viewFinance .wb-span .field textarea {
+  width: 100%;
+}
+
+/* Keep two-column layouts neat and responsive */
+#viewFinance .wb-span .two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+}
+
+/* Optional: widen textareas for memos and notices */
+#viewFinance .wb-span textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+</style>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PropertyWize Decision Tool 2.0</title>
@@ -900,8 +931,10 @@ You will receive updates once the work is completed and the invoice has been pro
           <textarea id="fin_note" placeholder="Click Generate to fill…"></textarea>
           <!-- ==== Water Bills (inside Finance view) ==== -->
 <div class="hr"></div>
-<!-- ==== Water Bills (inside Finance view) ==== -->
-<div class="hr"></div>
+<div id="waterbills" class="card wb-span">
+  <h3>Water Bills</h3>
+  <!-- everything from Pre-Handoff Checklist to the end of this section -->
+</div>
 <h3>Water Bills</h3>
 
 <details open id="wb_checklist">
@@ -1008,7 +1041,7 @@ After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
 <div class="field"><label>Buildium Comment</label><textarea id="ho_out_bu_wb" readonly></textarea></div>
 <div class="field"><label>Email Draft (Subject + Body)</label><textarea id="ho_out_em_wb" readonly></textarea></div>
 </details>
-
+</div>
 <script>
 (function(){
 if (window._pwWB_inline) return; window._pwWB_inline = true;
