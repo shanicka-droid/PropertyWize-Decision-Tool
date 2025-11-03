@@ -5736,6 +5736,80 @@ else
 setupRolePicker();
 })();
 </script>
+<script>
+/* === SAFE PANE SWITCHER (uses your real ids) === */
+(function(){
+function hideAll(){
+document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+}
+function showPane(id){
+hideAll();
+var el = document.getElementById(id);
+if (el){ el.classList.remove('hidden'); try{ localStorage.setItem('pw_last_pane', id); }catch(e){} }
+}
+function firstExisting(){
+// prefer last remembered
+try{
+var last = localStorage.getItem('pw_last_pane');
+if (last && document.getElementById(last)) return last;
+}catch(e){}
+// <<— put YOUR pane ids here —>>
+var ids = [
+'viewMaintenance',
+'viewFinance',
+'viewListings', // <-- your Stale Listing pane
+'viewDelinquency',
+'viewNonMaintenance',
+'viewAppliance'
+];
+for (var i=0;i<ids.length;i++){
+if (document.getElementById(ids[i])) return ids[i];
+}
+return null;
+}
+
+// radios like: <input type="radio" name="role" data-target="viewFinance">
+function wireRadios(){
+var radios = document.querySelectorAll('input[name="role"][data-target]');
+radios.forEach(function(r){
+if (r._pwBound) return;
+r._pwBound = true;
+r.addEventListener('change', function(){
+var t = r.getAttribute('data-target');
+if (t) showPane(t);
+}, {passive:true});
+});
+}
+
+// any clickable with data-target="viewX"
+function wireTargetClicks(){
+document.addEventListener('click', function(e){
+var t = e.target.closest('[data-target]');
+if (!t) return;
+var id = t.getAttribute('data-target');
+if (id && document.getElementById(id)){
+e.preventDefault && e.preventDefault();
+showPane(id);
+}
+}, {passive:true});
+}
+
+function init(){
+wireRadios();
+wireTargetClicks();
+var start = firstExisting();
+if (start) showPane(start);
+}
+
+(document.readyState === 'loading')
+? document.addEventListener('DOMContentLoaded', init, {once:true})
+: init();
+
+// expose so old links/buttons can call it
+window.showPane = showPane;
+})();
+</script>
+
 
 
 </body>
