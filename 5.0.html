@@ -1,509 +1,782 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>PropertyWize • Decision Tool 2.0 (Clean Fix)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PropertyWize Decision Tool — Clean Build</title>
 
-<!-- Minimal styles only to preserve your current look; adjust tokens to your theme if needed -->
+<!-- ===== Minimal, neutral styles (keeps your familiar layout/feel) ===== -->
 <style>
-  :root{ --card-bg:#fff; --line:#e8eef4; --muted:#657081; --ink:#101828; --btn:#eef2f6; --btn-ink:#1f2937; --btn-primary:#2563eb; --btn-primary-ink:#fff; --radius:10px; }
-  body{ font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif; color:var(--ink); margin:0; background:#f7f9fc;}
-  .container{ max-width:1100px; margin:28px auto; padding:0 16px;}
-  .pillnav{ width:260px; float:left; }
-  .main{ margin-left:290px;}
-  .card{ background:var(--card-bg); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin:14px 0;}
-  .hr{ height:1px; background:var(--line); margin:12px 0;}
-  .note{ color:var(--muted); margin-top:0;}
-  .row{ display:flex; align-items:center; flex-wrap:wrap;}
-  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  .field{ display:block; margin:8px 0;}
-  .field label{ display:block; font-size:14px; margin-bottom:6px;}
-  input[type="text"], input[type="number"], textarea, select{
-    width:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; color:var(--ink);
+  :root{
+    --bg:#f7f7fb;
+    --card:#ffffff;
+    --ink:#1f2430;
+    --muted:#6b7280;
+    --accent:#1f7ae0;
+    --hr:#e5e7eb;
+    --kbd:#eef2f7;
+    --border:#e6e6ef;
+    --radius:10px;
   }
-  textarea{ min-height:130px; }
-  .btn{ background:var(--btn); color:var(--btn-ink); border:1px solid var(--line); border-radius:8px; padding:8px 12px; cursor:pointer;}
-  .btn.primary{ background:var(--btn-primary); color:var(--btn-primary-ink); border-color:var(--btn-primary);}
-  .btn:disabled{ opacity:.6; cursor:not-allowed;}
-  .hidden{ display:none !important; }
-  /* left nav (just placeholder to resemble your layout) */
-  .pill{ background:#fff; border:1px solid var(--line); border-radius:999px; padding:10px 14px; margin:8px 0; display:flex; align-items:center; gap:10px; cursor:pointer;}
-  .pill.active{ outline:2px solid #dbeafe; background:#f8fbff;}
-  .progress{ height:8px; background:#e6edf6; border-radius:8px; overflow:hidden;}
-  .progress > div{ height:100%; background:#60a5fa; width:6%;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+  .wrap{max-width:1100px;margin:24px auto;padding:0 16px;}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  header .brand{font-weight:700;font-size:18px;margin-right:auto}
+  header .nav a{display:inline-block;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--border);margin-right:6px}
+  header .nav a:hover{border-color:var(--accent)}
+  .badge{display:inline-block;background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 10px;margin:2px 6px 8px 0;color:var(--muted)}
+  .hr{height:1px;background:var(--hr);margin:14px 0}
+  .view-pane{display:block}
+  .hidden{display:none !important}
+  h3{margin:0 0 10px 0}
+  .note{color:var(--muted);font-size:12.5px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+  .row{display:flex;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .soft{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+  label{display:block;font-size:12px;color:var(--muted);margin:4px 0}
+  input[type="text"],input[type="number"],input[type="date"],input[type="url"],select,textarea{
+    width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:8px;background:#fff;padding:8px 10px;font:inherit;
+  }
+  textarea{min-height:110px}
+  .kbd{background:var(--kbd);padding:2px 6px;border-radius:6px;border:1px solid var(--border)}
+  details{border:1px solid var(--border);border-radius:8px;padding:10px;background:#fff;margin:10px 0}
+  details summary{cursor:pointer;font-weight:600}
+  .check{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .check input{transform:translateY(1px)}
+  /* Make Water Bills block span full width on wide screens */
+  @media (min-width:1100px){
+    #viewFinance #waterbills{grid-column:1 / -1;width:100%}
+  }
+  @media (max-width:800px){ .two-col{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <div class="brand">PropertyWize Decision Tool</div>
+    <nav class="nav">
+      <a href="#" data-target="viewMaintenance">Maintenance</a>
+      <a href="#" data-target="viewFinance">Finance</a>
+      <a href="#" data-target="viewListings">Stale Listing</a>
+      <a href="#" data-target="viewDelinquency">Delinquency</a>
+      <a href="#" data-target="viewNonMaint">Non-Maintenance Bill</a>
+    </nav>
+  </header>
 
-<div class="container">
-  <!-- LEFT NAV (static for this sample) -->
-  <div class="pillnav">
-    <div class="pill active" data-view="maintenance">🛠️ Maintenance</div>
-    <div class="pill" data-view="finance">💵 Finance</div>
-    <div class="pill" data-view="nonmaint">📄 Non-Maintenance Bill</div>
-    <div class="pill" data-view="delinquency">🧾 Delinquency</div>
-    <div class="pill" data-view="stale">📉 Stale Listing</div>
-    <div class="pill" data-view="appliance">🔌 Appliance</div>
+  <!-- =========================================================
+       MAINTENANCE
+  ========================================================== -->
+  <div id="viewMaintenance" class="view-pane">
+    <div class="badge">Owner FYI for emergencies is sent by <b>Maintenance</b></div>
+    <div class="badge">Handoff status: <span class="kbd">READY FOR FINANCE</span></div>
+    <div class="hr"></div>
 
-    <div class="card" style="margin-top:12px;">
-      <div class="row" style="gap:8px; justify-content:space-between">
-        <button class="btn" id="btnResetAll">Reset</button>
-        <button class="btn">Print / Save PDF</button>
+    <!-- Maintenance Dispatch Flow -->
+    <div class="card" id="maintDispatchFlow" style="margin-bottom:12px;">
+      <h3>Maintenance Dispatch Flow</h3>
+      <p class="note">Answer each question in order. The next step will appear automatically.</p>
+
+      <!-- Q1 -->
+      <div class="flowQ" id="q1">
+        <label><strong>Is it an Emergency?</strong></label>
+        <div class="row" style="gap:8px;">
+          <button type="button" class="btn" data-next="OUT_EMER">Yes</button>
+          <button type="button" class="btn" data-next="q2">No</button>
+        </div>
       </div>
-      <div class="hr"></div>
-      <button class="btn" id="btnOwnerPlans">Manage Owner Plans</button>
-      <div class="hr"></div>
-      <div class="progress"><div></div></div>
+
+      <!-- Q2 -->
+      <div class="flowQ hidden" id="q2">
+        <label><strong>Is the Property in Delinquent Status?</strong></label>
+        <div class="row" style="gap:8px;">
+          <button type="button" class="btn" data-next="OUT_DELINQ">Yes</button>
+          <button type="button" class="btn" data-next="q3">No</button>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="flowQ hidden" id="q3">
+        <label><strong>Is the Property enrolled in a Home Warranty program?</strong></label>
+        <div class="row" style="gap:8px;">
+          <button type="button" class="btn" data-next="OUT_HW">Yes</button>
+          <button type="button" class="btn" data-next="q4">No</button>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="flowQ hidden" id="q4">
+        <label><strong>Will the Owner complete their own maintenance tickets?</strong></label>
+        <div class="row" style="gap:8px;">
+          <button type="button" class="btn" data-next="OUT_NOTIFY_OWNER">Yes</button>
+          <button type="button" class="btn" data-next="q5">No</button>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="flowQ hidden" id="q5">
+        <label><strong>Was the same issue reported within the last 12 months?</strong></label>
+        <div class="row" style="gap:8px;">
+          <button type="button" class="btn" data-next="OUT_RECALL">Yes</button>
+          <button type="button" class="btn" data-next="OUT_STANDARD">No</button>
+        </div>
+      </div>
+
+      <!-- Outcome -->
+      <div id="mdf_out_wrap" class="hidden" style="margin-top:10px;">
+        <div class="hr"></div>
+        <label><strong>Decision</strong></label>
+        <textarea id="mdf_out" readonly style="min-height:110px"></textarea>
+        <div class="row" style="gap:8px;margin-top:6px;">
+          <button type="button" class="btn primary" id="mdf_copy">Copy Decision</button>
+          <button type="button" class="btn" id="mdf_reset">Reset</button>
+        </div>
+      </div>
+
+      <!-- Emergency Email (only shows when Emergency is chosen) -->
+      <div id="emerg_email_wrap" class="hidden" style="margin-top:12px;">
+        <div class="hr"></div>
+        <h3>Emergency Email Data</h3>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Tenant Name</label>
+            <input id="maint_tenant" type="text" placeholder="e.g., Jane Smith">
+          </div>
+          <div class="field">
+            <label>Unit Address</label>
+            <input id="maint_address" type="text" placeholder="e.g., 123 Main St, Baltimore MD">
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Owner Name (for greeting)</label>
+            <input id="maint_owner_name" type="text" placeholder="e.g., John Doe">
+          </div>
+          <div class="field">
+            <label>Vendor Visit Date</label>
+            <input id="maint_vendor_visitdate" type="date">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tenant Complaint (quote exact)</label>
+          <textarea id="maint_tenant_complaint" rows="3" placeholder="Quote tenant’s original statement…"></textarea>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Vendor Findings (diagnosis)</label>
+            <textarea id="maint_vendor_findings" rows="3" placeholder="What the vendor found…"></textarea>
+          </div>
+          <div class="field">
+            <label>Vendor Recommendation (proposed work)</label>
+            <textarea id="maint_vendor_reco" rows="3" placeholder="What the vendor recommends…"></textarea>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Vendor Estimate (USD)</label>
+            <input id="maint_vendor_estimate" type="number" step="0.01" min="0" placeholder="e.g., 325.00">
+          </div>
+          <div class="field">
+            <label>Portal Link (optional)</label>
+            <input id="maint_portal_link" type="url" placeholder="https://…">
+          </div>
+        </div>
+
+        <div class="row" style="gap:8px; margin-top:6px;">
+          <button type="button" class="btn primary" id="med_generate">Generate Emergency Emails</button>
+        </div>
+
+        <div class="hr"></div>
+        <h3>Emergency Emails (auto-filled)</h3>
+        <p class="note"><strong>Policy:</strong> Step 1: FYI to <em>EPM</em> for approval. Step 2: After EPM approves, FYI to <em>Owner</em>.</p>
+
+        <div class="field">
+          <label>EPM Subject</label>
+          <input id="epm_subj" type="text" readonly>
+        </div>
+        <div class="field">
+          <label>EPM Body</label>
+          <textarea id="epm_body" rows="9" readonly></textarea>
+          <div class="row" style="justify-content:flex-end; gap:8px;">
+            <button type="button" class="btn" data-copy="#epm_body">Copy EPM Email</button>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div class="field">
+          <label>Owner Subject</label>
+          <input id="own_subj" type="text" readonly>
+        </div>
+        <div class="field">
+          <label>Owner FYI Body</label>
+          <textarea id="own_body" rows="11" readonly></textarea>
+          <div class="row" style="justify-content:flex-end; gap:8px;">
+            <button type="button" class="btn" data-copy="#own_body">Copy Owner Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WO + Controls (unchanged look; plan + issue) -->
+    <div class="two-col">
+      <div class="soft">
+        <h3>WO Details</h3>
+        <div class="field"><label class="small">Work Order #</label><input id="wo" type="text" placeholder="e.g., 3425886"></div>
+        <div class="field"><label class="small">Property Address</label><input id="addr" type="text" placeholder="e.g., 7418 Hindon Cir"></div>
+        <div class="field"><label class="small">Vendor</label><input id="vendor" type="text" placeholder="e.g., ABC Plumbing"></div>
+        <div class="field">
+          <label class="small">Owner Plan</label>
+          <select id="plan">
+            <option value="">Select…</option>
+            <option>Standard (Owner Approval &gt; 300+)</option>
+            <option>Home Warranty (Owner Has An Active HW Plan with PW Auth)</option>
+            <option>Basic (Owner Approval &gt; 150+)</option>
+            <option>Opt-Out (Owner Managed)</option>
+            <option>Emergency-Only (Auto Approved, EPM Approved, FYI to Owner)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="small">Issue Type</label>
+          <select id="issue">
+            <option value="">Select…</option>
+            <option>Emergency</option>
+            <option>Non-Emergency</option>
+            <option>Urgent</option>
+            <option>Recall</option>
+            <option>Cosmetic / Upgrade</option>
+            <option>Opt-Out Maintenance</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="soft">
+        <h3>Controls & Approvals</h3>
+        <div class="field"><label class="small">Invoice Amount (USD)</label><input id="amount" type="number" min="0" step="0.01" placeholder="e.g., 425.00"></div>
+        <div class="check"><input id="chkPhotos" type="checkbox"><div>Photos complete (before & after, <b>timestamp + watermark</b>)</div></div>
+        <div class="check"><input id="chkTenant" type="checkbox"><div>Tenant confirmed completion</div></div>
+        <div class="check"><input id="chkFYI" type="checkbox"><div><b>FYI to Owner</b> sent (required for Emergency &gt; $300)</div></div>
+        <div class="check"><input id="chkOwnerOK" type="checkbox"><div><b>Owner Approval</b> attached (required for Non-Emergency &gt; $300)</div></div>
+      </div>
     </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
+  <!-- =========================================================
+       FINANCE (includes Water Bills full width on wide screens)
+  ========================================================== -->
+  <div id="viewFinance" class="view-pane hidden">
+    <div class="badge">Finance Intake</div>
+    <div class="hr"></div>
 
-    <!-- ===== Maintenance ===== -->
-    <section class="card" id="view-maintenance" data-view="maintenance">
-      <div class="row" style="gap:8px; align-items:center; flex-wrap:wrap;">
-        <div class="pill" style="background:#f3f6fb;border:none;">Owner FYI for emergencies is sent by <strong>Maintenance</strong></div>
-        <div class="pill" style="background:#f3f6fb;border:none;">Handoff status: <strong>READY FOR FINANCE</strong></div>
-      </div>
+    <div class="two-col">
+      <div class="soft">
+        <h3>Finance Intake — Inputs</h3>
+        <div class="field"><label>WO #</label><input id="fin_wo" type="text" placeholder="e.g., 3446201"></div>
+        <div class="field"><label>Property Address</label><input id="fin_addr" type="text" placeholder="e.g., 1814 E 30th St"></div>
+        <div class="field"><label>Vendor</label><input id="fin_vendor" type="text" placeholder="e.g., ABC Plumbing"></div>
+        <div class="field"><label>Amount (USD)</label><input id="fin_amount" type="number" min="0" step="0.01" placeholder="e.g., 275.00"></div>
+        <div class="field"><label>Approval/FYI Date</label><input id="fin_date" type="date"></div>
 
-      <!-- Dispatch Flow -->
-      <div class="card" id="maintDispatchFlow" style="margin-top:12px;">
-        <h3>Maintenance Dispatch Flow</h3>
-        <p class="note">Answer each question in order. The next step will appear automatically.</p>
-
-        <!-- Q1 -->
-        <div class="flowQ" id="q1">
-          <label><strong>Is it an Emergency?</strong></label>
-          <div class="row" style="gap:8px;">
-            <button type="button" class="btn" data-next="OUT_STANDARD">Yes</button>
-            <button type="button" class="btn" data-next="q2">No</button>
-          </div>
-        </div>
-
-        <!-- Q2 -->
-        <div class="flowQ hidden" id="q2">
-          <label><strong>Is the Property in Delinquent Status?</strong></label>
-          <div class="row" style="gap:8px;">
-            <button type="button" class="btn" data-next="OUT_DELINQ">Yes</button>
-            <button type="button" class="btn" data-next="q3">No</button>
-          </div>
-        </div>
-
-        <!-- Q3 -->
-        <div class="flowQ hidden" id="q3">
-          <label><strong>Is the Property enrolled in a Home Warranty program?</strong></label>
-          <div class="row" style="gap:8px;">
-            <button type="button" class="btn" data-next="OUT_HW">Yes</button>
-            <button type="button" class="btn" data-next="q4">No</button>
-          </div>
-        </div>
-
-        <!-- Q4 -->
-        <div class="flowQ hidden" id="q4">
-          <label><strong>Will the Owner complete their own maintenance tickets?</strong></label>
-          <div class="row" style="gap:8px;">
-            <button type="button" class="btn" data-next="OUT_NOTIFY_OWNER">Yes</button>
-            <button type="button" class="btn" data-next="q5">No</button>
-          </div>
-        </div>
-
-        <!-- Q5 -->
-        <div class="flowQ hidden" id="q5">
-          <label><strong>Was the same issue reported within the last 12 months?</strong></label>
-          <div class="row" style="gap:8px;">
-            <button type="button" class="btn" data-next="OUT_RECALL">Yes</button>
-            <button type="button" class="btn" data-next="OUT_STANDARD">No</button>
-          </div>
-        </div>
-
-        <!-- Decision -->
-        <div id="mdf_out_wrap" class="hidden" style="margin-top:10px;">
-          <div class="hr"></div>
-          <label><strong>Decision</strong></label>
-          <textarea id="mdf_out" readonly style="min-height:110px"></textarea>
-          <div class="row" style="gap:8px;margin-top:6px;">
-            <button type="button" class="btn primary" id="mdf_copy">Copy Decision</button>
-            <button type="button" class="btn" id="mdf_reset">Reset</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Work Order Details + Owner Plan -->
-      <div class="two-col">
-        <div class="card">
-          <h3>WO Details</h3>
-          <div class="field"><label>Work Order #</label><input id="wo_id" type="text" placeholder="e.g., 3425886"></div>
-          <div class="field"><label>Property Address</label><input id="wo_addr" type="text" placeholder="e.g., 7418 Hindon Cir"></div>
-          <div class="field"><label>Vendor</label><input id="wo_vendor" type="text" placeholder="e.g., ABC Plumbing"></div>
-          <div class="field">
-            <label>Owner Plan</label>
-            <select id="owner_plan">
-              <option value="" selected>Select...</option>
-              <option>Standard- (Owner Approval >300+)</option>
-              <option>Home Warranty (Owner Has An Active HW Plan with PW Auth)</option>
-              <option>Basic- (Owner Approval >150+)</option>
-              <option>Opt-Out (Owner Managed)</option>
-              <option>Emergency-Only (Auto Approved, EPM Approved, FYI to Owner)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Finance (placeholder) ===== -->
-    <section class="card hidden" id="view-finance" data-view="finance"><h3>Finance</h3><p class="note">—</p></section>
-    <section class="card hidden" id="view-nonmaint" data-view="nonmaint"><h3>Non-Maintenance Bill</h3><p class="note">—</p></section>
-    <section class="card hidden" id="view-stale" data-view="stale"><h3>Stale Listing</h3><p class="note">—</p></section>
-
-    <!-- ===== Delinquency ===== -->
-    <section class="card hidden" id="view-delinquency" data-view="delinquency">
-      <h3>Delinquency Details</h3>
-      <div class="two-col">
-        <div class="field"><label>Tenant name</label><input id="dlq_tenant" type="text"></div>
-        <div class="field"><label>Address</label><input id="dlq_address" type="text"></div>
-        <div class="field"><label>Rent balance</label><input id="dlq_rent" type="text"></div>
-        <div class="field"><label>Utility balance</label><input id="dlq_util" type="text"></div>
-        <div class="field"><label>Misc balance</label><input id="dlq_misc" type="text"></div>
-        <div class="field"><label>Fees/Late Fees</label><input id="dlq_fees" type="text"></div>
-        <div class="field"><label>Total balance</label><input id="dlq_total" type="text" placeholder="$0.00"></div>
-        <div class="field"><label>Last payment</label><input id="dlq_lastpay" type="text"></div>
-        <div class="field"><label>Last communication</label><input id="dlq_lastcomm" type="text"></div>
+        <div class="hr"></div>
+        <h3>Verification</h3>
+        <div class="check"><input id="fin_invwo" type="checkbox"><label for="fin_invwo">Invoice WITH WO#</label></div>
+        <div class="check"><input id="fin_approve" type="checkbox"><label for="fin_approve">Owner Approval (> $300 Non-Emergency) or FYI (> $300 Emergency)</label></div>
+        <div class="check"><input id="fin_photos" type="checkbox"><label for="fin_photos">Before/After photos (timestamp + watermark)</label></div>
+        <div class="check"><input id="fin_tenant" type="checkbox"><label for="fin_tenant">Tenant completion confirmation</label></div>
+        <div class="check"><input id="fin_temp" type="checkbox"><label for="fin_temp">Temp Check present if &gt; $300</label></div>
       </div>
 
       <div class="soft">
-        <div class="field"><label>FTP date</label><input id="dlq_ftp" type="text" placeholder="e.g., 10/26/2025 or Not Scheduled"></div>
-        <div class="field"><label>Court outcome</label><input id="dlq_court" type="text"></div>
-        <div class="field"><label>Judgment ordered</label><input id="dlq_judgment" type="text"></div>
-        <div class="field"><label>Eviction date</label><input id="dlq_eviction" type="text"></div>
-        <div class="field"><label>Reason no eviction</label><input id="dlq_noevict_reason" type="text"></div>
-        <div class="field"><label>Lease end date</label><input id="dlq_leaseend" type="text"></div>
-        <div class="field"><label>Last PW action</label><input id="dlq_lastaction" type="text"></div>
+        <h3>Generate</h3>
+        <div class="field"><label>Output (Finance Intake Note)</label>
+          <textarea id="fin_note" placeholder="Click Generate to fill…"></textarea>
+        </div>
+        <div class="row" style="gap:10px;">
+          <button class="btn primary" id="fin_btn_gen">Generate Finance Note</button>
+          <button class="btn" id="fin_btn_copy">Copy</button>
+        </div>
       </div>
+    </div>
 
-      <div class="hr"></div>
-      <h3>Delinquency Contact & Email</h3>
-      <div class="two-col">
-        <div class="field"><label>Manager Assigned</label><input id="dlq_manager" type="text" placeholder="e.g., SYS"></div>
-        <div class="field">
-          <label>Voucher Tenant?</label>
-          <select id="dlq_voucher"><option value="" selected>— Select —</option><option>Yes</option><option>No</option></select>
-        </div>
-        <div class="field"><label>Tenant vs HAP Rent Portion</label><input id="dlq_rentportion" type="text" placeholder="e.g., N/A - Rent is $1,674 + $25 RBP"></div>
-        <div class="field">
-          <label>Buildium Collection Block (blocked from partial online payments?)</label>
-          <select id="dlq_blocked"><option value="" selected>— Select —</option><option>Yes</option><option>No</option></select>
-        </div>
-        <div class="field">
-          <label>Eligible for ROR?</label>
-          <select id="dlq_ror"><option value="" selected>— Select —</option><option>Yes</option><option>No</option></select>
-        </div>
-      </div>
+    <div class="hr"></div>
 
-      <div class="hr"></div>
-      <h3>Email Draft</h3>
-      <div class="two-col">
-        <div class="field"><label>To</label><input id="dlq_email_to" type="text" placeholder="owner@example.com"></div>
-        <div class="field"><label>CC</label><input id="dlq_email_cc" type="text" placeholder="epm@propertywize.com"></div>
-      </div>
-      <div class="soft">
-        <div class="field"><label>Subject</label><input id="dlq_email_subj" type="text" placeholder="Delinquency Update – [Tenant] ([Property])"></div>
-        <div class="field"><label>Preview</label><textarea id="dlq_email_body" readonly style="min-height:220px"></textarea></div>
+    <!-- Water Bills: spans full width on large screens -->
+    <div id="waterbills" class="card">
+      <h3>Water Bills</h3>
+
+      <details open id="wb_checklist">
+        <summary><strong>✅ Pre-Handoff Checklist — Water Bills</strong></summary>
+        <div class="check"><input type="checkbox" id="wb_c1"><label for="wb_c1">Owner &amp; Tenant copies prepared &amp; named correctly</label></div>
+        <div class="check"><input type="checkbox" id="wb_c2"><label for="wb_c2">5% late fee added if prior cycle unpaid</label></div>
+        <div class="check"><input type="checkbox" id="wb_c3"><label for="wb_c3">Bill posted to tenant ledger + Tenant Copy attached</label></div>
+        <div class="check"><input type="checkbox" id="wb_c4"><label for="wb_c4">Notices prepared (Email + Mail) and saved/linked</label></div>
+        <div class="check"><input type="checkbox" id="wb_c5"><label for="wb_c5">Compared to 6-mo avg &amp; unpaid balances checked</label></div>
+        <div class="check"><input type="checkbox" id="wb_c6"><label for="wb_c6">Proof/links uploaded (Drive/Buildium)</label></div>
+      </details>
+
+      <details open>
+        <summary><strong>Step 1 • Process the Bill</strong></summary>
+        <ol>
+          <li>Open the <strong>Main Water Bill Tracking Sheet</strong> &amp; pick a bill date ≤ today.</li>
+          <li>DPW Portal → search property → download latest bill.</li>
+          <li>Name Owner Copy: <code>YYYYMMDD_Property_$Amount_dueMMDD</code>.</li>
+          <li>Duplicate → Tenant Copy (remove owner; highlight balances).</li>
+          <li>If previous cycle unpaid → add <strong>5% late fee</strong> in Buildium (WB Late Fee Income).</li>
+          <li>Post current bill to tenant ledger (Account: Utility Income) and attach Tenant Copy.</li>
+        </ol>
+        <div class="field"><label><strong>Buildium memo</strong></label>
+          <textarea id="wb_memo_process">Water Bill [Start Date] – [End Date], $[Amount] due after [Due Date].</textarea>
+        </div>
+        <button type="button" class="btn" data-copy="#wb_memo_process">Copy memo</button>
+      </details>
+
+      <details>
+        <summary><strong>Step 2 • Prepare the Bill</strong></summary>
+        <ol>
+          <li>Upload Owner Copy (Owner only) &amp; Tenant Copy (Tenant only) to Buildium.</li>
+          <li>Send notices (Email + 1st Notice). Save as <code>YYYYMMDD_Property_WaterBillNotice</code>.</li>
+          <li>Upload PDFs to the designated Drive folder.</li>
+          <li>Email the Water Bill Process Report to: rachel@…, michelle@…, neha@…</li>
+        </ol>
+        <div class="field"><label><strong>Notice quick-fill</strong></label>
+          <textarea id="wb_notice_notes">Bill Due Date: [MM/DD/YYYY]
+Current Amount: $[Amount]
+After-Due Amount (with 5%): $[Amount x 1.05]</textarea>
+        </div>
+        <button type="button" class="btn" data-copy="#wb_notice_notes">Copy notes</button>
+      </details>
+
+      <details>
+        <summary><strong>Step 3 • Pay the Bill</strong></summary>
+        <p class="note"><em>Reminder:</em> Before paying, check the Water Bill Average doc:
+          <a href="https://docs.google.com/spreadsheets/d/1_1oeQsj_TOc89CARn5rtYtNgN5lsqjIS/edit?gid=1576758348#gid=1576758348" target="_blank" rel="noopener">Open reference</a>.
+        </p>
+        <p><strong>Rule Summary:</strong> Pay ≤ $200 directly. Over $200: confirm no unpaid balances &amp; compare to 6-mo avg. Escalate if &gt;$300 (SFD) or &gt;$350 (MFD).</p>
+
+        <div class="two-col">
+          <div class="soft">
+            <div class="field"><label>Bill amount (USD)</label><input id="wb_amount" type="number" inputmode="decimal" step="0.01"></div>
+            <div class="field"><label>Property Type</label><select id="wb_ptype"><option value="sfd">SFD</option><option value="mfd">MFD</option></select></div>
+          </div>
+          <div class="soft">
+            <div class="field"><label>Any unpaid balances?</label><select id="wb_unpaid"><option value="no">No</option><option value="yes">Yes</option></select></div>
+            <div class="field"><label>Similar to 6-month average?</label><select id="wb_avgok"><option value="yes">Yes</option><option value="no">No</option></select></div>
+          </div>
+        </div>
+
         <div class="row" style="gap:8px;">
-          <button class="btn" id="dlq_email_preview">Preview</button>
-          <button class="btn primary" id="dlq_email_send">Send Email</button>
+          <button type="button" class="btn primary" id="wb_btn_check">Check Decision</button>
+          <button type="button" class="btn" id="wb_btn_reset">Reset</button>
+        </div>
+
+        <div id="wb_decision" class="note" aria-live="polite"></div>
+
+        <div class="field"><label><strong>Buildium payment memo</strong></label>
+          <textarea id="wb_memo_pay">Water Bill Paid [Service Period] – $[Amount] paid on [MM/DD/YYYY].</textarea>
+        </div>
+        <button type="button" class="btn" data-copy="#wb_memo_pay">Copy memo</button>
+      </details>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       STALE LISTING (shows correctly)
+  ========================================================== -->
+  <div id="viewListings" class="view-pane hidden">
+    <div class="badge">Stale Listing • Weekly Owner Report</div>
+    <div class="hr"></div>
+    <div class="two-col">
+      <div class="soft">
+        <h3>Inputs</h3>
+        <div class="field"><label>Address</label><input id="sl_address" type="text"></div>
+        <div class="field"><label>List Rent</label><input id="sl_rent" type="text"></div>
+        <div class="field"><label>Days on Market</label><input id="sl_dom" type="number"></div>
+        <div class="field"><label>Showings (7d)</label><input id="sl_showings" type="number"></div>
+      </div>
+      <div class="soft">
+        <h3>Owner Email</h3>
+        <div class="field"><label>Draft</label><textarea id="sl_out" placeholder="Summary will appear here…"></textarea></div>
+        <div class="row" style="gap:8px;">
+          <button class="btn primary" id="sl_btnGen">Generate</button>
+          <button class="btn" data-copy="#sl_out">Copy</button>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- ===== Appliance ===== -->
-    <section class="card hidden" id="view-appliance" data-view="appliance">
-      <h3>Appliance Intake</h3>
-      <div class="two-col">
-        <div class="field"><label>Tenant</label><input id="appl_tenant" type="text" placeholder="(auto uses Delinquency Tenant if blank)"></div>
-        <div class="field"><label>Address / Unit</label><input id="appl_address" type="text" placeholder="123 Main St, Unit 2B"><input id="appl_unit" type="text" style="margin-top:6px" placeholder="Unit"></div>
-        <div class="field"><label>Appliance Type</label><input id="appl_type" type="text" placeholder="e.g., Dishwasher"></div>
-        <div class="field"><label>Brand</label><input id="appl_brand" type="text" placeholder="e.g., Whirlpool"></div>
-        <div class="field"><label>Model #</label><input id="appl_model" type="text" placeholder="e.g., WRS571CIHZ"></div>
-        <div class="field"><label>Serial #</label><input id="appl_sn" type="text"></div>
-        <div class="field"><label>Color</label><input id="appl_color" type="text"></div>
-        <div class="field"><label>Age (years)</label><input id="appl_age" type="text" placeholder="e.g., 4"></div>
-        <div class="field"><label>Issue (tenant complaint)</label><input id="appl_complaint" type="text" placeholder="(quote tenant)"></div>
-        <div class="field"><label>Vendor</label><input id="appl_vendor" type="text" placeholder="e.g., NT Appliance - Ahmed"></div>
-        <div class="field"><label>Vendor Reco</label><input id="appl_vendor_reco" type="text" placeholder="[repair/replacement] (if applicable)"></div>
-        <div class="field"><label>Album Link</label><input id="appl_album" type="text" placeholder="https://..."></div>
+  <!-- =========================================================
+       DELINQUENCY (shows correctly)
+  ========================================================== -->
+  <div id="viewDelinquency" class="view-pane hidden">
+    <div class="badge">Delinquency Handoff</div>
+    <div class="hr"></div>
+    <div class="two-col">
+      <div class="soft">
+        <h3>Case Inputs</h3>
+        <div class="field"><label>Tenant Name(s)</label><input id="dlq_tenant" type="text" placeholder="Jane Smith"></div>
+        <div class="field"><label>Address</label><input id="dlq_addr" type="text" placeholder="123 Bank St"></div>
+        <div class="field"><label>Balance</label><input id="dlq_balance" type="text" placeholder="$1,058.30"></div>
+        <div class="field"><label>Last Payment</label><input id="dlq_lastpay" type="text" placeholder="10/17 for $1,000"></div>
       </div>
-
-      <div class="hr"></div>
-      <div class="two-col">
-        <div class="field"><label>Troubleshooting Result</label><input id="appl_troubleshoot" type="text" placeholder="e.g., power reset done, still not heating"></div>
-        <div class="field"><label>Prepared By</label><input id="appl_prepared_by" type="text" placeholder="Your Name"></div>
+      <div class="soft">
+        <h3>Email to Owner/EPM</h3>
+        <div class="field"><label>Output</label><textarea id="dlq_out" placeholder="Click Generate…"></textarea></div>
+        <div class="row" style="gap:8px;">
+          <button class="btn primary" id="dlq_btnGen">Generate</button>
+          <button class="btn" data-copy="#dlq_out">Copy</button>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <div class="hr"></div>
-      <h3>EPM Email (preview)</h3>
-      <textarea id="appl_email_out" readonly></textarea>
-      <div class="row" style="gap:8px;margin-top:6px;">
-        <button class="btn" id="appl_copy_epm">Copy Handoff Comment</button>
+  <!-- =========================================================
+       NON-MAINTENANCE BILL (shows correctly)
+  ========================================================== -->
+  <div id="viewNonMaint" class="view-pane hidden">
+    <div class="badge">Non-Maintenance Bill</div>
+    <div class="hr"></div>
+    <div class="two-col">
+      <div class="soft">
+        <h3>Inputs</h3>
+        <div class="field"><label>WO / Ref</label><input id="nm_ref" type="text"></div>
+        <div class="field"><label>Address</label><input id="nm_addr" type="text"></div>
+        <div class="field"><label>Amount</label><input id="nm_amt" type="number" step="0.01"></div>
       </div>
-
-      <div class="hr"></div>
-      <h3>Tenant Deferral Email (if delinquent &amp; non-essential)</h3>
-      <textarea id="appl_deferral_out" readonly></textarea>
-      <div class="row" style="gap:8px;margin-top:6px;">
-        <button type="button" class="btn" id="appl_deferral_copy">Copy Tenant Deferral Email</button>
+      <div class="soft">
+        <h3>Output</h3>
+        <div class="field"><label>Comment</label><textarea id="nm_out" placeholder="Click Generate…"></textarea></div>
+        <div class="row" style="gap:8px;">
+          <button class="btn primary" id="nm_btnGen">Generate</button>
+          <button class="btn" data-copy="#nm_out">Copy</button>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <div class="row" style="gap:8px;margin-top:12px;">
-        <button class="btn primary" onclick="window.appl_generate()">Generate</button>
-        <button class="btn" onclick="window.appl_clear()">Clear</button>
-      </div>
-    </section>
+</div><!--/wrap-->
 
-  </div><!-- /main -->
-</div><!-- /container -->
-
+<!-- ====== SINGLE SCRIPT (pane switcher + features) ====== -->
 <script>
-/* ========= Navigation (left pills) ========= */
 (function(){
-  const pills=[...document.querySelectorAll('.pillnav .pill')];
-  function show(view){
-    document.querySelectorAll('[data-view]').forEach(s=>{
-      s.classList.toggle('hidden', s.getAttribute('data-view')!==view);
-      s.classList.toggle('active', s.classList.contains('pill') && s.getAttribute('data-view')===view);
-    });
-    document.querySelectorAll('section[id^="view-"]').forEach(sec=>{
-      sec.classList.toggle('hidden', sec.id !== 'view-' + view);
-    });
+  if (window._pw_boot) return; window._pw_boot = true;
+
+  /* ---------- helpers ---------- */
+  const $  = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const gid = id => document.getElementById(id);
+  const gval = id => { const el = gid(id); return (el && 'value' in el) ? String(el.value||'').trim() : ''; };
+  const gcheck = id => { const el = gid(id); return !!(el && el.checked); };
+  const show = el => el && el.classList.remove('hidden');
+  const hide = el => el && el.classList.add('hidden');
+
+  /* ---------- pane switching ---------- */
+  function showPane(id){
+    $$('.view-pane').forEach(p => p.classList.add('hidden'));
+    const el = gid(id);
+    if (el) el.classList.remove('hidden');
+    try{ localStorage.setItem('pw_last_view', id); }catch(_){}
   }
-  pills.forEach(p=>p.addEventListener('click',()=>show(p.getAttribute('data-view'))));
-  show('maintenance');
-  document.getElementById('btnResetAll')?.addEventListener('click',()=>location.reload());
-})();
+  function firstExisting(){
+    try{
+      const last = localStorage.getItem('pw_last_view');
+      if (last && gid(last)) return last;
+    }catch(_){}
+    const ids = ['viewMaintenance','viewFinance','viewListings','viewDelinquency','viewNonMaint'];
+    for (let i=0;i<ids.length;i++){ if (gid(ids[i])) return ids[i]; }
+    return null;
+  }
+  document.addEventListener('click', (e)=>{
+    const t = e.target.closest('[data-target]');
+    if (!t) return;
+    const id = t.getAttribute('data-target');
+    if (id && gid(id)){ e.preventDefault(); showPane(id); }
+  }, {passive:true});
+  if (document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', ()=>{ const start=firstExisting(); if(start) showPane(start); }, {once:true});
+  } else {
+    const start=firstExisting(); if(start) showPane(start);
+  }
+  window.showPane = showPane;
 
-/* ========= Maintenance Dispatch Flow: single-step + decisions ========= */
-(function(){
-  const flow = document.getElementById('maintDispatchFlow');
-  if (!flow || flow._pwBound) return;
-  const $ = s => flow.querySelector(s);
-  const $$ = s => Array.from(flow.querySelectorAll(s));
-
-  const DECISIONS = {
-    OUT_STANDARD: "Proceed with Standard Dispatch (send owner FYI; auto approval by EPM for emergencies).",
-    OUT_DELINQ:   "Complete Delinquency SOP.",
-    OUT_HW:       "Proceed with Scheduling with Home Warranty.",
-    OUT_NOTIFY_OWNER: "Notify the rental owner of the request (owner completes maintenance tickets).",
-    OUT_RECALL:   "Check the history and begin the Recall SOP."
+  /* ---------- Maintenance: flow + emergency emails ---------- */
+  const OUT = {
+    OUT_STANDARD:
+      "Proceed with Standard Dispatch.\n• Send owner FYI (auto-approve where applicable).",
+    OUT_DELINQ:
+      "Complete Delinquency SOP before dispatching.\n• Follow delinquency checklist and handoff steps.",
+    OUT_HW:
+      "Proceed with scheduling via Home Warranty.\n• Open warranty portal and follow HW process.",
+    OUT_NOTIFY_OWNER:
+      "Notify the rental owner of the request.\n• Confirm if the owner will complete the work.\n• Document plan and timeline.",
+    OUT_RECALL:
+      "Check for recall/warranty within 12 months.\n• Review invoice for warranty coverage (roofing, water proofing, HVAC, carpet, etc.).\n• Begin Recall SOP if applicable.",
+    OUT_EMER:
+      "Please follow the Emergency Dispatch Policy:\nStep 1: Send an FYI to the EPM for approval.\nStep 2: Once the EPM approves, send an FYI to the property owner."
   };
+  (function wireMDF(){
+    const flow = gid('maintDispatchFlow');
+    if (!flow) return;
+    const qs = Array.from(flow.querySelectorAll('.flowQ'));
+    const outWrap = gid('mdf_out_wrap');
+    const outBox  = gid('mdf_out');
+    const copyBtn = gid('mdf_copy');
+    const resetBtn= gid('mdf_reset');
 
-  const outWrap = document.getElementById('mdf_out_wrap');
-  const outBox  = document.getElementById('mdf_out');
-
-  function hideAll(){ $$('.flowQ').forEach(el=>{ el.classList.add('hidden'); el.removeAttribute('data-active'); }); }
-  function show(id){ const el = document.getElementById(id); if (el){ el.classList.remove('hidden'); el.setAttribute('data-active','1'); } }
-  function showDecision(code){ if(!outWrap||!outBox) return; outBox.value = DECISIONS[code] || code; outWrap.classList.remove('hidden'); }
-
-  hideAll(); show('q1'); outWrap?.classList.add('hidden');
-
-  flow.addEventListener('click',(e)=>{
-    const btn = e.target.closest('button[data-next]'); if(!btn) return;
-    const next = btn.getAttribute('data-next')||'';
-    hideAll();
-    if (next.startsWith('OUT_')) showDecision(next); else show(next);
-  });
-
-  document.getElementById('mdf_copy')?.addEventListener('click',()=>{ outBox.select(); document.execCommand('copy'); });
-  document.getElementById('mdf_reset')?.addEventListener('click',()=>{ outWrap.classList.add('hidden'); hideAll(); show('q1'); });
-
-  flow._pwBound = true;
-})();
-
-/* ========= Delinquency: Email builder (CRLF-safe) ========= */
-(function(){
-  if (window._pwDlqEmailBound) return; window._pwDlqEmailBound = true;
-  const $ = id => document.getElementById(id);
-  const v = id => ( $(id)?.value || '' ).trim();
-  const na = x => x ? x : 'N/A';
-
-  function buildBody(){
-    const data = {
-      manager:          na(v('dlq_manager')),
-      voucher:          na(v('dlq_voucher')),
-      rentPortion:      na(v('dlq_rentportion')),
-      tenant:           na(v('dlq_tenant')),
-      address:          na(v('dlq_address')),
-      balance:          na(v('dlq_total')),
-      lastPayment:      na(v('dlq_lastpay')),
-      lastComm:         na(v('dlq_lastcomm')),
-      ftpDate:          na(v('dlq_ftp')),
-      courtOutcome:     na(v('dlq_court')),
-      judgment:         na(v('dlq_judgment')),
-      evictionDate:     na(v('dlq_eviction')),
-      lastAction:       na(v('dlq_lastaction')),
-      reasonNoEviction: na(v('dlq_noevict_reason')),
-      leaseEnd:         na(v('dlq_leaseend')),
-      blocked:          na(v('dlq_blocked')),
-      ror:              na(v('dlq_ror'))
-    };
-    return `Manager Assigned: ${data.manager}
-Voucher Tenant: ${data.voucher}
-Tenant's vs HAP Rent Portion: ${data.rentPortion}
-1. Tenant's Name: ${data.tenant}
-2. Address: ${data.address}
-3. Balance: ${data.balance}
-4. Last Payment Received: ${data.lastPayment}
-5. Last Communication from Tenant: ${data.lastComm}
-6. FTP Date: ${data.ftpDate}
-7. Court Outcome: ${data.courtOutcome}
-8. Judgment Ordered: ${data.judgment}
-9. Eviction Date Scheduled: ${data.evictionDate}
-10. Last Action Completed: ${data.lastAction}
-11. If no eviction schedule was completed, please state the reason: ${data.reasonNoEviction}
-12. Lease End Date: ${data.leaseEnd}
-13. Tenant status in Buildium reflects collection status, meaning they are blocked from making partial payments online: ${data.blocked}
-14. Eligible for ROR? ${data.ror}`;
-  }
-
-  function defaultSubject(){
-    const t = v('dlq_tenant') || 'Tenant';
-    const a = v('dlq_address') || 'Property';
-    return `Delinquency Update – ${t} (${a})`;
-  }
-
-  function preview(){
-    const subj = v('dlq_email_subj') || defaultSubject();
-    $('dlq_email_subj').value = subj;
-    $('dlq_email_body').value = buildBody();
-  }
-
-  function send(){
-    const to = v('dlq_email_to'); const cc = v('dlq_email_cc');
-    const subj = v('dlq_email_subj') || defaultSubject();
-    let body = $('dlq_email_body').value || buildBody();
-    if (!to){ alert('Please add a recipient (To).'); return; }
-    // force CRLF for mobile/Outlook
-    body = body.replace(/\r?\n/g, '\r\n');
-    const rcpts = [to, cc].filter(Boolean).join('; ');
-    window.location.href = `mailto:${encodeURIComponent(rcpts)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
-  }
-
-  $('dlq_email_preview')?.addEventListener('click', e=>{ e.preventDefault(); preview(); });
-  $('dlq_email_send')?.addEventListener('click',    e=>{ e.preventDefault(); preview(); send(); });
-
-  ['dlq_tenant','dlq_address'].forEach(id=>$(id)?.addEventListener('input',()=>{ if(!v('dlq_email_subj')) $('dlq_email_subj').placeholder = defaultSubject(); }));
-})();
-
-/* ========= Appliance: generate (deferral + EPM email) ========= */
-if (typeof window.appl_generate !== 'function'){
-  window.appl_generate = function(){
-    const gv = id => (document.getElementById(id)?.value || '').trim();
-
-    const addr = gv('appl_address'),
-          unit = gv('appl_unit'),
-          t    = gv('appl_tenant') || gv('dlq_tenant'),
-          type = gv('appl_type'),
-          brand= gv('appl_brand'),
-          model= gv('appl_model'),
-          color= gv('appl_color'),
-          sn   = gv('appl_sn'),
-          age  = gv('appl_age'),
-          issue= gv('appl_complaint'),
-          vendor=gv('appl_vendor'),
-          reco = gv('appl_vendor_reco'),
-          album= gv('appl_album'),
-          troubleshoot = gv('appl_troubleshoot'),
-          preparedBy = gv('appl_prepared_by');
-
-    /* ---- Deferral gate (balances OVER $500 + non-essential) → fill deferral box and return ---- */
-    const num = s => { const n=(s??'').toString().replace(/[^0-9.]/g,''); return parseFloat(n)||0; };
-    const balance = num(gv('dlq_total'));
-    const aType = (type || '').toLowerCase().trim();
-    const essentials = ['refrigerator','fridge','stove','range','oven','washer','dryer'];
-    const isNonEssential = aType && !essentials.some(e=>aType.includes(e));
-
-    let defBox = document.getElementById('appl_deferral_out');
-    if (!defBox){ defBox = document.createElement('textarea'); defBox.id='appl_deferral_out'; defBox.readOnly=true; document.querySelector('#view-appliance .card')?.appendChild(defBox); }
-
-    if (balance > 500 && isNonEssential){
-      defBox.value =
-`Dear ${t || 'Tenant'},
-
-Thank you for submitting your request.
-
-Unfortunately, we are unable to process your request at this time as your account is not in good standing. Please get in touch with our Collections Account Manager to discuss payment arrangements if necessary.
-
-You can conveniently submit a request through your online portal at https://propertywize.managebuilding.com/Resident/public/home.
-
-Once your account is back in good standing, please contact us to complete your request.
-
-Regards,
-PropertyWize Management Team`;
-      const epmBox = document.getElementById('appl_email_out'); if (epmBox) epmBox.value = '';
-      return; // stop normal EPM generation
-    } else {
-      defBox.value = ''; // clear deferral area if not applicable
+    function resetFlow(){
+      qs.forEach(q=>hide(q));
+      show(gid('q1'));
+      hide(outWrap);
+      if(outBox) outBox.value='';
+      hide(gid('emerg_email_wrap'));
     }
 
-    /* ---- EPM email (per your template) ---- */
-    const subject = `Appliance Ticket – ${type || 'Appliance'} – ${t || unit || addr || ''}`;
-    const subjBox = document.getElementById('appl_subject') || document.getElementById('appl_email_subj');
-    if (subjBox) subjBox.value = subject;
+    function setOutcome(key){
+      if (key==='OUT_EMER'){ show(gid('emerg_email_wrap')); buildEmergencyEmails(); }
+      else { hide(gid('emerg_email_wrap')); }
+      if (!OUT[key]) return;
+      outBox.value = OUT[key];
+      show(outWrap);
+      qs.forEach(q=>hide(q));
+    }
 
-    const historyBlock = gv('appl_history') || `List each old ticket related to this appliance with
-   = Date:
-   = WO# :
-   = What was repaired or replaced?
-   = How much the cost`;
+    flow.addEventListener('click', (e)=>{
+      const b = e.target.closest('button[data-next]');
+      if(!b) return;
+      const next = b.getAttribute('data-next');
+      if (next.startsWith('OUT_')){ setOutcome(next); return; }
+      qs.forEach(q=>hide(q));
+      show(gid(next));
+    });
 
+    copyBtn && copyBtn.addEventListener('click', ()=>{
+      const t = outBox.value || '';
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+      else { outBox.select && outBox.select(); document.execCommand && document.execCommand('copy'); }
+      const prev = copyBtn.textContent; copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent=prev,900);
+    });
+    resetBtn && resetBtn.addEventListener('click', resetFlow);
+
+    // Owner Plan acts like an emergency trigger if "Emergency" selected
+    const planSel = gid('plan');
+    planSel && planSel.addEventListener('change', ()=>{
+      if (/emergency/i.test(planSel.value||'')) setOutcome('OUT_EMER');
+      else hide(gid('emerg_email_wrap'));
+    });
+
+    resetFlow();
+  })();
+
+  // Emergency email generation
+  function currency(n){
+    const num = Number(String(n||'').replace(/[^0-9.]/g,''));
+    return Number.isFinite(num) ? num.toLocaleString(undefined,{style:'currency',currency:'USD'}) : 'TBD';
+  }
+  function buildEmergencyEmails(){
+    const t      = gval('maint_tenant') || '[Tenant Name]';
+    const addr   = gval('maint_address')|| '[Property Address]';
+    const owner  = gval('maint_owner_name') || '[Owner Name]';
+    const visit  = gval('maint_vendor_visitdate') || 'TBD';
+    const est    = gval('maint_vendor_estimate');
+    const estText= est ? `${currency(est)} (Vendor Estimate) + 10% Surcharge\nTotal: ${currency(Number(est)*1.10)}` : 'TBD (Vendor Estimate) + 10% Surcharge\nTotal: TBD';
+    const ten    = gval('maint_tenant_complaint') || '[Tenant statement]';
+    const find   = gval('maint_vendor_findings')  || '[Vendor findings]';
+    const reco   = gval('maint_vendor_reco')      || '[Vendor recommendation]';
+
+    const epmSubj = `🔔 EPM Approval Needed – Emergency Maintenance Ticket [${t} / ${addr}]`;
     const epmBody =
-`Dear Shanicka/Michelle,
+`Dear EPM Team,
 
-We have received an appliance ticket for the ${type || '[Dryer/Oven/Refrigerator/etc.]'}.
+Please review the emergency maintenance request below and provide your approval before we notify the property owner.
 
-Tenant Reported:
-"${issue || '[Insert tenant’s direct complaint from work order]'}"
+Tenant Name: ${t}
+Unit Address: ${addr}
 
-Appliance Information:
-Brand: ${brand || '[Brand Name]'}
-Model#: ${model || '[Model Number]'}
-Serial#: ${sn || '[Serial Number]'}
-Color: ${color || '[Color]'}
-Age of Appliance: ${age || '[Years/Approximate Age – from lookup]'}
-Photo Album Link: ${album || '[Insert link here – tenant and/or vendor photos]'}
+Reported Issue (Tenant Complaint):
+“${ten}”
 
-Result of troubleshooting: ${troubleshoot || '{Was troubleshooting done by the tenant:}'}
+Vendor’s Diagnosis:
+“${find}”
 
-History of Appliance Repairs:
-${historyBlock}
+Proposed Work:
+“${reco}”
 
-Appliance Vendor (${vendor || 'NT Appliance - Ahmed'}) has reviewed the ticket and advised ${reco || '[repair/replacement]'} (if applicable).
+Quoted Cost:
+${estText}
 
-Based on our review, we are looking into either the same model or closest match available.
+Visit Date: ${visit}`;
 
-If replacement is needed, we will ensure the unit has 4.0+/5.0 rating with 500+ user reviews.
+    const ownSubj = `🚨 Emergency Dispatch FYI – ${t} / ${addr}`;
+    const ownBody =
+`Dear ${owner},
 
-Please advise on how to proceed.
+In order to better service you and ensure timely updates, please click on the “View Request” green button to reply via your portal if you are viewing this message in an email form.
 
-Thank you,
-${preparedBy || '[Your Name]'}
-`;
-    const out = document.getElementById('appl_email_out');
-    if (out) out.value = epmBody.trim();
-  };
-}
+You have a new emergency maintenance request from PropertyWize that has been approved and dispatched for your information. Details are provided below:
 
-/* ========= Appliance helpers ========= */
-if (typeof window.appl_clear !== 'function'){
-  window.appl_clear = function(){
-    ['appl_email_out','appl_deferral_out'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  };
-}
-(function(){
-  const c1=document.getElementById('appl_deferral_copy');
-  if (c1 && !c1._pwBound){ c1.addEventListener('click',()=>{ const t=document.getElementById('appl_deferral_out'); if(!t||!t.value) return; t.select(); document.execCommand('copy'); }); c1._pwBound=true; }
-  const c2=document.getElementById('appl_copy_epm');
-  if (c2 && !c2._pwBound){ c2.addEventListener('click',()=>{ const t=document.getElementById('appl_email_out'); if(!t||!t.value) return; t.select(); document.execCommand('copy'); }); c2._pwBound=true; }
+Tenant Name: ${t}
+Unit Address: ${addr}
+
+Brief Description of Work Requested:
+The tenant reported:
+“${ten}”
+
+Vendor’s Diagnosis:
+Our service provider visited the property on ${visit} and found/reported:
+“${find}”
+
+Proposed Work:
+“${reco}”
+
+Quoted Cost:
+${estText}
+
+This repair has been approved under the emergency dispatch policy to prevent further damage or safety risk.
+You will receive updates once the work is completed and the invoice has been processed.`;
+
+    const set = (id,val)=>{ const el=gid(id); if(el) el.value=val; };
+    set('epm_subj', epmSubj);
+    set('epm_body', epmBody);
+    set('own_subj', ownSubj);
+    set('own_body', ownBody);
+  }
+  gid('med_generate') && gid('med_generate').addEventListener('click', buildEmergencyEmails);
+  // live fill while typing
+  ['maint_tenant','maint_address','maint_owner_name','maint_vendor_visitdate','maint_vendor_estimate','maint_tenant_complaint','maint_vendor_findings','maint_vendor_reco']
+    .forEach(id=>{ const el=gid(id); el && el.addEventListener('input', buildEmergencyEmails); });
+
+  // Copy buttons via data-copy
+  document.addEventListener('click', (e)=>{
+    const b = e.target.closest('[data-copy]');
+    if(!b) return;
+    const sel = b.getAttribute('data-copy');
+    const el = sel ? document.querySelector(sel) : null;
+    if(!el) return;
+    const text = ('value' in el) ? el.value : (el.textContent||'');
+    if (navigator.clipboard) navigator.clipboard.writeText(text);
+    else { el.select && el.select(); document.execCommand && document.execCommand('copy'); }
+    const prev=b.textContent; b.textContent='Copied!'; setTimeout(()=>b.textContent=prev,900);
+  }, {passive:true});
+
+  /* ---------- Finance: note generator & copy ---------- */
+  function financeNote(){
+    const wo     = gval('fin_wo') || gval('wo') || '[####]';
+    const addr   = gval('fin_addr') || gval('addr') || '<Address>';
+    const vendor = gval('fin_vendor') || gval('vendor') || '<Vendor>';
+    const amount = gval('fin_amount') || gval('amount') || '0.00';
+    const plan   = gval('plan') || '<Plan>';
+    const issue  = gval('issue') || '<Type>';
+    const when   = gval('fin_date') || (new Date().toLocaleString());
+    const mark = b => b ? '✔' : '✖';
+
+    const out =
+`WO # ${wo} READY FOR FINANCE — ${addr} — ${vendor}
+Owner Plan: ${plan}
+Issue: ${issue} — Amount: $${amount}
+Date/Time: ${when}
+
+Attached in WO:
+• Invoice WITH WO# — ${mark(gcheck('fin_invwo'))}
+• Approval Type: (Standard Plan <$300, Non-emergency > $300 = APPROVAL) OR (Emergency > $300 = FYI was sent by Maintenance) Basic Plan <$150) — ${mark(gcheck('fin_approve'))}
+• Before/After photos (timestamp + watermark) — ${mark(gcheck('fin_photos'))}
+• Tenant completion confirmation — ${mark(gcheck('fin_tenant'))}
+${gcheck('fin_temp') ? '• Temp Check present if > $300 — ✔' : ''}
+
+Status: READY FOR FINANCE — Assigned to: FINANCE`;
+
+    const box = gid('fin_note');
+    if (box){ box.value = out; box.focus(); box.select && box.select(); }
+  }
+  gid('fin_btn_gen') && gid('fin_btn_gen').addEventListener('click', (e)=>{ e.preventDefault(); financeNote(); });
+  gid('fin_btn_copy') && gid('fin_btn_copy').addEventListener('click', ()=>{
+    const el = gid('fin_note'); if (!el) return;
+    if (navigator.clipboard) navigator.clipboard.writeText(el.value||'');
+    else { el.select && el.select(); document.execCommand && document.execCommand('copy'); }
+  });
+
+  /* ---------- Water Bills: decision + reset ---------- */
+  function wbDecision(){
+    const amt  = Number(gval('wb_amount')||0);
+    const ptyp = gval('wb_ptype') || 'sfd';
+    const unpaid = gval('wb_unpaid') || 'no';
+    const avgok  = gval('wb_avgok') || 'yes';
+    const out = gid('wb_decision');
+    let msg = '';
+    if (amt <= 200) msg = '✅ Pay directly (≤ $200).';
+    else {
+      if (unpaid==='yes') msg += '⚠️ Unpaid balances present. Clear before paying.\n';
+      if (avgok==='no')   msg += '⚠️ Not within 6-month average. Investigate variance.\n';
+      const th = (ptyp==='mfd') ? 350 : 300;
+      if (amt > th) msg += `⬆️ Escalate: amount exceeds $${th} for ${ptyp.toUpperCase()}.`;
+      if (!msg) msg = '✅ Within rules. Proceed to pay.';
+    }
+    out.textContent = msg;
+  }
+  gid('wb_btn_check') && gid('wb_btn_check').addEventListener('click', wbDecision);
+  gid('wb_btn_reset') && gid('wb_btn_reset').addEventListener('click', ()=>{
+    ['wb_amount','wb_ptype','wb_unpaid','wb_avgok'].forEach(id=>{ const el=gid(id); if (!el) return; if (el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; });
+    const out = gid('wb_decision'); if (out) out.textContent='';
+  });
+
+  /* ---------- Simple generators for the other two pages ---------- */
+  gid('sl_btnGen') && gid('sl_btnGen').addEventListener('click', ()=>{
+    const addr = gval('sl_address') || 'Unit';
+    const rent = gval('sl_rent') || '—';
+    const dom  = gval('sl_dom') || '0';
+    const sh   = gval('sl_showings') || '0';
+    gid('sl_out').value =
+`Weekly Owner Report — ${addr}
+• List Rent: ${rent}
+• Days on Market: ${dom}
+• Showings (7d): ${sh}
+
+Recommendation:
+- Review price/condition and marketing signals; see attached market comps.`;
+  });
+
+  gid('dlq_btnGen') && gid('dlq_btnGen').addEventListener('click', ()=>{
+    const t   = gval('dlq_tenant') || 'Tenant';
+    const a   = gval('dlq_addr')   || 'Address';
+    const bal = gval('dlq_balance')|| '$0.00';
+    const lp  = gval('dlq_lastpay')|| '—';
+    gid('dlq_out').value =
+`Manager Assigned: SYS
+Voucher Tenant: No
+Tenant's vs HAP Rent Portion: N/A
+1. Tenant's Name: ${t}
+2. Address: ${a}
+3. Balance: ${bal}
+4. Last Payment Received: ${lp}
+5. Last Communication from Tenant: —
+6. FTP Date: None Filed
+7. Court Outcome: N/A
+8. Judgment Ordered: N/A
+9. Eviction Date Scheduled: None filed yet
+10. Last Action Completed: —
+11. If no eviction schedule was completed, please state the reason: —
+12. Lease End Date: —
+13. Tenant status in Buildium reflects collection status, meaning they are blocked from making partial payments online: —
+14. Eligible for ROR? —`;
+  });
+
+  gid('nm_btnGen') && gid('nm_btnGen').addEventListener('click', ()=>{
+    const ref = gval('nm_ref') || 'Ref';
+    const a   = gval('nm_addr')|| 'Address';
+    const amt = gval('nm_amt') || '0.00';
+    gid('nm_out').value =
+`Non-Maintenance Bill
+Ref/WO: ${ref}
+Address: ${a}
+Amount: $${amt}
+
+Entered for processing.`;
+  });
+
 })();
 </script>
 </body>
