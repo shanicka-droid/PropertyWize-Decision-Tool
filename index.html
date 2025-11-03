@@ -5698,80 +5698,45 @@ You will receive updates once the work is completed and the invoice has been pro
 })();
 </script>
 <script>
-/* === Robust view switcher (no UI changes) === */
-(function () {
-  // Map your nav values/targets to pane IDs.
-  // If your IDs differ, add them in the arrays (first existing wins).
-  const PANE_IDS = {
-    maintenance : ['viewMaintenance'],
-    finance     : ['viewFinance'],
-    nonmaint    : ['viewNonMaint','viewNonMaintenance','viewNonMaintenanceBill'],
-    delinquency : ['viewDelinquency','view-delinquency'],
-    stale       : ['viewStale','viewStaleListing','viewListings'],
-    appliance   : ['viewAppliance']
-  };
+/* === Repair Role Switcher === */
+(function() {
+function hideAll() {
+document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
+}
 
-  // Utility: find the first pane element that exists for a key
-  function paneFor(key){
-    const ids = PANE_IDS[key] || [];
-    for (const id of ids) {
-      const el = document.getElementById(id);
-      if (el) return el;
-    }
-    return null;
-  }
+function showPane(id) {
+hideAll();
+const pane = document.getElementById(id);
+if (pane) {
+pane.classList.remove('hidden');
+localStorage.setItem('pw.activePane', id);
+}
+}
 
-  // Show one pane, hide the rest
-  function showPaneById(id){
-    document.querySelectorAll('.view-pane').forEach(p => p.classList.add('hidden'));
-    const el = document.getElementById(id);
-    if (el) { el.classList.remove('hidden'); localStorage.setItem('pw.activePane', id); }
-  }
-  window.showPaneById = showPaneById; // optional, for console/debug
+function setupRolePicker() {
+const radios = document.querySelectorAll('input[name="role"][data-target]');
+if (!radios.length) return;
 
-  // Show by key (maintenance/finance/nonmaint/delinquency/stale/appliance)
-  function showByKey(key){
-    const el = paneFor(key);
-    if (el) showPaneById(el.id);
-  }
-  window.pwShow = showByKey; // optional
+// Restore last open pane or show the first one
+const last = localStorage.getItem('pw.activePane');
+if (last && document.getElementById(last)) showPane(last);
+else showPane(radios[0].getAttribute('data-target'));
 
-  function wireNav(){
-    // 1) Radios like: <input type="radio" name="role" value="stale"> …
-    document.querySelectorAll('input[type="radio"][name="role"]').forEach(r => {
-      r.addEventListener('change', () => showByKey(r.value));
-    });
+radios.forEach(r => {
+r.addEventListener('change', () => {
+const id = r.getAttribute('data-target');
+if (id) showPane(id);
+});
+});
+}
 
-    // 2) Any element with data-target (e.g., buttons/links) -> exact pane id
-    document.querySelectorAll('[data-target]').forEach(el => {
-      el.addEventListener('click', e => {
-        const id = el.getAttribute('data-target');
-        if (id && document.getElementById(id)) {
-          e.preventDefault();
-          showPaneById(id);
-        }
-      });
-    });
-
-    // On first load: restore last, else show the first existing pane.
-    const last = localStorage.getItem('pw.activePane');
-    if (last && document.getElementById(last)) {
-      showPaneById(last);
-    } else {
-      const order = ['maintenance','finance','nonmaint','delinquency','stale','appliance'];
-      for (const key of order) {
-        const el = paneFor(key);
-        if (el) { showPaneById(el.id); break; }
-      }
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireNav, { once:true });
-  } else {
-    wireNav();
-  }
+if (document.readyState === 'loading')
+document.addEventListener('DOMContentLoaded', setupRolePicker);
+else
+setupRolePicker();
 })();
 </script>
+
+
 </body>
 </html>
