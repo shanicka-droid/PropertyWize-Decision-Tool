@@ -5809,6 +5809,53 @@ if (start) showPane(start);
 window.showPane = showPane;
 })();
 </script>
+<script>
+(function(){
+function gid(id){ return document.getElementById(id); }
+function gval(id){ var el=gid(id); return el && 'value' in el ? String(el.value||'').trim() : ''; }
+function gcheck(id){ var el=gid(id); return !!(el && el.checked); }
+function financeNote(){
+var wo = gval('fin_wo') || gval('wo') || '[####]';
+var addr = gval('fin_addr') || gval('addr') || '<Address>';
+var vendor = gval('fin_vendor') || gval('vendor') || '<Vendor>';
+var amount = gval('fin_amount') || gval('amount') || '0.00';
+var plan = gval('plan') || '<Plan>';
+var issue = gval('issue') || '<Type>';
+var when = gval('fin_date') || (new Date().toLocaleString());
+
+function mark(b){ return b ? '✔' : '✖'; }
+var hasInvWO = mark(gcheck('fin_invwo'));
+var hasApprove = mark(gcheck('fin_approve'));
+var hasPhotos = mark(gcheck('fin_photos'));
+var hasTenant = mark(gcheck('fin_tenant'));
+var hasTemp = mark(gcheck('fin_temp'));
+
+var out =
+`WO # ${wo} READY FOR FINANCE — ${addr} — ${vendor}\n` +
+`Owner Plan: ${plan}\n` +
+`Issue: ${issue} — Amount: $${amount}\n` +
+`Date/Time: ${when}\n\n` +
+`Attached in WO:\n` +
+`• Invoice WITH WO# — ${hasInvWO}\n` +
+`• Approval Type: (Standard Plan <$300, Non-emergency > $300 = APPROVAL) OR (Emergency > $300 = FYI was sent by Maintenance) Basic Plan <$150) — ${hasApprove}\n` +
+`• Before/After photos (timestamp + watermark) — ${hasPhotos}\n` +
+`• Tenant completion confirmation — ${hasTenant}\n` +
+(gcheck('fin_temp') ? `• Temp Check present if > $300 — ${hasTemp}\n` : ``) +
+`\nStatus: READY FOR FINANCE — Assigned to: FINANCE`;
+
+var box = gid('fin_note') || gid('handoff');
+if (box){ box.value = out; box.focus(); box.select && box.select(); }
+}
+window.genFinance = financeNote;
+
+var btn = document.getElementById('fin_btn_gen');
+if (btn && !btn._pwBound){
+btn._pwBound = true;
+btn.addEventListener('click', function(e){ e.preventDefault(); financeNote(); });
+}
+})();
+</script>
+
 
 
 
