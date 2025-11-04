@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1798,6 +1800,384 @@ Notes: ${gv('appl_notes')}
   window.calcRules = calcRules;
 
 })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  
+  // --- Helper Functions ---
+  const $ = (q) => document.querySelector(q);
+  const gv = (id) => $(`#${id}`)?.value || '';
+  const N_chk = (id) => $(`#${id}`) && $(`#${id}`).checked ? "✔" : "✖";
+  const todayISO = () => new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+  const todayLocal = () => new Date().toLocaleDateString();
+
+  /**
+   * FIX 1: Re-define genFinance to ensure it populates the note.
+   * This overwrites the existing window.genFinance.
+   * It uses the requested behavior: "when a date is empty, default to today (local date)".
+   */
+  window.genFinance = async function() { 
+    console.debug("FIX: genFinance clicked");
+    
+    // Fallback getter (id1=finance, id2=maintenance, fb=default)
+    const V = (id1, id2, fb) => (gv(id1) || gv(id2) || fb);
+
+    const txt = `FINANCE INTAKE — WO # ${V("fin_wo","wo","[####]")} — ${V("fin_addr","addr","<Address>")}\n`
+      + `Vendor: ${V("fin_vendor","vendor","<Vendor>")} — Amount: $${V("fin_amount","amount","0.00")}\n`
+      // Use local date as default, per requirement
+      + `Approval/FYI date: ${V("fin_date","",todayLocal())}\n\n` 
+      + `Verification:\n`
+      + `[${ N_chk("fin_invwo") }] Invoice WITH WO#\n`
+      + `[${ N_chk("fin_approve") }] Owner Approval (> $300 non‑emergency) or FYI (> $300 emergency)\n`
+      + `[${ N_chk("fin_photos") }] Before/After photos (timestamp + watermark)\n`
+      + `[${ N_chk("fin_tenant") }] Tenant completion confirmation\n`
+      + `[${ N_chk("fin_temp") }] Temp Check present if > $300\n\n`
+      + `Buildium/Spreadsheet:\n`
+      + `[${ N_chk("fin_enter") }] Entered via WO → Enter Bill\n`
+      + `[${ N_chk("fin_link") }] Bill linked to WO; vendor/property/expense OK\n`
+      + `[${ N_chk("fin_sheet") }] Added to Finance spreadsheet\n`
+      + `[${ N_chk("fin_epm") }] EPM Approval received\n`
+      + `[${ N_chk("fin_pay") }] Payment issued\n`
+      + `[${ N_chk("fin_upload") }] Paid invoice uploaded & shared with Owner\n`
+      + `[${ N_chk("fin_done") }] Spreadsheet updated; copy saved to Drive`;
+    
+    if ($("#fin_note")) $("#fin_note").value = txt;
+    
+    // Use the existing pwAlert function
+    if (window.pwAlert) await window.pwAlert("Finance Note Generated\nNote created in textarea.");
+  }
+
+  /**
+   * FIX 2: Implement pw_genWB (Water Bill Handoff Generator).
+   * This overwrites the existing stubbed function.
+   */
+  window.pw_genWB = async function() { 
+    console.debug("FIX: pw_genWB clicked");
+    
+    // Check checklist first
+    if (!['wb_c1','wb_c2','wb_c3','wb_c4','wb_c5','wb_c6'].every(id => $(`#${id}`)?.checked)) {
+        if (window.pwAlert) return window.pwAlert('Please complete the checklist before generating the handoff.');
+    }
+    
+    const addr = gv('fin_addr') || gv('addr') || '[Address]'; // Use finance or maint address
+
+    // Buildium Comment
+    const bu = `HANDOFF: ${gv('ho_from_wb')} → ${gv('ho_to_wb')} (${gv('ho_person_wb')})\n` +
+               `Due: ${gv('ho_due_wb') || 'ASAP'}\n` +
+               `Ref: ${gv('ho_ref_wb')}\n` +
+               `Tags: ${gv('ho_tags_wb')}\n\n` +
+               `DECISION/ACTION:\n${gv('ho_decision_wb')}\n\n` +
+               `THRESHOLD/SOP:\n${gv('ho_threshold_wb')}\n\n` +
+               `SUMMARY/ASK:\n${gv('ho_summary_wb')}\n\n` +
+               `BLOCKING:\n${gv('ho_block_wb')}\n\n` +
+               `ATTACHMENTS:\n${gv('ho_attach_wb')}\n\n` +
+               `Notify: ${gv('ho_notify_wb')}`;
+    if ($('#ho_out_bu_wb')) $('#ho_out_bu_wb').value = bu.trim();
+
+    // Email Draft
+    const subject = `Handoff: ${gv('ho_summary_wb') || `Water Bill Action`} – ${addr} – ${todayISO()}`;
+    const body = `Hi ${gv('ho_person_wb') || gv('ho_to_wb')},\n\n` +
+                 `This is a handoff from ${gv('ho_from_wb')}.\n` +
+                 `Task: ${gv('ho_summary_wb')}\n` +
+                 `Due: ${gv('ho_due_wb') || 'ASAP'}\n` +
+                 `Ref: ${gv('ho_ref_wb')}\n\n` +
+                 `Details:\n${gv('ho_decision_wb')}\n\n` +
+                 `Basis:\n${gv('ho_threshold_wb')}\n\n` +
+                 `Blocking: ${gv('ho_block_wb')}\n\n` +
+                 `Please see attachments: ${gv('ho_attach_wb')}\n\n` +
+                 `Thanks,`;
+    if ($('#ho_out_em_wb')) $('#ho_out_em_wb').value = `Subject: ${subject}\n\n${body.trim()}`;
+    
+    if (window.pwAlert) await window.pwAlert('Water Bill Handoff Generated.');
+  }
+
+  /**
+   * FIX 3: Implement pwNM_gen (Non-Maintenance Bill Handoff Generator).
+   * This overwrites the existing stubbed function.
+   */
+  window.pwNM_gen = async function() { 
+    console.debug("FIX: pwNM_gen clicked");
+    
+    // Check checklist first
+    if (!['nb_c1','nb_c2','nb_c3','nb_c4','nb_c5'].every(id => $(`#${id}`)?.checked)) {
+        if (window.pwAlert) return window.pwAlert('Please complete the checklist before generating.');
+    }
+
+    // Buildium Comment
+    const bu = `HANDOFF: ${gv('ho_from_nb')} → ${gv('ho_to_nb')} (${gv('ho_person_nb')})\n` +
+               `Due: ${gv('ho_due_nb') || 'ASAP'}\n` +
+               `Ref: ${gv('ho_ref_nb')}\n` +
+               `Tags: ${gv('ho_tags_nb')}\n\n` +
+               `SUMMARY/ASK:\n${gv('ho_summary_nb')}\n\n` +
+               `BLOCKING:\n${gv('ho_block_nb')}\n\n` +
+               `ATTACHMENTS:\n${gv('ho_attach_nb')}\n\n` +
+               `Notify: ${gv('ho_notify_nb')}`;
+    if ($('#ho_out_bu_nb')) $('#ho_out_bu_nb').value = bu.trim();
+
+    // Email Draft
+    const subject = `Handoff: ${gv('ho_summary_nb') || `Non-Maint Bill Action`} – ${gv('ho_ref_nb')} – ${todayISO()}`;
+    const body = `Hi ${gv('ho_person_nb') || gv('ho_to_nb')},\n\n` +
+                 `This is a handoff from ${gv('ho_from_nb')}.\n` +
+                 `Task: ${gv('ho_summary_nb')}\n` +
+                 `Due: ${gv('ho_due_nb') || 'ASAP'}\n` +
+                 `Ref: ${gv('ho_ref_nb')}\n\n` +
+                 `Blocking: ${gv('ho_block_nb')}\n\n` +
+                 `Please see attachments: ${gv('ho_attach_nb')}\n\n` +
+                 `Thanks,`;
+    if ($('#ho_out_em_nb')) $('#ho_out_em_nb').value = `Subject: ${subject}\n\n${body.trim()}`;
+    
+    if (window.pwAlert) await window.pwAlert('Non-Maintenance Handoff Generated.');
+  }
+  
+  /**
+   * FIX 4a: Implement pw_clearWB (Water Bill Handoff Reset).
+   * This overwrites the existing stubbed function to clear the handoff form.
+   */
+  window.pw_clearWB = function() {
+    console.debug("FIX: pw_clearWB clicked");
+    const ids = ['ho_from_wb', 'ho_to_wb', 'ho_person_wb', 'ho_due_wb', 'ho_ref_wb', 'ho_tags_wb', 'ho_decision_wb', 'ho_threshold_wb', 'ho_summary_wb', 'ho_block_wb', 'ho_attach_wb', 'ho_notify_wb', 'ho_out_bu_wb', 'ho_out_em_wb'];
+    ids.forEach(id => {
+        const el = $(`#${id}`);
+        if (el) {
+            if (el.tagName === 'SELECT') el.selectedIndex = 0;
+            else el.value = '';
+        }
+    });
+  }
+  
+  /**
+   * FIX 4b: Implement pwNM_clear (Non-Maintenance Handoff Reset).
+   * This overwrites the existing stubbed function to clear its form.
+   */
+  window.pwNM_clear = function() {
+    console.debug("FIX: pwNM_clear clicked");
+    const ids = ['ho_from_nb', 'ho_to_nb', 'ho_person_nb', 'ho_due_nb', 'ho_ref_nb', 'ho_tags_nb', 'ho_summary_nb', 'ho_block_nb', 'ho_attach_nb', 'ho_notify_nb', 'ho_out_bu_nb', 'ho_out_em_nb'];
+    ids.forEach(id => {
+        const el = $(`#${id}`);
+        if (el) {
+            if (el.tagName === 'SELECT') el.selectedIndex = 0;
+            else el.value = '';
+        }
+    });
+  }
+  
+  /**
+   * FIX 4c: (No change needed) window.pw_resetWB
+   * The existing `pw_resetWB` function already correctly clears *only* * the "Step 3" decision fields, which is the correct view-specific
+   * behavior for that particular button.
+   */
+   console.debug("FIX: All generator and clear functions have been redefined.");
+   
+});
+</script>
+<script>
+  (function() {
+    'use strict';
+    
+    // Helper to find elements
+    const $ = (q) => document.querySelector(q);
+
+    /**
+     * FIX 1: Redefine the Finance Note generator.
+     * This function will overwrite the existing 'window.genFinance'.
+     */
+    window.genFinance = async function() {
+      console.debug("FIX: genFinance clicked");
+      
+      // Helpers
+      const N_chk = (id) => $(`#${id}`) && $(`#${id}`).checked ? "✔" : "✖";
+      const gv = (id) => $(`#${id}`)?.value || '';
+      const todayLocal = () => new Date().toLocaleDateString();
+      
+      // Getter: (finance_id, maintenance_id, fallback_text)
+      const V = (id1, id2, fb) => (gv(id1) || gv(id2) || fb);
+
+      // Build the note
+      const txt = `FINANCE INTAKE — WO # ${V("fin_wo","wo","[####]")} — ${V("fin_addr","addr","<Address>")}\n`
+        + `Vendor: ${V("fin_vendor","vendor","<Vendor>")} — Amount: $${V("fin_amount","amount","0.00")}\n`
+        + `Approval/FYI date: ${V("fin_date","",todayLocal())}\n\n`
+        + `Verification:\n`
+        + `[${ N_chk("fin_invwo") }] Invoice WITH WO#\n`
+        + `[${ N_chk("fin_approve") }] Owner Approval (> $300 non‑emergency) or FYI (> $300 emergency)\n`
+        + `[${ N_chk("fin_photos") }] Before/After photos (timestamp + watermark)\n`
+        + `[${ N_chk("fin_tenant") }] Tenant completion confirmation\n`
+        + `[${ N_chk("fin_temp") }] Temp Check present if > $300\n\n`
+        + `Buildium/Spreadsheet:\n`
+        + `[${ N_chk("fin_enter") }] Entered via WO → Enter Bill\n`
+        + `[${ N_chk("fin_link") }] Bill linked to WO; vendor/property/expense OK\n`
+        + `[${ N_chk("fin_sheet") }] Added to Finance spreadsheet\n`
+        + `[${ N_chk("fin_epm") }] EPM Approval received\n`
+        + `[${ N_chk("fin_pay") }] Payment issued\n`
+        + `[${ N_chk("fin_upload") }] Paid invoice uploaded & shared with Owner\n`
+        + `[${ N_chk("fin_done") }] Spreadsheet updated; copy saved to Drive`;
+      
+      // Populate the textarea
+      const noteEl = $("#fin_note");
+      if (noteEl) {
+        noteEl.value = txt;
+      } else {
+        console.debug("FIX: #fin_note textarea not found!");
+      }
+
+      // Use the existing modal alert
+      if (window.pwAlert) {
+        await window.pwAlert("Finance Note Generated\nNote created in textarea.");
+      }
+    }
+
+    /**
+     * FIX 2: Redefine the view-specific "Clear" functions.
+     * These were empty stubs in the original file.
+     */
+
+    // Helper to clear a list of form field IDs
+    const clearFormFields = (ids) => {
+        ids.forEach(id => {
+            const el = $(`#${id}`);
+            if (el) {
+                if (el.tagName === 'SELECT') {
+                    el.selectedIndex = 0;
+                } else if (el.type === 'checkbox') {
+                    el.checked = false;
+                } else {
+                    el.value = ''; // Clears textareas, inputs (text, number, date, etc.)
+                }
+            }
+        });
+    };
+
+    // Redefine the empty stub for Water Bill Handoff Clear
+    // This targets the button: onclick="pw_clearWB()"
+    window.pw_clearWB = function() {
+        console.debug("FIX: pw_clearWB (Water Bill Handoff) clicked");
+        const wb_handoff_ids = [
+            "ho_from_wb", "ho_to_wb", "ho_person_wb", "ho_due_wb", "ho_ref_wb", 
+            "ho_tags_wb", "ho_decision_wb", "ho_threshold_wb", "ho_summary_wb", 
+            "ho_block_wb", "ho_attach_wb", "ho_notify_wb", "ho_out_bu_wb", "ho_out_em_wb"
+        ];
+        clearFormFields(wb_handoff_ids);
+    }
+
+    // Redefine the empty stub for Non-Maint Bill Handoff Clear
+    // This targets the button: onclick="pwNM_clear()"
+    window.pwNM_clear = function() {
+        console.debug("FIX: pwNM_clear (Non-Maint Handoff) clicked");
+        const nb_handoff_ids = [
+            "ho_from_nb", "ho_to_nb", "ho_person_nb", "ho_due_nb", "ho_ref_nb", 
+            "ho_tags_nb", "ho_summary_nb", "ho_block_nb", "ho_attach_nb", 
+            "ho_notify_nb", "ho_out_bu_nb", "ho_out_em_nb"
+        ];
+        clearFormFields(nb_handoff_ids);
+    }
+    
+    console.debug("FIX: All override functions (genFinance, pw_clearWB, pwNM_clear) are now active.");
+
+  })();
+</script>
+<script>
+  /**
+   * Helper function to clear form fields.
+   * We define this globally so our other functions can find it.
+   */
+  function _pwFixClearFields(ids) {
+    if (!ids || !ids.forEach) return;
+    
+    ids.forEach(id => {
+        const el = document.querySelector(`#${id}`);
+        if (el) {
+            if (el.tagName === 'SELECT') {
+                el.selectedIndex = 0;
+            } else if (el.type === 'checkbox') {
+                el.checked = false;
+            } else {
+                // This clears textareas, inputs (text, number, date, url, etc.)
+                el.value = '';
+            }
+        }
+    });
+  }
+
+  /**
+   * FIX for: Finance "Generate Finance Note"
+   * This overwrites the existing window.genFinance function.
+   * It uses document.querySelector and native alert() to avoid scope dependency issues.
+   */
+  window.genFinance = async function() {
+    console.debug("FIX: genFinance override clicked");
+
+    // Helper functions, scoped locally
+    const N_chk = (id) => {
+      const el = document.querySelector(`#${id}`);
+      return el && el.checked ? "✔" : "✖";
+    }
+    const gv = (id) => document.querySelector(`#${id}`)?.value || '';
+    const todayLocal = () => new Date().toLocaleDateString();
+    
+    // Getter: (finance_id, maintenance_id, fallback_text)
+    const V = (id1, id2, fb) => (gv(id1) || gv(id2) || fb);
+
+    // Build the note
+    const txt = `FINANCE INTAKE — WO # ${V("fin_wo","wo","[####]")} — ${V("fin_addr","addr","<Address>")}\n`
+      + `Vendor: ${V("fin_vendor","vendor","<Vendor>")} — Amount: $${V("fin_amount","amount","0.00")}\n`
+      + `Approval/FYI date: ${V("fin_date","",todayLocal())}\n\n`
+      + `Verification:\n`
+      + `[${ N_chk("fin_invwo") }] Invoice WITH WO#\n`
+      + `[${ N_chk("fin_approve") }] Owner Approval (> $300 non‑emergency) or FYI (> $300 emergency)\n`
+      + `[${ N_chk("fin_photos") }] Before/After photos (timestamp + watermark)\n`
+      + `[${ N_chk("fin_tenant") }] Tenant completion confirmation\n`
+      + `[${ N_chk("fin_temp") }] Temp Check present if > $300\n\n`
+      + `Buildium/Spreadsheet:\n`
+      + `[${ N_chk("fin_enter") }] Entered via WO → Enter Bill\n`
+      + `[${ N_chk("fin_link") }] Bill linked to WO; vendor/property/expense OK\n`
+      + `[${ N_chk("fin_sheet") }] Added to Finance spreadsheet\n`
+      + `[${ N_chk("fin_epm") }] EPM Approval received\n`
+      + `[${ N_chk("fin_pay") }] Payment issued\n`
+      + `[${ N_chk("fin_upload") }] Paid invoice uploaded & shared with Owner\n`
+      + `[${ N_chk("fin_done") }] Spreadsheet updated; copy saved to Drive`;
+    
+    // Populate the textarea
+    const noteEl = document.querySelector("#fin_note");
+    if (noteEl) {
+      noteEl.value = txt;
+    } else {
+      console.debug("FIX: #fin_note textarea not found!");
+    }
+
+    // Use native alert() as a fallback, since pwAlert() is in a different scope
+    alert("Finance Note Generated\nNote created in textarea.");
+  }
+
+  /**
+   * FIX for: "Reset button(s) don’t clear their form(s)"
+   * This overwrites the empty stubs for pw_clearWB and pwNM_clear
+   */
+  
+  // Overwrite Water Bill Handoff "Clear" (called by onclick="pw_clearWB()")
+  window.pw_clearWB = function() {
+      console.debug("FIX: pw_clearWB (Water Bill Handoff) override clicked");
+      const wb_handoff_ids = [
+          "ho_from_wb", "ho_to_wb", "ho_person_wb", "ho_due_wb", "ho_ref_wb", 
+          "ho_tags_wb", "ho_decision_wb", "ho_threshold_wb", "ho_summary_wb", 
+          "ho_block_wb", "ho_attach_wb", "ho_notify_wb", "ho_out_bu_wb", "ho_out_em_wb"
+      ];
+      // Use the global helper
+      _pwFixClearFields(wb_handoff_ids);
+  }
+
+  // Overwrite Non-Maint Bill Handoff "Clear" (called by onclick="pwNM_clear()")
+  window.pwNM_clear = function() {
+      console.debug("FIX: pwNM_clear (Non-Maint Handoff) override clicked");
+      const nb_handoff_ids = [
+          "ho_from_nb", "ho_to_nb", "ho_person_nb", "ho_due_nb", "ho_ref_nb", 
+          "ho_tags_nb", "ho_summary_nb", "ho_block_nb", "ho_attach_nb", 
+          "ho_notify_nb", "ho_out_bu_nb", "ho_out_em_nb"
+      ];
+      // Use the global helper
+      _pwFixClearFields(nb_handoff_ids);
+  }
+
+  console.log("PropertyWize Fix-It Script Loaded: (genFinance, pw_clearWB, pwNM_clear) have been overridden.");
+
 </script>
 </body>
 </html>
