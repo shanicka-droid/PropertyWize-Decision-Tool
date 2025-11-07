@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2178,6 +2180,183 @@ document.addEventListener('DOMContentLoaded', function() {
 
   console.log("PropertyWize Fix-It Script Loaded: (genFinance, pw_clearWB, pwNM_clear) have been overridden.");
 
+</script>
+<script>
+  /**
+   * PropertyWize Decision Tool Patch (2025-11-07 v2)
+   *
+   * This script runs after all others to fix two issues:
+   * 1. Replaces the Reset button listener to fully clear localStorage and reset the UI.
+   * 2. Wraps the Water Bill generator to auto-populate the decision field.
+   */
+  document.addEventListener('DOMContentLoaded', function() {
+    // Delay execution to ensure all other scripts have run
+    // and all original functions are defined/overwritten.
+    setTimeout(function() {
+      'use strict';
+      
+      // --- Helper functions for this patch ---
+      const $ = (q) => document.querySelector(q);
+      const gv = (id) => $(`#${id}`)?.value || '';
+      const chk = (id) => $(`#${id}`)?.checked ? '✔' : '✖';
+      
+      // Find a label for a checkbox
+      const chkLabel = (id) => {
+        const label = $(`label[for="${id}"]`);
+        return label ? label.textContent.trim() : id;
+      };
+
+      // --- Store original functions AFTER all scripts loaded ---
+      // We are now confident this is the *final* version of pw_genWB
+      const _original_pw_genWB = window.pw_genWB; 
+      const _original_pw_decideWB = window.pw_decideWB;
+
+      
+      /**
+       * FIX 1: Overwrite 'resetForm' by replacing the button's listener.
+       */
+       
+      // 1a. Define our new reset function
+      async function myPatchedResetForm() {
+        // Get confirmation
+        if (window.pwConfirm && !await window.pwConfirm("Are you sure you want to reset the form? This will clear all fields.")) {
+            return;
+        }
+
+        // Clear localStorage (This is the key change from [cite: 114])
+        localStorage.clear();
+
+        // Clear all inputs
+        document.querySelectorAll("input[type=checkbox], input[type=radio]").forEach(c => c.checked = false);
+        document.querySelectorAll("input[type=text], input[type=number], input[type=date], input[type=url]").forEach(i => i.value = "");
+        document.querySelectorAll("select").forEach(s => s.selectedIndex = 0);
+        document.querySelectorAll("textarea").forEach(t => t.value = "");
+        document.querySelectorAll(".pill.active").forEach(p => p.classList.remove("active"));
+
+        // Call all known clear functions for sub-tools [cite: 115]
+        if (window.dlq_clear) window.dlq_clear();
+        if (window.appl_clear) window.appl_clear();
+        if (window.pwNM_clear) window.pwNM_clear();
+        if (window.pw_clearWB) window.pw_clearWB();
+        if (window.pw_resetWB) window.pw_resetWB();
+
+        // Replicate setRole(null, 'viewWelcome')
+        // (Based on original setRole [cite: 102-109])
+        
+        // Hide all panes, show Welcome
+        document.querySelectorAll('.view-pane').forEach(v => v.classList.add('hidden'));
+        const welcomeView = document.querySelector('#viewWelcome');
+        if (welcomeView) {
+            welcomeView.classList.remove('hidden'); // [cite: 107]
+        }
+        
+        // Clear active pills
+        document.querySelectorAll("#rolePicker label.pill.active").forEach(p => {
+            p.classList.remove("active"); // [cite: 104]
+        });
+        
+        // Set last pane (original setRole does this)
+        localStorage.setItem('pw_last_pane', 'viewWelcome'); // [cite: 108]
+
+        // Replicate updateProgress() to force 0%
+        // (Based on original updateProgress [cite: 117-120])
+        const progressBar = document.querySelector("#progressBar");
+        const progressNote = document.querySelector("#progressNote");
+        if (progressBar) progressBar.style.width = "0%"; // [cite: 119]
+        if (progressNote) progressNote.textContent = "0% complete"; // [cite: 120]
+
+        // Call calcRules (original resetForm does this)
+        if (window.calcRules) window.calcRules(); // [cite: 116]
+
+        // Scroll to top (original setRole does this)
+        window.scrollTo(0, 0); // [cite: 108]
+      }
+       
+      // 1b. Clone the reset button to remove old listeners and add ours.
+      const btnReset = document.querySelector("#btnReset");
+      if (btnReset) {
+          const btnResetClone = btnReset.cloneNode(true);
+          btnReset.parentNode.replaceChild(btnResetClone, btnReset);
+          btnResetClone.addEventListener("click", myPatchedResetForm);
+      } else {
+          console.error("Patch Error: #btnReset not found.");
+      }
+
+      /**
+       * FIX 2: Overwrite 'pw_genWB' to populate the decision field first.
+       */
+      window.pw_genWB = async function() {
+        // 1. Run the original checklist check [cite: 266]
+        if (!['wb_c1', 'wb_c2', 'wb_c3', 'wb_c4', 'wb_c5', 'wb_c6'].every(id => $(`#${id}`)?.checked)) {
+          if (window.pwAlert) return window.pwAlert('Please complete the checklist before generating the handoff.');
+          return;
+        }
+
+        // --- Start: New logic to build combined note ---
+
+        // 2. Get the decision text by re-implementing pw_decideWB's logic
+        // (Based on [cite: 189-193])
+        const N = (v) => parseFloat(String(v || '').replace(/[^0-9.]/g, '')) || 0;
+        const amount = N(gv('wb_amount'));
+        const type = gv('wb_ptype');
+        const unpaid = gv('wb_unpaid');
+        const avgok = gv('wb_avgok');
+        let step3DecisionText = 'No decision (enter details)';
+        
+        if (amount > 0) {
+          if (amount <= 200) step3DecisionText = 'Decision: APPROVE – Direct pay (≤ $200)';
+          else if (unpaid === 'yes') step3DecisionText = 'Decision: HOLD / REJECT – Unpaid balances exist';
+          else {
+            const th = (type === 'sfd') ? 300 : 350; // [cite: 190]
+            if (amount > th) step3DecisionText = 'Decision: ESCALATE to EPM – Over threshold'; // [cite: 190]
+            else if (amount > 200 && amount <= th && avgok === 'yes') step3DecisionText = 'Decision: APPROVE – Finance may pay (within avg, no unpaid)'; // [cite: 191]
+            else step3DecisionText = 'Decision: ESCALATE – Not within 6-mo average'; // [cite: 192]
+          }
+        }
+        
+        // 2b. Also call the original function (if it exists) to update the UI
+        if (typeof _original_pw_decideWB === 'function') {
+          _original_pw_decideWB(); // This updates the #wb_decision <span>
+        }
+
+        // 3. Build the combined string
+        let combinedNote = `--- PRE-HANDOFF CHECKLIST ---\n`;
+        combinedNote += `[${chk('wb_c1')}] ${chkLabel('wb_c1')}\n`; // [cite: 59]
+        combinedNote += `[${chk('wb_c2')}] ${chkLabel('wb_c2')}\n`; // [cite: 59]
+        combinedNote += `[${chk('wb_c3')}] ${chkLabel('wb_c3')}\n`; // [cite: 59]
+        combinedNote += `[${chk('wb_c4')}] ${chkLabel('wb_c4')}\n`; // [cite: 59]
+        combinedNote += `[${chk('wb_c5')}] ${chkLabel('wb_c5')}\n`; // [cite: 60]
+        combinedNote += `[${chk('wb_c6')}] ${chkLabel('wb_c6')}\n\n`; // [cite: 60]
+
+        combinedNote += `--- STEP 1 & 2: MEMOS ---\n`;
+        combinedNote += `Buildium memo:\n${gv('wb_memo_process')}\n\n`; // [cite: 61]
+        combinedNote += `Notice quick-fill:\n${gv('wb_notice_notes')}\n\n`; // [cite: 63]
+
+        combinedNote += `--- STEP 3: DECISION & PAYMENT ---\n`;
+        combinedNote += `${step3DecisionText}\n\n`;
+        combinedNote += `Buildium payment memo:\n${gv('wb_memo_pay')}\n`; // [cite: 65]
+
+        // 4. Populate the #ho_decision_wb textarea
+        const targetTextarea = $("#ho_decision_wb"); // [cite: 130]
+        if (targetTextarea) {
+          targetTextarea.value = combinedNote.trim();
+        }
+        
+        // --- End: New logic ---
+
+        // 5. Call the original pw_genWB function
+        if (typeof _original_pw_genWB === 'function') {
+          await _original_pw_genWB.call(window); // [cite: 265-276]
+        } else {
+           console.error("Patch Error: _original_pw_genWB not found.");
+           if (window.pwAlert) await window.pwAlert('Water Bill Handoff Generated (Original generator not found).');
+        }
+      }
+      
+      console.log("PropertyWize Decision Tool Patch (Reset, WB Handoff) Loaded Successfully.");
+      
+    }, 100); // 100ms delay to ensure it runs last.
+  });
 </script>
 </body>
 </html>
