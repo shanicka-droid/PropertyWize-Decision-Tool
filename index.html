@@ -2,6 +2,8 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2356,6 +2358,104 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log("PropertyWize Decision Tool Patch (Reset, WB Handoff) Loaded Successfully.");
       
     }, 100); // 100ms delay to ensure it runs last.
+  });
+</script>
+<script>
+  /**
+   * PropertyWize Decision Tool Patch (2025-11-07 v4 - Garbage Disposal)
+   *
+   * This script patches the Appliance tool (#viewAppliance) to:
+   * 1. Add "Garbage Disposal" to the #appl_type dropdown.
+   * 2. Add custom troubleshooting steps for "Garbage Disposal".
+   * 3. Fix the "Essential vs. Non-Essential" logic to be an
+   * explicit, automatic selection based on the appliance type.
+   */
+  document.addEventListener('DOMContentLoaded', function() {
+    // Delay execution slightly to ensure all original elements are ready
+    setTimeout(function() {
+      'use strict';
+      
+      const $ = (q) => document.querySelector(q);
+
+      const applTypeSelect = $('#appl_type');
+      const applPrioritySelect = $('#appl_priority');
+      const applTroubleshootText = $('#appl_troubleshoot');
+
+      // Check if all required appliance elements exist
+      if (!applTypeSelect || !applPrioritySelect || !applTroubleshootText) {
+        console.error("Appliance Patch Error: Missing one or more elements (#appl_type, #appl_priority, #appl_troubleshoot).");
+        return;
+      }
+
+      // --- 1. Add "Garbage Disposal" to #appl_type dropdown ---
+      const newApplianceName = "Garbage Disposal"; // Corrected name
+      
+      // Check if the option already exists (to prevent duplicates on re-load)
+      if (!$(`option[value="${newApplianceName}"]`)) {
+        const newOption = document.createElement('option');
+        newOption.value = newApplianceName;
+        newOption.textContent = newApplianceName;
+        applTypeSelect.appendChild(newOption);
+      }
+
+      // --- 2. Fix #appl_priority dropdown for clarity ---
+      // This makes the "auto" selection logic obsolete and provides
+      // a much clearer, explicit selection for the user.
+      [cite_start]// We replace the old confusing options[cite: 44].
+      applPrioritySelect.innerHTML = `
+        <option value="">— Select appliance first —</option>
+        <option value="essential">Essential</option>
+        <option value="nonessential">Non-Essential</option>
+      `;
+      
+      // Define troubleshooting steps for the new appliance
+      const newApplianceSteps = "1. Power/Breaker checked and ON.\n2. Pressed RED RESET button on bottom of unit.\n3. Used Allen key in bottom socket to clear jam (if applicable).\n4. Checked for foreign objects (with power OFF).\n5. Photos of model/serial and issue captured.";
+
+      // --- 3. Add the main event listener to #appl_type ---
+      applTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        let newPriority = ""; // Default to "select"
+        let newTroubleshooting = "";
+        let setTroubleshooting = false;
+
+        [cite_start]// Set priority based on the selected appliance type [cite: 43]
+        switch (selectedType) {
+          case "Refrigerator":
+          case "Oven / Stove / Range":
+            newPriority = "essential";
+            break;
+          
+          case "Dishwasher":
+          case "Microwave":
+          case "Washer":
+          case "Dryer":
+            newPriority = "nonessential";
+            break;
+
+          case newApplianceName: // Our new appliance: "Garbage Disposal"
+            newPriority = "nonessential"; // As requested
+            newTroubleshooting = newApplianceSteps;
+            setTroubleshooting = true;
+            break;
+            
+          default:
+            newPriority = ""; // Back to "Select appliance first"
+        }
+
+        // Set the priority dropdown
+        applPrioritySelect.value = newPriority;
+
+        // Set troubleshooting text *only* for the new item
+        // and *only* if the box is currently empty (to avoid overwriting).
+        // This is why the steps may not have appeared for you before.
+        if (setTroubleshooting && applTroubleshootText.value.trim() === "") {
+          applTroubleshootText.value = newTroubleshooting;
+        }
+      });
+      
+      console.log("PropertyWize Decision Tool Patch (Appliance v4 - Garbage Disposal) Loaded Successfully.");
+      
+    }, 150); // 150ms delay, ensuring it runs after other patches.
   });
 </script>
 </body>
