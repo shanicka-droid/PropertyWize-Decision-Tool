@@ -2458,6 +2458,673 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 150); // 150ms delay, ensuring it runs after other patches.
   });
 </script>
+<script>
+/**
+ * PropertyWize Decision Tool Patch (2025-11-07 v5 - Inspection Processing)
+ * Adds a full Inspection Processing module based on 2025 SOP.
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        'use strict';
+        const $ = (q) => document.querySelector(q);
+        
+        // 1. INJECT THE NEW "INSPECTION" PILL INTO ROLE PICKER
+        const rolePicker = $('#rolePicker');
+        if (rolePicker && !$('input[value="inspection"]')) {
+            const label = document.createElement('label');
+            label.className = 'pill';
+            label.innerHTML = `
+                <input type="radio" name="role" value="inspection" data-target="viewInspection">
+                <span>🔎 Inspection</span>
+            `;
+            rolePicker.appendChild(label);
+            
+            // Re-bind listener for the new button
+            label.querySelector('input').addEventListener('change', function() {
+                if(window.setRole) window.setRole('inspection', 'viewInspection');
+            });
+        }
+
+        // 2. INJECT THE NEW INSPECTION VIEW HTML
+        const mainContainer = $('main section:nth-child(2)'); // The right column
+        if (mainContainer && !$('#viewInspection')) {
+            const viewHtml = `
+            <div id="viewInspection" class="view-pane hidden">
+                <h2>Inspection Processing (2025 SOP)</h2>
+                <p class="note">Daily Goal: Review inspection reports (1hr/day). Focus on "Poor" or "Bad" items.</p>
+
+                <details style="margin-bottom:12px; cursor:pointer;">
+                    <summary class="note"><strong>🔐 Click for HappyCo Credentials</strong></summary>
+                    <div class="soft" style="margin-top:6px; user-select:text;">
+                        Email: propertywizemanagement@gmail.com<br>
+                        Pass: ShanickaYang2022$$$
+                    </div>
+                </details>
+
+                <div class="card" style="border: 1px solid var(--danger); background: #fff5f5;">
+                    <h3 style="color:var(--danger)">🛑 STEP 1: History & Duplicate Check</h3>
+                    <p class="note">Before processing, you <strong>MUST</strong> check history to avoid duplicate work.</p>
+                    <div class="check">
+                        <input type="checkbox" id="insp_ck_latchel" onchange="persist()">
+                        <label for="insp_ck_latchel">I have checked <strong>Latchel</strong> for recent/completed work.</label>
+                    </div>
+                    <div class="check">
+                        <input type="checkbox" id="insp_ck_buildium" onchange="persist()">
+                        <label for="insp_ck_buildium">I have checked <strong>Buildium</strong> history.</label>
+                    </div>
+                </div>
+
+                <div class="hr"></div>
+
+                <div class="two-col">
+                    <div class="field"><label>Property Address</label><input id="insp_addr" type="text" placeholder="123 Main St" oninput="persist()"></div>
+                    <div class="field"><label>Tenant Name</label><input id="insp_tenant" type="text" placeholder="Jane Doe" oninput="persist()"></div>
+                </div>
+
+                <div class="hr"></div>
+                <h3>Step 2: Critical / Safety (Auto-Dispatch)</h3>
+                <p class="note" style="color:var(--danger)"><strong>DO NOT WAIT FOR OWNER APPROVAL.</strong><br>
+                Dispatch immediately for: Leaks, Mold/Growth, Missing Shingles, Safety/Trip Hazards, CO/Smoke Detectors, Railings.</p>
+                
+                <div class="field">
+                    <label>Critical Items Found (List for Work Order)</label>
+                    <textarea id="insp_critical_list" placeholder="e.g., Active leak under sink, missing smoke detector..." style="min-height:80px" oninput="persist()"></textarea>
+                </div>
+                <div class="row">
+                    <button class="btn warn" onclick="insp_copyCritical()">Copy Critical WO Description</button>
+                    <span class="note" style="align-self:center">Paste into Buildium/Latchel WO</span>
+                </div>
+
+                <div class="hr"></div>
+                <h3>Step 3: Cosmetic / Deferred (Owner Approval)</h3>
+                <p class="note">For items that are NOT critical (e.g., paint, flooring, cosmetic wear). Requires EPM/Owner approval.</p>
+                
+                <div class="two-col">
+                     <div class="field">
+                        <label>Owner Photo Album Link (Google Photos)</label>
+                        <input id="insp_album_owner" type="url" placeholder="https://photos.google.com/..." oninput="persist()">
+                     </div>
+                     <div class="field">
+                        <label>Tenant Photo Album Link</label>
+                        <input id="insp_album_tenant" type="url" placeholder="https://photos.google.com/..." oninput="persist()">
+                     </div>
+                </div>
+
+                <div class="field">
+                    <label>Cosmetic Items List (for Email)</label>
+                    <textarea id="insp_cosmetic_list" placeholder="e.g., Bedroom 2 paint peeling, blind slats broken..." oninput="persist()"></textarea>
+                </div>
+                
+                <div class="row">
+                    <button class="btn primary" onclick="insp_genEPM()">Generate EPM Approval Email</button>
+                    <button class="btn" onclick="insp_copy('insp_email_out')">Copy Email</button>
+                </div>
+                <div class="field">
+                    <label>EPM Email Draft</label>
+                    <textarea id="insp_email_out" readonly style="min-height:200px"></textarea>
+                </div>
+
+                <div class="hr"></div>
+                <h3>Step 4: Tenant Notification</h3>
+                <div class="check"><input type="checkbox" id="insp_ck_portal" onchange="persist()"><label for="insp_ck_portal">Inspection Schedule posted to Resident Portal</label></div>
+                <div class="check"><input type="checkbox" id="insp_ck_notice" onchange="persist()"><label for="insp_ck_notice">Courtesy Notice sent (or Lease Violation if >1 week)</label></div>
+            </div>
+            `;
+            // Append to the main container
+            mainContainer.insertAdjacentHTML('beforeend', viewHtml);
+        }
+
+        // 3. DEFINE JS FUNCTIONS FOR INSPECTION TOOL
+        window.insp_copyCritical = function() {
+            const items = $('#insp_critical_list').value;
+            const addr = $('#insp_addr').value;
+            if(!items) return alert('List critical items first.');
+            
+            const text = `URGENT INSPECTION FINDINGS - ${addr}\n\nItems requiring immediate attention (Safety/Liability/Damage):\n${items}\n\nAuto-dispatching per SOP.`;
+            
+            // Temp textarea to copy
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert('Critical Work Order description copied to clipboard!');
+        };
+
+        window.insp_genEPM = function() {
+            const addr = $('#insp_addr').value || '[Address]';
+            const tenant = $('#insp_tenant').value || '[Tenant]';
+            const ownerAlbum = $('#insp_album_owner').value || '[Link]';
+            const cosmetic = $('#insp_cosmetic_list').value || 'No cosmetic items listed.';
+            const latchel = $('#insp_ck_latchel').checked ? "YES" : "NO";
+            const buildium = $('#insp_ck_buildium').checked ? "YES" : "NO";
+
+            if (latchel === "NO" || buildium === "NO") {
+                return alert("STOP: You must check Latchel and Buildium history before generating.");
+            }
+
+            const subject = `Inspection Review Required: ${addr} (${tenant})`;
+            const body = `Hi EPM Team,
+
+Please review the Annual Inspection findings for ${addr}.
+
+✅ History Check:
+- Latchel Checked: ${latchel}
+- Buildium Checked: ${buildium}
+
+📷 Photos:
+- Owner Album (Defects): ${ownerAlbum}
+
+📋 Cosmetic / Deferred Items (Need Approval):
+${cosmetic}
+
+Please advise on approval to send to owner.
+(Note: Critical/Safety items have been auto-dispatched separately per SOP).
+
+Thanks,
+Operations`;
+
+            $('#insp_email_out').value = `Subject: ${subject}\n\n${body}`;
+        };
+
+        window.insp_copy = function(id) {
+            const el = $(`#${id}`);
+            if(el) {
+                el.select();
+                document.execCommand('copy');
+                alert('Copied!');
+            }
+        };
+
+        console.log("Inspection Processing Tool Loaded Successfully.");
+    }, 300); // Slight delay to ensure DOM is ready
+});
+</script>
+<script>
+/**
+ * PropertyWize Decision Tool Patch (2025-11-13 v6 - Inspection Processing Update)
+ * Includes: Inspection Types, Tenant vs Owner separation, Auto-Dispatch Ticket tracking, and Handoffs.
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        'use strict';
+        const $ = (q) => document.querySelector(q);
+        
+        // 1. INJECT THE "INSPECTION" PILL (If not already there)
+        const rolePicker = $('#rolePicker');
+        if (rolePicker && !$('input[value="inspection"]')) {
+            const label = document.createElement('label');
+            label.className = 'pill';
+            label.innerHTML = `
+                <input type="radio" name="role" value="inspection" data-target="viewInspection">
+                <span>🔎 Inspection</span>
+            `;
+            rolePicker.appendChild(label);
+            
+            // Re-bind listener
+            label.querySelector('input').addEventListener('change', function() {
+                if(window.setRole) window.setRole('inspection', 'viewInspection');
+            });
+        }
+
+        // 2. INJECT THE VIEW HTML (Or replace if exists)
+        const mainContainer = $('main section:nth-child(2)');
+        // Remove old view if exists to prevent duplicates
+        const oldView = $('#viewInspection');
+        if(oldView) oldView.remove();
+
+        const viewHtml = `
+        <div id="viewInspection" class="view-pane hidden">
+            <h2>Inspection Processing (2025 SOP)</h2>
+            <p class="note">Goal: Review reports daily. Check "Poor" items. Auto-dispatch safety issues.</p>
+
+            <details style="margin-bottom:12px; cursor:pointer;">
+                <summary class="note"><strong>🔐 Click for HappyCo Credentials</strong></summary>
+                <div class="soft" style="margin-top:6px; user-select:text;">
+                    Email: propertywizemanagement@gmail.com<br>
+                    Pass: ShanickaYang2022$$$
+                </div>
+            </details>
+
+            <div class="card" style="border: 1px solid var(--brand); margin-bottom:12px;">
+                <h3>Step 1: Details & History Check</h3>
+                <div class="two-col">
+                    <div class="field">
+                        <label>Inspection Type</label>
+                        <select id="insp_type">
+                            <option>Annual Inspection</option>
+                            <option>Pre-Move In</option>
+                            <option>Pre-Move Out</option>
+                            <option>Move In</option>
+                            <option>Move Out</option>
+                            <option>Owner Requested</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Property Address</label><input id="insp_addr" type="text" placeholder="123 Main St" oninput="persist()"></div>
+                    <div class="field"><label>Tenant Name</label><input id="insp_tenant" type="text" placeholder="Jane Doe" oninput="persist()"></div>
+                </div>
+                <div class="hr"></div>
+                <p class="note" style="color:var(--danger)"><strong>🛑 STOP:</strong> Check history before processing.</p>
+                <div class="check">
+                    <input type="checkbox" id="insp_ck_latchel" onchange="persist()">
+                    <label for="insp_ck_latchel">I have checked <strong>Latchel</strong> for recent work.</label>
+                </div>
+                <div class="check">
+                    <input type="checkbox" id="insp_ck_buildium" onchange="persist()">
+                    <label for="insp_ck_buildium">I have checked <strong>Buildium</strong> history.</label>
+                </div>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--danger); background: #fff5f5; margin-bottom:12px;">
+                <h3 style="color:var(--danger)">Step 2: Critical / Safety (Auto-Dispatch)</h3>
+                <p class="note" style="color:var(--danger)"><strong>DO NOT WAIT FOR OWNER.</strong> Dispatch immediately: Leaks, Mold, Safety Hazards, Detectors.</p>
+                
+                <div class="field">
+                    <label>Critical Items (List for Work Order)</label>
+                    <textarea id="insp_critical_list" placeholder="e.g., Active leak under sink, missing smoke detector..." style="min-height:60px" oninput="persist()"></textarea>
+                </div>
+                <div class="two-col">
+                    <div class="field">
+                        <label>WO # / Ticket Number</label>
+                        <input id="insp_critical_wo" type="text" placeholder="e.g., WO-10293" oninput="persist()">
+                    </div>
+                    <div class="row" style="align-items:flex-end; padding-bottom:8px;">
+                        <button class="btn warn" onclick="insp_copyCritical()">Copy WO Description</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="soft">
+                <h3>Step 3: Non-Critical Findings</h3>
+                <div class="two-col">
+                     <div class="field"><label>Owner Photo Album Link</label><input id="insp_album_owner" type="url" placeholder="Google Photos URL..." oninput="persist()"></div>
+                     <div class="field"><label>Tenant Photo Album Link</label><input id="insp_album_tenant" type="url" placeholder="Google Photos URL..." oninput="persist()"></div>
+                </div>
+                
+                <div class="hr"></div>
+                
+                <div class="field">
+                    <label>Owner Responsibility (Cosmetic / Deferred)</label>
+                    <p class="note">Examples: Peeling paint, foggy windows, worn carpet, aging appliances (if not misused), roof wear, settling cracks.</p>
+                    <textarea id="insp_owner_list" placeholder="Items for Owner approval..." style="min-height:80px" oninput="persist()"></textarea>
+                </div>
+
+                <div class="field">
+                    <label>Tenant Responsibility (Chargeback/Compliance)</label>
+                    <p class="note">Examples: Dirty filters, landscaping neglect, trash/debris, pet damage, broken blinds, holes in drywall, removed detectors.</p>
+                    <textarea id="insp_tenant_list" placeholder="Items for Tenant notice/chargeback..." style="min-height:80px" oninput="persist()"></textarea>
+                </div>
+            </div>
+
+            <div class="hr"></div>
+            <h3>Outputs & Handoff</h3>
+            
+            <div class="row">
+                <button class="btn primary" onclick="insp_genEPM()">Generate EPM Email</button>
+                <button class="btn" onclick="insp_genHandoff()">Generate Buildium Handoff</button>
+                <button class="btn" onclick="insp_copy('insp_out')">Copy Text</button>
+            </div>
+            <div class="field">
+                <label>Generated Output (Email or Handoff)</label>
+                <textarea id="insp_out" readonly style="min-height:200px"></textarea>
+            </div>
+
+            <div class="hr"></div>
+            <details>
+                <summary><strong>✅ Post-Processing Checklist</strong></summary>
+                <div class="check"><input type="checkbox" id="insp_ck_portal" onchange="persist()"><label for="insp_ck_portal">Inspection Schedule posted to Resident Portal</label></div>
+                <div class="check"><input type="checkbox" id="insp_ck_notice" onchange="persist()"><label for="insp_ck_notice">Courtesy Notice/Lease Violation sent to tenant (if applicable)</label></div>
+                <div class="check"><input type="checkbox" id="insp_ck_sheet" onchange="persist()"><label for="insp_ck_sheet">Master Spreadsheet Updated</label></div>
+            </details>
+        </div>
+        `;
+        mainContainer.insertAdjacentHTML('beforeend', viewHtml);
+
+        // 3. DEFINE JS FUNCTIONS
+        
+        // Helper: Copy Critical Description for Latchel/Buildium WO
+        window.insp_copyCritical = function() {
+            const items = $('#insp_critical_list').value;
+            if(!items) return alert('List critical items first.');
+            const text = `URGENT INSPECTION FINDINGS\nItems requiring immediate attention (Safety/Liability/Damage):\n${items}\n\nAuto-dispatching per SOP.`;
+            navigator.clipboard.writeText(text).then(() => alert('Copied Critical WO Description!'));
+        };
+
+        // Generate EPM Approval Email
+        window.insp_genEPM = function() {
+            const addr = $('#insp_addr').value || '[Address]';
+            const tenant = $('#insp_tenant').value || '[Tenant]';
+            const type = $('#insp_type').value;
+            const wo = $('#insp_critical_wo').value;
+            const critList = $('#insp_critical_list').value;
+            const ownList = $('#insp_owner_list').value || 'None listed.';
+            const tenList = $('#insp_tenant_list').value || 'None listed.';
+            const latchel = $('#insp_ck_latchel').checked;
+            const buildium = $('#insp_ck_buildium').checked;
+
+            if (!latchel || !buildium) return alert("STOP: You must check Latchel and Buildium history first.");
+
+            // Urgent Section Logic
+            let urgentSection = "";
+            if (wo || critList) {
+                urgentSection = `\n🚨 URGENT / AUTO-DISPATCHED:\nTicket #: ${wo || 'Pending'}\nSummary: ${critList || 'See WO'}\n`;
+            }
+
+            const subject = `Inspection Review: ${addr} (${type})`;
+            const body = `Hi EPM Team,
+
+Please review the ${type} findings for ${addr} (${tenant}).
+
+✅ History Checked (Latchel & Buildium): Yes
+
+📷 Owner Album: ${$('#insp_album_owner').value || 'N/A'}
+${urgentSection}
+📋 OWNER RESPONSIBILITY (Needs Approval):
+${ownList}
+
+⚠️ TENANT RESPONSIBILITY (Notice/Chargeback):
+${tenList}
+
+Please advise on approval to send the cosmetic list to the owner.
+
+Thanks,
+Operations`;
+            $('#insp_out').value = `Subject: ${subject}\n\n${body}`;
+        };
+
+        // Generate Buildium Handoff Note
+        window.insp_genHandoff = function() {
+             const addr = $('#insp_addr').value || '[Address]';
+             const type = $('#insp_type').value;
+             const wo = $('#insp_critical_wo').value;
+             const critList = $('#insp_critical_list').value;
+             const ownList = $('#insp_owner_list').value ? "Listed" : "None";
+             const tenList = $('#insp_tenant_list').value ? "Listed" : "None";
+
+             const note = `INSPECTION PROCESSED: ${type}
+Date: ${new Date().toLocaleDateString()}
+
+1. History Check: Completed
+2. Urgent/Safety: ${wo ? 'Dispatched WO#' + wo : (critList ? 'Dispatched (No WO# entered)' : 'None')}
+   ${critList ? '('+critList+')' : ''}
+3. Owner Items: ${ownList}
+4. Tenant Items: ${tenList}
+5. Albums: Attached/Linked in email
+
+Action: Sent to EPM for approval.`;
+            $('#insp_out').value = note;
+        };
+
+        window.insp_copy = function(id) {
+            const el = $(`#${id}`);
+            if(el) { el.select(); document.execCommand('copy'); alert('Copied!'); }
+        };
+
+        console.log("Inspection Tool v6 Loaded.");
+    }, 300);
+});
+</script>
+<script>
+/**
+ * PropertyWize Decision Tool Patch (2025-11-13 v7 - Inspection Processing Final)
+ * Updates: Exact EPM Email Template, EPM Selector (Shanicka/Michelle), PDF Link, and Visit Date.
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        'use strict';
+        const $ = (q) => document.querySelector(q);
+        
+        // 1. INJECT THE "INSPECTION" PILL (If not already there)
+        const rolePicker = $('#rolePicker');
+        if (rolePicker && !$('input[value="inspection"]')) {
+            const label = document.createElement('label');
+            label.className = 'pill';
+            label.innerHTML = `
+                <input type="radio" name="role" value="inspection" data-target="viewInspection">
+                <span>🔎 Inspection</span>
+            `;
+            rolePicker.appendChild(label);
+            
+            // Re-bind listener
+            label.querySelector('input').addEventListener('change', function() {
+                if(window.setRole) window.setRole('inspection', 'viewInspection');
+            });
+        }
+
+        // 2. INJECT THE VIEW HTML (Replace old view to update fields)
+        const oldView = $('#viewInspection');
+        if(oldView) oldView.remove();
+
+        const mainContainer = $('main section:nth-child(2)');
+        const viewHtml = `
+        <div id="viewInspection" class="view-pane hidden">
+            <h2>Inspection Processing (2025 SOP)</h2>
+            <p class="note">Goal: Review reports daily. Check "Poor" items. Auto-dispatch safety issues.</p>
+
+            <details style="margin-bottom:12px; cursor:pointer;">
+                <summary class="note"><strong>🔐 Click for HappyCo Credentials</strong></summary>
+                <div class="soft" style="margin-top:6px; user-select:text;">
+                    Email: propertywizemanagement@gmail.com<br>
+                    Pass: ShanickaYang2022$$$
+                </div>
+            </details>
+
+            <div class="card" style="border: 1px solid var(--brand); margin-bottom:12px;">
+                <h3>Step 1: Details & History Check</h3>
+                
+                <div class="two-col">
+                    <div class="field">
+                        <label>EPM (Property Manager)</label>
+                        <select id="insp_epm_select" onchange="persist()">
+                            <option value="">Select EPM...</option>
+                            <option value="Shanicka">Shanicka</option>
+                            <option value="Michelle">Michelle</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Inspection Type</label>
+                        <select id="insp_type" onchange="persist()">
+                            <option>PropertyWize Annual Visit</option>
+                            <option>Pre-Move In Inspection</option>
+                            <option>Pre-Move Out Inspection</option>
+                            <option>Move In Inspection</option>
+                            <option>Move Out Inspection</option>
+                            <option>Owner Requested Inspection</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div class="field"><label>Property Address</label><input id="insp_addr" type="text" placeholder="123 Main St" oninput="persist()"></div>
+                    <div class="field"><label>Owner Name</label><input id="insp_owner_name" type="text" placeholder="e.g. John Smith" oninput="persist()"></div>
+                </div>
+
+                <div class="two-col">
+                    <div class="field"><label>Tenant Name</label><input id="insp_tenant" type="text" placeholder="Jane Doe" oninput="persist()"></div>
+                    <div class="field"><label>Visit Date</label><input id="insp_visit_date" type="date" oninput="persist()"></div>
+                </div>
+                
+                <div class="field"><label>PDF Report Link</label><input id="insp_pdf_link" type="url" placeholder="https://..." oninput="persist()"></div>
+
+                <div class="hr"></div>
+                <p class="note" style="color:var(--danger)"><strong>🛑 STOP:</strong> Check history before processing.</p>
+                <div class="check">
+                    <input type="checkbox" id="insp_ck_latchel" onchange="persist()">
+                    <label for="insp_ck_latchel">I have checked <strong>Latchel</strong> for recent work.</label>
+                </div>
+                <div class="check">
+                    <input type="checkbox" id="insp_ck_buildium" onchange="persist()">
+                    <label for="insp_ck_buildium">I have checked <strong>Buildium</strong> history.</label>
+                </div>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--danger); background: #fff5f5; margin-bottom:12px;">
+                <h3 style="color:var(--danger)">Step 2: Critical / Safety (Auto-Dispatch)</h3>
+                <p class="note" style="color:var(--danger)"><strong>DO NOT WAIT FOR OWNER.</strong> Dispatch immediately: Leaks, Mold, Safety Hazards, Detectors.</p>
+                
+                <div class="field">
+                    <label>Critical Items (List for Work Order)</label>
+                    <textarea id="insp_critical_list" placeholder="e.g., Active leak under sink, missing smoke detector..." style="min-height:60px" oninput="persist()"></textarea>
+                </div>
+                <div class="two-col">
+                    <div class="field">
+                        <label>WO # / Ticket Number</label>
+                        <input id="insp_critical_wo" type="text" placeholder="e.g., WO-10293" oninput="persist()">
+                    </div>
+                    <div class="row" style="align-items:flex-end; padding-bottom:8px;">
+                        <button class="btn warn" onclick="insp_copyCritical()">Copy WO Description</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="soft">
+                <h3>Step 3: Report Categorization</h3>
+                <div class="two-col">
+                     <div class="field"><label>Owner Photo Album Link</label><input id="insp_album_owner" type="url" placeholder="Google Photos URL..." oninput="persist()"></div>
+                     <div class="field"><label>Tenant Photo Album Link</label><input id="insp_album_tenant" type="url" placeholder="Google Photos URL..." oninput="persist()"></div>
+                </div>
+                
+                <div class="hr"></div>
+                
+                <div class="field">
+                    <label>Owner Responsibility List</label>
+                    <textarea id="insp_owner_list" placeholder="List items for Owner..." style="min-height:100px" oninput="persist()"></textarea>
+                </div>
+
+                <div class="field">
+                    <label>Tenant Responsibility List</label>
+                    <textarea id="insp_tenant_list" placeholder="List items for Tenant..." style="min-height:100px" oninput="persist()"></textarea>
+                </div>
+            </div>
+
+            <div class="hr"></div>
+            <h3>Outputs & Handoff</h3>
+            
+            <div class="row">
+                <button class="btn primary" onclick="insp_genEPM()">Generate EPM Draft Approval</button>
+                <button class="btn" onclick="insp_genHandoff()">Generate Buildium Handoff</button>
+                <button class="btn" onclick="insp_copy('insp_out')">Copy Text</button>
+            </div>
+            <div class="field">
+                <label>Generated Output</label>
+                <textarea id="insp_out" readonly style="min-height:300px"></textarea>
+            </div>
+
+            <div class="hr"></div>
+            <details>
+                <summary><strong>✅ Post-Processing Checklist</strong></summary>
+                <div class="check"><input type="checkbox" id="insp_ck_portal" onchange="persist()"><label for="insp_ck_portal">Inspection Schedule posted to Resident Portal</label></div>
+                <div class="check"><input type="checkbox" id="insp_ck_notice" onchange="persist()"><label for="insp_ck_notice">Courtesy Notice/Lease Violation sent to tenant (if applicable)</label></div>
+                <div class="check"><input type="checkbox" id="insp_ck_sheet" onchange="persist()"><label for="insp_ck_sheet">Master Spreadsheet Updated</label></div>
+            </details>
+        </div>
+        `;
+        mainContainer.insertAdjacentHTML('beforeend', viewHtml);
+
+        // 3. DEFINE JS FUNCTIONS
+        
+        // Helper: Copy Critical Description
+        window.insp_copyCritical = function() {
+            const items = $('#insp_critical_list').value;
+            if(!items) return alert('List critical items first.');
+            const text = `URGENT INSPECTION FINDINGS\nItems requiring immediate attention (Safety/Liability/Damage):\n${items}\n\nAuto-dispatching per SOP.`;
+            const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el);
+            el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            alert('Copied Critical WO Description!');
+        };
+
+        // Generate EPM Email (Updated Template)
+        window.insp_genEPM = function() {
+            const epm = $('#insp_epm_select').value || '(EPM Name)';
+            const addr = $('#insp_addr').value || '(Property Address)';
+            const owner = $('#insp_owner_name').value || '(Owner Name)';
+            const visitDate = $('#insp_visit_date').value || '(Visit Date)';
+            const type = $('#insp_type').value || 'PropertyWize Annual Visit';
+            const pdf = $('#insp_pdf_link').value || '(Insert Link to PDF report)';
+            const ownerAlbum = $('#insp_album_owner').value || '(Insert photo Link)';
+            const tenantAlbum = $('#insp_album_tenant').value || '(Insert photo Link)';
+            const ownerList = $('#insp_owner_list').value || '(List down items that fall under the owner’s responsibility)';
+            const tenantList = $('#insp_tenant_list').value || '(List down items that fall under the tenant’s responsibility)';
+
+            // Validate Critical Checks
+            if (!$('#insp_ck_latchel').checked || !$('#insp_ck_buildium').checked) {
+                return alert("STOP: You must confirm you checked Latchel and Buildium history.");
+            }
+
+            const subject = `[MSY: Draft Approval Needed] ${addr} - ${type} Failed Items - Done on ${visitDate}`;
+            
+            const body = `Hi ${epm},
+
+Please let me know if the below-mentioned draft is approved to be sent to the owner:
+
+----------------
+Dear ${owner},
+
+We would like to inform you that during the last ${type}, we observed certain issues. 
+
+Please review the full PDF report of the ${type} by clicking on the URL below:
+${pdf}
+
+Photos linked here are for the items identified from the report: 
+Owner Responsibility Items:
+${ownerAlbum}
+
+Tenant Responsibility Items:
+${tenantAlbum}
+
+We have identified the items that need to be addressed and categorized them into two sections - owner responsibility and tenant responsibility. 
+
+Here are the details:
+
+Owner responsibility:
+${ownerList}
+
+Tenant responsibility:
+${tenantList}
+
+For owner-responsibility items, if any, please let us know how you would like to proceed. 
+For the tenant's responsibility items, we will take care of them by sending a courtesy notice to inform the tenant to rectify them.
+
+If you have any questions or concerns, please do not hesitate to contact us.
+
+Best Regards,
+PropertyWize Management Team`;
+
+            $('#insp_out').value = `Subject: ${subject}\n\n${body}`;
+        };
+
+        // Generate Buildium Handoff Note
+        window.insp_genHandoff = function() {
+             const type = $('#insp_type').value;
+             const wo = $('#insp_critical_wo').value;
+             const critList = $('#insp_critical_list').value;
+             const ownList = $('#insp_owner_list').value ? "Listed" : "None";
+             const tenList = $('#insp_tenant_list').value ? "Listed" : "None";
+
+             const note = `INSPECTION PROCESSED: ${type}
+Date: ${new Date().toLocaleDateString()}
+
+1. History Check: Completed
+2. Urgent/Safety: ${wo ? 'Dispatched WO#' + wo : (critList ? 'Dispatched (No WO# entered)' : 'None')}
+   ${critList ? '('+critList+')' : ''}
+3. Owner Items: ${ownList}
+4. Tenant Items: ${tenList}
+5. PDF/Albums: Linked in Owner Email Draft
+
+Action: Sent to EPM for approval.`;
+            $('#insp_out').value = note;
+        };
+
+        window.insp_copy = function(id) {
+            const el = $(`#${id}`);
+            if(el) { el.select(); document.execCommand('copy'); alert('Copied!'); }
+        };
+
+        console.log("Inspection Tool v7 (Final Template) Loaded.");
+    }, 300);
+});
+</script>
 </body>
 </html>
 
