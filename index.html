@@ -3125,6 +3125,52 @@ Action: Sent to EPM for approval.`;
     }, 300);
 });
 </script>
+    <script>
+/**
+ * PropertyWize Decision Tool Patch (2025-11-07 v8 - Top Right Logo)
+ * Adds the "Pw logo (1).png" to the right side of the header.
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        'use strict';
+        const $ = (q) => document.querySelector(q);
+        
+        // Find the header container
+        const headerBrand = $('header .brand');
+        
+        if (headerBrand) {
+            // Check if we already added it to avoid duplicates
+            if ($('#pw_right_logo')) return;
+
+            // Create a wrapper for the new logo
+            const logoContainer = document.createElement('div');
+            logoContainer.id = 'pw_right_logo';
+            
+            // "margin-left: auto" pushes this element to the far right in a flex container
+            logoContainer.style.marginLeft = 'auto';
+            logoContainer.style.display = 'flex';
+            logoContainer.style.alignItems = 'center';
+
+            // Create the image element
+            const img = document.createElement('img');
+            // ENSURE THIS FILE IS IN THE SAME FOLDER AS THE HTML TOOL
+            img.src = 'Pw logo (1).png'; 
+            img.alt = 'PropertyWize Official Logo';
+            
+            // Styling to fit nicely within the header bar
+            img.style.height = '45px'; // Matches the scale of the header
+            img.style.width = 'auto';
+            img.style.objectFit = 'contain';
+
+            // Assemble and inject
+            logoContainer.appendChild(img);
+            headerBrand.appendChild(logoContainer);
+            
+            console.log("Header Logo Patch Applied.");
+        }
+    }, 400); // Runs after other UI elements are settled
+});
+</script>
 </body>
 </html>
 
